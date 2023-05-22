@@ -57,7 +57,7 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 - indent with 2 spaces
 
 # Technical notes
-We're building this in Node so we can share code between front and backend, should we need to.
+We're building this in Node.js v18.16.0 LTS so we can share code between front and backend, should we need to.
 
 SQLite for the database.
 
