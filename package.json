@@ -1,5 +1,22 @@
 {
+  "name": "passport-appointments",
+  "version": "0.0.0",
+  "main": "app/main.js",
   "dependencies": {
     "sqlite3": "^5.1.6"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pabloernesto/passport-appointments.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pabloernesto/passport-appointments/issues"
+  },
+  "homepage": "https://github.com/pabloernesto/passport-appointments#readme"
 }

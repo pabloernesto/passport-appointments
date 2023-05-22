@@ -49,7 +49,7 @@ Users are able to declare a date-time preference (monday morning, tuesday aftern
 When a batch of appointments is released, the system will attempt to fulfill as many people's preferences as it can.
 
 # Priorities
-- test out serving websites from node
+- ~~test out serving websites from node~~
 - test out getting data from SQLite
 - test out making a dynamic page with node
 
