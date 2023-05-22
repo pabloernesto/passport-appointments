@@ -59,8 +59,8 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 # Technical notes
 We're building this in Node.js v18.16.0 LTS so we can share code between front and backend, should we need to.
 
-SQLite for the database.
+Start the project with `node run start`.
+
+SQLite3 for the database via the `sqlite3` npm package.
 
 nginx?
-
-Start the project with `node myproject`?
