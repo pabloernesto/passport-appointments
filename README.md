@@ -50,8 +50,8 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 
 # Priorities
 - ~~test out serving websites from node~~
-- test out getting data from SQLite
-- test out making a dynamic page with node
+- ~~test out getting data from SQLite~~
+- ~~test out making a dynamic page with node~~
 
 # Style notes
 - indent with 2 spaces
