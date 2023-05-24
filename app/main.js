@@ -4,7 +4,7 @@ const http = require('http');
 const hostname = '0.0.0.0';
 const port = 3000;
 
-const server = http.createServer((req, res) => {
+function showHomePage(req, res) {
   res.statusCode = 200;
   db.get(
     `update counters
@@ -23,7 +23,23 @@ const server = http.createServer((req, res) => {
       res.end(`This page has been accessed ${row.value} time${row.value == 1 ? "" : "s"}`);
     }
   );
-});
+}
+
+function show404(req, res) {
+  res.statusCode = 404;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end("404 error. This page does not exist.");
+}
+
+function route(req, res) {
+  const { method, url } = req;
+  if (method === "GET" && ["/", "/index.html"].includes(url))
+    showHomePage(req, res);
+  else
+    show404(req, res);
+}
+
+const server = http.createServer(route);
 
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
