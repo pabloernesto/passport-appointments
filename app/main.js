@@ -2,6 +2,7 @@ import showHomePage from './request-handlers/homepage.js';
 import show404 from './request-handlers/404.js'
 import http from 'http';
 import sqlite3 from 'sqlite3';
+import getAppointment from './request-handlers/appointment.js';
 
 //const hostname = '127.0.0.1';
 const hostname = '0.0.0.0';
@@ -10,7 +11,7 @@ const port = 3000;
 function route(req, res) {
   const { method, url } = req;
   if (method === "GET" && ["/", "/index.html"].includes(url))
-    showHomePage(req, res, db);
+    getAppointment(req, res, db);
   else
     show404(req, res, db);
 }
@@ -34,6 +35,12 @@ db.serialize(() => {
     value
   );`)
   .run(`insert into counters (name, value)
-    values ("accesses", 0);`
+    values ("accesses", 0);`)
+  .run(`create table users (
+    user_id primary key,
+    passport int
+  );`)
+  .run(`insert into users (user_id, passport)
+    values (69, 420);`
   );
 });
