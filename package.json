@@ -2,6 +2,7 @@
   "name": "passport-appointments",
   "version": "0.0.0",
   "main": "app/main.js",
+  "type": "module",
   "dependencies": {
     "sqlite3": "^5.1.6"
   },
