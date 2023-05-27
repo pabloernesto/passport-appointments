@@ -1,19 +1,29 @@
-import showHomePage from './request-handlers/homepage.js';
-import show404 from './request-handlers/404.js'
+import route_homepage from './request-handlers/homepage.js';
+import route_appointment from './request-handlers/appointment.js';
+import route_static from './request-handlers/static.js';
+import route_404 from './request-handlers/404.js';
+
 import http from 'http';
 import sqlite3 from 'sqlite3';
-import getAppointment from './request-handlers/appointment.js';
 
 //const hostname = '127.0.0.1';
 const hostname = '0.0.0.0';
 const port = 3000;
 
+const routes = [
+  route_homepage,
+  route_appointment,
+  route_static,
+  route_404,
+];
+console.log(route_homepage);
+
 function route(req, res) {
-  const { method, url } = req;
-  if (method === "GET" && ["/", "/index.html"].includes(url))
-    getAppointment(req, res, db);
-  else
-    show404(req, res, db);
+  for (const { match, respond } of routes)
+    if (match(req)) {
+      respond(req, res, db);
+      break;
+    }
 }
 
 const server = http.createServer(route);

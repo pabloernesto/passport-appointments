@@ -1,20 +1,31 @@
-export default function showHomePage(req, res, db) {
-  res.statusCode = 200;
-  db.get(
-    `update counters
-      set value = value + 1
-      where name = 'accesses'
-      returning value`,
-    (err, row) => {
-      if (err !== null) {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(`Error while updating counter: ${JSON.stringify(err)}`);
-      }
+function match(req) {
+  const { method, url } = req;
+  return method === "GET" && ["/", "/index.html"].includes(url);
+}
 
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end(`This page has been accessed ${row.value} time${row.value == 1 ? "" : "s"}`);
-    }
+function respond(req, res, db) {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/html');
+  res.end(`\
+<!DOCTYPE html>
+<html lang="en" class="booting">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Argenzuela</title>
+
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <meta name="description" content="Una solución argentina para los problemas venezolanos." />
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <h1>Argenzuela</h1>
+  <p>This is a website.</p>
+</body>
+</html>
+`
   );
 }
+
+export default { match, respond };
