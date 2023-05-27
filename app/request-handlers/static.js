@@ -11,7 +11,6 @@ const known_assets = (await listFiles(dir))
     path: s,
     url: new URL(path.relative(dir.path, s), "file:").pathname
   }));
-console.log(known_assets);
 
 function match(req) {
   const { method, url } = req;

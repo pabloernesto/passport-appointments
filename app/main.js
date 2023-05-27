@@ -16,7 +16,6 @@ const routes = [
   route_static,
   route_404,
 ];
-console.log(route_homepage);
 
 function route(req, res) {
   for (const { match, respond } of routes)
