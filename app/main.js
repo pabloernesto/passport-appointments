@@ -1,4 +1,5 @@
 import route_homepage from './request-handlers/homepage.js';
+import route_static from './request-handlers/static.js';
 import route_404 from './request-handlers/404.js';
 
 import http from 'http';
@@ -10,6 +11,7 @@ const port = 3000;
 
 const routes = [
   route_homepage,
+  route_static,
   route_404,
 ];
 console.log(route_homepage);
