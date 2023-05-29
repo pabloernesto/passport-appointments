@@ -55,9 +55,9 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 - ~~automatically serve static files~~
 - ~~skeleton request~~
 - ~~research: date-handling in Node~~ uses js-native [Date objects][date]
-- keep html templates away from response code: move to render function
+- ~~keep html templates away from response code: move to render function~~
 - ~~parse form data in HTTP POST requests~~
-- hide database behind interface object
+- ~~hide database behind interface object~~
 
 [date]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
 
