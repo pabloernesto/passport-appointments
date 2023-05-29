@@ -1,5 +1,3 @@
-
-import route_homepage from './request-handlers/homepage.js';
 import route_appointment from './request-handlers/appointment.js';
 import route_static from './request-handlers/static.js';
 import route_404 from './request-handlers/404.js';
@@ -12,7 +10,6 @@ const hostname = '0.0.0.0';
 const port = 3000;
 
 const routes = [
-  route_homepage,
   route_appointment,
   route_static,
   route_404,
@@ -22,6 +19,7 @@ function route(req, res) {
   for (const { match, respond } of routes) {
     if (match(req)) {
       respond(req, res, db);
+      // TODO: add support for middleware that doesn't capture the req, eg redirects
       break;
     }
   }
