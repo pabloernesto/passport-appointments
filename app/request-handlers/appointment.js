@@ -1,25 +1,20 @@
 function match(req) {
   const { method, url } = req;
-  return method === "GET" && url === "/appointment";
+  return method === "POST" && url === "/appointment";
 }
 
-function respond(req, res, db) {
-  res.statusCode = 200;
-  db.get(
-    `select user_id from users`,
-    (err, row) => {
-      if (err !== null) {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(`Error: ${JSON.stringify(err)}`);
-      } else {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        res.end(`This page has been accessed ${row.user_id}`);
+function formBody(req) {
+  return new Promise((resolve, reject) => {
+    // your code goes here
+    // when you get the data, call resolve(data)
+    // if you encounter an error, call reject(error)
+  });
+}
 
-      }
-    }
-  );
+async function respond(req, res, db) {
+  res.statusCode = 200;
+  const body = await formBody(req);
+  // handle the request
 }
 
 export default { match, respond };
