@@ -11,7 +11,8 @@ function formBody(request) {
     }).on('end', () => {
       body = Buffer.concat(body).toString();
       // at this point, `body` has the entire request body stored in it as a string
-      resolve(body)
+      body = body.substring("userid=".length)
+      resolve({'userid': body})
     }).on('error', (e) => {
       reject(e);
     });
@@ -20,8 +21,9 @@ function formBody(request) {
 
 async function respond(req, res, db) {
   res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
   const body = await formBody(req);
-  // handle the request
+  res.end(`User ${ body.userid }, you have your appointment.`);
 }
 
 export default { match, respond };
