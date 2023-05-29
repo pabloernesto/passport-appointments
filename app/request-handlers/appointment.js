@@ -1,4 +1,9 @@
-export default function getAppointment(req, res, db) {
+function match(req) {
+  const { method, url } = req;
+  return method === "GET" && url === "/appointment";
+}
+
+function respond(req, res, db) {
   res.statusCode = 200;
   db.get(
     `select user_id from users`,
@@ -16,3 +21,5 @@ export default function getAppointment(req, res, db) {
     }
   );
 }
+
+export default { match, respond };
