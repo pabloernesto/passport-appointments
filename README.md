@@ -53,6 +53,11 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 - ~~test out getting data from SQLite~~
 - ~~test out making a dynamic page with node~~
 - ~~automatically serve static files~~
+- ~~skeleton request~~
+- research: date-handling in Node
+- keep html templates away from response code: move to render function
+- parse form data in HTTP POST requests
+- hide database behind interface object
 
 # Prototypes
 ## Part one
