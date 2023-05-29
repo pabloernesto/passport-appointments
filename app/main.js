@@ -1,8 +1,8 @@
 import showHomePage from './request-handlers/homepage.js';
+import getAppointment from './request-handlers/appointment.js';
 import show404 from './request-handlers/404.js'
 import http from 'http';
 import sqlite3 from 'sqlite3';
-import getAppointment from './request-handlers/appointment.js';
 
 //const hostname = '127.0.0.1';
 const hostname = '0.0.0.0';
@@ -10,10 +10,13 @@ const port = 3000;
 
 function route(req, res) {
   const { method, url } = req;
-  if (method === "GET" && ["/", "/index.html"].includes(url))
+  if (method === "GET" && ["/", "/index.html"].includes(url)) {
+    showHomePage(req, res, db);
+  } else if (method == "GET" && ["/appointment"].includes(url)) {
     getAppointment(req, res, db);
-  else
+  } else {
     show404(req, res, db);
+  }
 }
 
 const server = http.createServer(route);
