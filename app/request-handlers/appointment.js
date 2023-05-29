@@ -1,3 +1,5 @@
+import querystring from 'node:querystring';
+
 function match(req) {
   const { method, url } = req;
   return method === "POST" && url === "/appointment";
@@ -11,8 +13,9 @@ function formBody(request) {
     }).on('end', () => {
       body = Buffer.concat(body).toString();
       // at this point, `body` has the entire request body stored in it as a string
-      body = body.substring("userid=".length)
-      resolve({'userid': body})
+      body = querystring.parse(body);
+      console.log(body);
+      resolve(body)
     }).on('error', (e) => {
       reject(e);
     });
