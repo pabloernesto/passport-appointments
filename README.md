@@ -54,6 +54,17 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 - ~~test out making a dynamic page with node~~
 - automatically serve static files
 
+# Prototypes
+## Part one
+- Three views: homepage, request ID, display appointment
+- Request ID: single numerical entry of exactly 8 digits, otherwise reject
+- No interaction with database
+- appointment generator does not handle concurrency, but it does take the ID as argument
+- Appointment is some valid date and time
+
+### Part one point five
+- Database: store ID, appointment pairs in real database
+
 # Style notes
 - indent with 2 spaces
 
