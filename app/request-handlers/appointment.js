@@ -3,11 +3,18 @@ function match(req) {
   return method === "POST" && url === "/appointment";
 }
 
-function formBody(req) {
+function formBody(request) {
   return new Promise((resolve, reject) => {
-    // your code goes here
-    // when you get the data, call resolve(data)
-    // if you encounter an error, call reject(error)
+    let body = [];
+    request.on('data', (chunk) => {
+      body.push(chunk);
+    }).on('end', () => {
+      body = Buffer.concat(body).toString();
+      // at this point, `body` has the entire request body stored in it as a string
+      resolve(body)
+    }).on('error', (e) => {
+      reject(e);
+    });
   });
 }
 
