@@ -34,7 +34,11 @@ async function respond(req, res, db) {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/html');
   const body = await formBody(req);
-  res.end(`\
+  res.end(render(body));
+}
+
+function render(body) {
+  return `\
 <!DOCTYPE html>
 <html lang="en" class="booting">
 <head>
@@ -51,10 +55,9 @@ async function respond(req, res, db) {
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <p>User ${ body.userid }, you have your appointment at ${getAppointment(body)}.<p/>
+  <p>User ${ body.userid }, you have your appointment at ${ getAppointment(body) }.<p/>
 </body>
 </html>`
-  );
 }
 
 export default { match, respond };
