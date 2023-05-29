@@ -1,5 +1,5 @@
 import querystring from 'node:querystring';
-
+import { database } from './database-wrapper.js';
 function match(req) {
   const { method, url } = req;
   return method === "POST" && url === "/appointment";
@@ -20,6 +20,14 @@ function formBody(request) {
       reject(e);
     });
   });
+}
+
+function getAppointment(body) {
+  if(database.hasAppointment(body)) {
+    return database.fetchAppointment(body);
+  } else {
+    return database.createAppointment(body);
+  }
 }
 
 async function respond(req, res, db) {
@@ -43,7 +51,7 @@ async function respond(req, res, db) {
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <p>User ${ body.userid }, you have your appointment.<p/>
+  <p>User ${ body.userid }, you have your appointment at ${getAppointment(body)}.<p/>
 </body>
 </html>`
   );
