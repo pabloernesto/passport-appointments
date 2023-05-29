@@ -19,13 +19,13 @@ const routes = [
 ];
 
 function route(req, res) {
-  for (const { match, respond } of routes)
+  for (const { match, respond } of routes) {
     if (match(req)) {
       respond(req, res, db);
       break;
     }
+  }
 }
-
 const server = http.createServer(route);
 
 server.listen(port, hostname, () => {
