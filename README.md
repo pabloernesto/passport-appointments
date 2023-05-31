@@ -58,6 +58,8 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 - ~~keep html templates away from response code: move to render function~~
 - ~~parse form data in HTTP POST requests~~
 - ~~hide database behind interface object~~
+- do a login
+- research: how does sql work?
 
 [date]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
 
