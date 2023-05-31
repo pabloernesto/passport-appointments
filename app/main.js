@@ -3,7 +3,7 @@ import route_static from './request-handlers/static.js';
 import route_404 from './request-handlers/404.js';
 
 import http from 'http';
-import sqlite3 from 'sqlite3';
+import { database } from './request-handlers/database-wrapper.js';
 
 //const hostname = '127.0.0.1';
 const hostname = '0.0.0.0';
@@ -18,7 +18,7 @@ const routes = [
 function route(req, res) {
   for (const { match, respond } of routes) {
     if (match(req)) {
-      respond(req, res, db);
+      respond(req, res, database);
       // TODO: add support for middleware that doesn't capture the req, eg redirects
       break;
     }
@@ -32,23 +32,4 @@ server.listen(port, hostname, () => {
 
 
 
-// database base code
-const db = new sqlite3.Database(':memory:');
-
-/* split table creation/initialization and run inside serialize to prevent
-  insertions from encountering a missing table */
-db.serialize(() => {
-  db.run(`create table counters (
-    name primary key,
-    value
-  );`)
-  .run(`insert into counters (name, value)
-    values ("accesses", 0);`)
-  .run(`create table users (
-    user_id primary key,
-    passport int
-  );`)
-  .run(`insert into users (user_id, passport)
-    values (69, 420);`
-  );
-});
+database.initialize();
