@@ -23,9 +23,18 @@ function formBody(request) {
 }
 
 function getAppointment(body) {
+  // TODO: put this logic in separate login code
+  if(!database.hasUser(body)) {
+    console.log("creating user...");
+    database.addUser(body);
+  }
+
+
   if(database.hasAppointment(body)) {
+    console.log("fetching appointment...");
     return database.fetchAppointment(body);
   } else {
+    console.log("creating appointment...");
     return database.createAppointment(body);
   }
 }

@@ -29,7 +29,3 @@ const server = http.createServer(route);
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
-
-
-
-database.initialize();
