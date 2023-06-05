@@ -1,3 +1,4 @@
+import route_login from './request-handlers/login.js';
 import route_appointment from './request-handlers/appointment.js';
 import route_static from './request-handlers/static.js';
 import route_404 from './request-handlers/404.js';
@@ -10,6 +11,7 @@ const hostname = '0.0.0.0';
 const port = 3000;
 
 const routes = [
+  route_login,
   route_appointment,
   route_static,
   route_404,
