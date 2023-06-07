@@ -10,10 +10,10 @@ class DatabaseWrapper {
         value
       );`)
       .run(`insert into counters (name, value)
-        values ("accesses", 0);`)
+        values ("accesses", 0)`)
   
       // create table 'users'
-      .run(`create table users (user_id primary key, email);`);
+      .run(`CREATE TABLE users (user_id PRIMARY KEY, email)`);
     });
   }
 
@@ -21,8 +21,8 @@ class DatabaseWrapper {
     return new Promise((resolve, reject) => {
       this.db.serialize(() => {
         this.db.run(
-          `insert into users (user_id, email) values (?, ?);`,
-          [ userobj.userid, userobj.email ],
+          `insert into users (user_id, email) values (?, ?)`,
+          ["user_id", "email"],
           (err, res) => {
             if (err !== undefined)
               reject(err)
@@ -39,8 +39,8 @@ class DatabaseWrapper {
     return new Promise((resolve, reject) => {
       this.db.serialize(() => {
         this.db.get(
-          `select (?, ?) from users;`,
-          userobj.userid, userobj.email,
+          `SELECT (?, ?) FROM users`,
+          "user_id", "email",
           (err, row) => {
             if (err !== undefined)
               reject(err)
