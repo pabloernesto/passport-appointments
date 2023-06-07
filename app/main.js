@@ -17,13 +17,10 @@ const routes = [
   route_404,
 ];
 
-function route(req, res) {
+async function route(req, res) {
   for (const { match, respond } of routes) {
-    if (match(req)) {
-      respond(req, res, database);
-      // TODO: add support for middleware that doesn't capture the req, eg redirects
+    if (match(req) && !(await respond(req, res, database)))
       break;
-    }
   }
 }
 const server = http.createServer(route);
