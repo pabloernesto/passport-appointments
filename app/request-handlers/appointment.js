@@ -27,7 +27,7 @@ async function respond(req, res, db) {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/html');
   const body = await formBody(req);
-  res.end(render(body));
+  res.end(render(body, db));
 }
 
 function render(body, db) {
