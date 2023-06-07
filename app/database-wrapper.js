@@ -14,7 +14,7 @@ class DatabaseWrapper {
       db.run(`create table users (user_id primary key, email);`);
     });
 
-    return DatabaseWrapper(db);
+    return new DatabaseWrapper(db);
   }
 
   addUser(userobj) {
