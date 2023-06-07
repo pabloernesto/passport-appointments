@@ -35,9 +35,11 @@ function WrapperDatabase() {
     // if first digit is 1, has appointment
     this.hasUser = function(userobj) {
         return this.db.serialize(() => {
-            this.db.get(`select (${userobj.userid}, ${userobj.email}) from users;`, (err, row) => {
-                return (row != undefined);
-            });
+            this.db.get(
+                `select (?, ?) from users;`,
+                [ userobj.userid, userobj.email ],
+                (err, row) => row != undefined
+            );
         })
     },
 
