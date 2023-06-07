@@ -22,7 +22,7 @@ function formBody(request) {
   });
 }
 
-function getAppointment(body) {
+function getAppointment(body, database) {
   // TODO: put this logic in separate login code
   if(!database.hasUser(body)) {
     console.log("creating user...");
@@ -46,7 +46,7 @@ async function respond(req, res, db) {
   res.end(render(body));
 }
 
-function render(body) {
+function render(body, db) {
   return `\
 <!DOCTYPE html>
 <html lang="en" class="booting">
@@ -64,7 +64,7 @@ function render(body) {
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <p>User ${ body.userid }, you have your appointment at ${ getAppointment(body) }.<p/>
+  <p>User ${ body.userid }, you have your appointment at ${ getAppointment(body,db) }.<p/>
 </body>
 </html>`
 }

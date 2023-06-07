@@ -37,10 +37,10 @@ async function respond(req, res, db) {
 
   // else, allow fallthrough
 
-  if (url === "/appointment" && !validSID(sid)) {
+  //if (url === "/appointment" && !validSID(sid)) {
     res.statusCode = 302;
     res.setHeader('Location', `/login?continue=/appointment`);
-  }
+  //}
 
   // res.statusCode = 302;
   // res.setHeader('Location', '/login');
