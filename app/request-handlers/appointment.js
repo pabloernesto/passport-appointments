@@ -1,4 +1,4 @@
-import { database } from './database-wrapper.js';
+import { database } from '../database-wrapper.js';
 import { formBody } from '../util-request.js';
 
 function match(req) {

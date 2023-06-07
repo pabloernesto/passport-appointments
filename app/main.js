@@ -4,7 +4,7 @@ import route_static from './request-handlers/static.js';
 import route_404 from './request-handlers/404.js';
 
 import http from 'http';
-import { database } from './request-handlers/database-wrapper.js';
+import { database } from './database-wrapper.js';
 
 //const hostname = '127.0.0.1';
 const hostname = '0.0.0.0';
