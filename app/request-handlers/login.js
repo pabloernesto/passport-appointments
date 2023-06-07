@@ -1,8 +1,12 @@
+import { formBody } from '../util-request.js';
+
 const managed_endpoints = [
+  "GET /login", "GET /login.html",  // get login form
+  "POST /login",                    // submit login form
+
+  // secure areas
   "GET /appointment",
-  "POST /appointment",
-  "GET /login", "GET /login.html",
-  "POST /login"
+  "POST /appointment"
 ]
 
 function match(req) {
@@ -14,17 +18,11 @@ async function respond(req, res, db) {
   const { method, url, headers } = req;
   const sid = headers.sid;  // session ID
 
-  // if /appointment and not logged in,
-    // set continuation
-    // redirect to /login
-    // NOTE: if the request was an unauthenticated POST (which shouldn't happen
-    //       in normal flow), we will lose form data
+  // if GET /login and not logged in,
+    // modify request to login.html
 
   // if /login and logged in,
     // modify request to login-unnecessary.html
-
-  // if GET /login and not logged in,
-    // modify request to login.html
 
   // if POST /login and not logged in,
     // attempt login
@@ -35,16 +33,39 @@ async function respond(req, res, db) {
     // else
       // redirect to GET /login (preserving continuation)
 
+  // if managed and not logged in,
+    // set continuation
+    // redirect to /login
+    // NOTE: if the request was an unauthenticated POST (which shouldn't happen
+    //       in normal flow), we will lose form data
+
   // else, allow fallthrough
 
-  if (url === "/appointment" && !validSID(sid)) {
-    res.statusCode = 302;
-    res.setHeader('Location', `/login?continue=/appointment`);
+  if (url === "/login" && validSID(sid)) {
+    req.url = "login-unnecessary.html";
+    return true;
   }
 
-  // res.statusCode = 302;
-  // res.setHeader('Location', '/login');
-  // res.end();
+  if (method === "GET" && url === "/login" && !validSID(sid)) {
+    req.url = "login.html";
+    return true;
+  }
+
+  if (method === "POST" && url === "/login" && !validSID(sid)) {
+    // TODO: login
+    const { user, pass } = await formBody(req);
+    // db.
+  }
+
+  if (!validSID(sid)) {
+    res.statusCode = 302;
+    res.setHeader('Location', `/login?continue=/appointment`);
+    res.end();
+  }
+}
+
+function validSID(sid) {
+  return true;
 }
 
 export default { match, respond };
