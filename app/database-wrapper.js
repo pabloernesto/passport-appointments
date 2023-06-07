@@ -2,19 +2,19 @@ import sqlite3 from 'sqlite3';
 // TODO: 'userobj' is the same as the form in index.html
 
 class DatabaseWrapper {
-  constructor() {
-    this.db = new sqlite3.Database(':memory:');
-    this.db.serialize(() => {
-      this.db.run(`create table counters (
-        name primary key,
-        value
-      );`)
-      .run(`insert into counters (name, value)
-        values ("accesses", 0)`)
-  
-      // create table 'users'
-      .run(`CREATE TABLE users (user_id PRIMARY KEY, email)`);
+  constructor(db) {
+    this.db = db;
+  }
+
+  // real db init could fail or take a long time.
+  // for a discussion of async constructors see https://dev.to/somedood/the-proper-way-to-write-async-constructors-in-javascript-1o8c
+  static fromNewTestDB() {
+    const db = new sqlite3.Database(':memory:');
+    db.serialize(() => {
+      db.run(`create table users (user_id primary key, email);`);
     });
+
+    return DatabaseWrapper(db);
   }
 
   addUser(userobj) {
@@ -67,5 +67,5 @@ class DatabaseWrapper {
   }
 }
   
-export const database = new DatabaseWrapper();
+export const database = DatabaseWrapper.fromNewTestDB();
 export default { database };
