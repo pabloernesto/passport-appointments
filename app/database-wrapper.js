@@ -39,13 +39,13 @@ class DatabaseWrapper {
     return new Promise((resolve, reject) => {
       this.db.serialize(() => {
         this.db.get(
-          `SELECT (?, ?) FROM users`,
-          "user_id", "email",
-          (err, row) => {
-            if (err !== undefined)
+          `select count(*) as count from users where user_id = ? and email = ?;`,
+          [ userobj.userid, userobj.mail ],
+          (err, res) => {
+            if (err !== null)
               reject(err)
             else
-              resolve(row !== undefined);
+              resolve(res.count === 1);
           }
         );
       })
