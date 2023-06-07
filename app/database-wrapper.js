@@ -40,7 +40,7 @@ class DatabaseWrapper {
       this.db.serialize(() => {
         this.db.get(
           `select (?, ?) from users;`,
-          [ userobj.userid, userobj.email ],
+          userobj.userid, userobj.email,
           (err, row) => {
             if (err !== undefined)
               reject(err)
@@ -52,9 +52,10 @@ class DatabaseWrapper {
     })
   }
 
-  // if even, it has an appointment
+  // takes a user that is known to exist
+  // TEMP: if even, the user has an appointment
   async hasAppointment(userobj) {
-    return (userobj.userid % 2 == 0) && (await this.hasUser(userobj));
+    return (userobj.userid % 2 == 0);
   }
 
   fetchAppointment(userobj) {

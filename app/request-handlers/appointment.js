@@ -6,15 +6,15 @@ function match(req) {
   return method === "POST" && url === "/appointment";
 }
 
-function getAppointment(body, database) {
+async function getAppointment(body, database) {
   // TODO: put this logic in separate login code
-  if(!database.hasUser(body)) {
+  const has = await database.hasUser(body);
+  if(!has) {
     console.log("creating user...");
     database.addUser(body);
   }
-
-
-  if(database.hasAppointment(body)) {
+  const appt = await database.hasAppointment(body);
+  if(appt) {
     console.log("fetching appointment...");
     return database.fetchAppointment(body);
   } else {
@@ -27,10 +27,13 @@ async function respond(req, res, db) {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/html');
   const body = await formBody(req);
-  res.end(render(body, db));
+  const appointment = await getAppointment(body, db)
+    .catch(
+      (reason) => console.log(reason));
+  res.end(render(body, db, appointment));
 }
 
-function render(body, db) {
+function render(body, db, appointment) {
   return `\
 <!DOCTYPE html>
 <html lang="en" class="booting">
@@ -48,7 +51,7 @@ function render(body, db) {
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <p>User ${ body.userid }, you have your appointment at ${ getAppointment(body,db) }.<p/>
+  <p>User ${ body.userid }, you have your appointment at ${ appointment }.<p/>
 </body>
 </html>`
 }
