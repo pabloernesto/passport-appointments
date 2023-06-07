@@ -11,7 +11,7 @@ const hostname = '0.0.0.0';
 const port = 3000;
 
 const routes = [
-  route_login,
+  // route_login,
   route_appointment,
   route_static,
   route_404,
