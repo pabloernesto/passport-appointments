@@ -1,71 +1,92 @@
-import { formBody } from '../util-request.js';
+import { formBody, RequestBodyParsingError } from '../util-request.js';
+import { authenticateUser, generateSessionToken, isValidSessionToken } from '../authentication.js';
 
-const managed_endpoints = [
-  "GET /login", "GET /login.html",  // get login form
-  "POST /login",                    // submit login form
+const loggedInEndpoints = [
+  '/appointment'
+];
 
-  // secure areas
-  "GET /appointment",
-  "POST /appointment"
-]
+export const match = (req) =>
+  loggedInEndpoints.includes(req.url)                     // logged in endpoint
+  && (!req.cookies.sessionToken                           // no token
+    || !isValidSessionToken(req.cookies.sessionToken))    // invalid token
+  || (req.method === 'POST' && req.url === '/login');     // handle logins
 
-function match(req) {
-  const { method, url } = req;
-  return managed_endpoints.includes(`${ method } ${ url }`);
-}
+export function respond(req, res, database) {
+  if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
+    redirectToLogin(req, res);
 
-async function respond(req, res, db) {
-  const { method, url, headers } = req;
-  const sid = headers.sid;  // session ID
-
-  // if GET /login and not logged in,
-    // modify request to login.html
-
-  // if /login and logged in,
-    // modify request to login-unnecessary.html
-
-  // if POST /login and not logged in,
-    // attempt login
-    // if login successful,
-      // set session cookie
-      // if continuation, redirect to continuation
-      // else modify request to login-successful.html
-    // else
-      // redirect to GET /login (preserving continuation)
-
-  // if managed and not logged in,
-    // set continuation
-    // redirect to /login
-    // NOTE: if the request was an unauthenticated POST (which shouldn't happen
-    //       in normal flow), we will lose form data
-
-  // else, allow fallthrough
-
-  if (url === "/login" && validSID(sid)) {
-    req.url = "login-unnecessary.html";
-    return true;
-  }
-
-  if (method === "GET" && url === "/login" && !validSID(sid)) {
-    req.url = "login.html";
-    return true;
-  }
-
-  if (method === "POST" && url === "/login" && !validSID(sid)) {
-    // TODO: login
-    const { user, pass } = await formBody(req);
-    // db.
-  }
-
-  if (!validSID(sid)) {
-    res.statusCode = 302;
-    res.setHeader('Location', `/login?continue=/appointment`);
-    res.end();
-  }
-}
-
-function validSID(sid) {
+  else if (req.method === 'POST' && req.url === '/login')
+    attemptLogin(req, res, database);
+  
   return true;
 }
 
-export default { match, respond };
+async function attemptLogin(req, res, database) {
+  try {
+    const body = await formBody(req);
+    const passedAuth = await authenticateUser(body);
+
+    if (!passedAuth) {
+      sendInvalidCredentialsResponse(res);
+      return;
+    }
+
+    const sessionToken = await generateSessionToken(user);
+    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
+    redirectToRedirectPage(req, res);
+
+  } catch (error) {
+    if (error instanceof RequestBodyParsingError) {
+      logRequestBodyParsingError(error, req);
+    } else {
+      sendErrorResponse(res, 400, error.message);
+    }
+  }
+}
+
+function logRequestBodyParsingError(error, request) {
+  const { method, url, headers } = request;
+  const clientIP = getClientIP(request);
+  const headerstr = Object.entries(headers)
+    .map(([name, value]) => `    ${name}: ${value}`)
+    .join('\n');
+
+  console.error(`
+RequestBodyParsingError:
+  Error Message: ${error.message}
+  Request Method: ${method}
+  Request URL: ${url}
+  Request Headers:
+${headerstr}
+  Client IP: ${clientIP}
+`);
+}
+
+function isLoggedIn(req) {
+  const sessionToken = req.cookies.sessionToken;
+  return sessionToken && isValidSessionToken(sessionToken);
+}
+
+function redirectToLogin(req, res) {
+  const currentURL = req.url;
+  res.statusCode = 302;
+  res.setHeader('Location', `/login?redirect=${encodeURIComponent(currentURL)}`);
+  res.end();
+}
+
+function sendInvalidCredentialsResponse(res) {
+  res.statusCode = 401;
+  res.end('Invalid username or password.');
+}
+
+function redirectToRedirectPage(req, res) {
+  const redirectURL = getRedirectURL(req);
+  res.statusCode = 302;
+  res.setHeader('Location', redirectURL);
+  res.end();
+}
+
+function getRedirectURL(req) {
+  const redirectParam = req.query.redirect;
+  return redirectParam ? decodeURIComponent(redirectParam) : '/';
+}
