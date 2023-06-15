@@ -102,3 +102,6 @@ function getRedirectURL(req) {
   const redirectParam = queryParams?.redirect;
   return redirectParam ? decodeURIComponent(redirectParam) : '/';
 }
+
+
+export default { match, respond }
