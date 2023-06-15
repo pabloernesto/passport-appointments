@@ -22,15 +22,15 @@ export function respond(req, res, database) {
 
 async function attemptLogin(req, res, database) {
   try {
-    const body = await formBody(req);
-    const passedAuth = await authenticateUser(body);
+    const { username, password } = await formBody(req);
+    const passedAuth = await authenticateUser(username, password);
 
     if (!passedAuth) {
       sendInvalidCredentialsResponse(res);
       return;
     }
 
-    const sessionToken = await generateSessionToken(user);
+    const sessionToken = generateSessionToken();
     res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
     redirectToRedirectPage(req, res);
 
