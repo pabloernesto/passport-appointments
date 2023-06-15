@@ -1,6 +1,9 @@
 import { formBody, RequestBodyParsingError } from '../util-request.js';
-import { authenticateUser, generateSessionToken, isValidSessionToken } from '../authentication.js';
+import Authentication from '../authentication.js';
 import querystring from 'node:querystring';
+import { database } from '../database-wrapper.js';
+
+const auth = new Authentication(database);
 
 const loggedInEndpoints = [
   '/appointment'
@@ -17,21 +20,21 @@ export function respond(req, res, database) {
 
   else if (req.method === 'POST' && req.url === '/login')
     attemptLogin(req, res, database);
-  
+
   return false;
 }
 
 async function attemptLogin(req, res, database) {
   try {
     const { username, password } = await formBody(req);
-    const passedAuth = await authenticateUser(username, password, database);
+    const passedAuth = await auth.authenticateUser(username, password);
 
     if (!passedAuth) {
       sendInvalidCredentialsResponse(res);
       return;
     }
 
-    const sessionToken = generateSessionToken();
+    const sessionToken = auth.generateSessionToken();
     res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
     redirectToRedirectPage(req, res);
 
@@ -75,7 +78,7 @@ function isLoggedIn(req) {
   const cookies = querystring.parse(req.headers?.cookie || '', '; ');
 
   const sessionToken = cookies.sessionToken;
-  return sessionToken && isValidSessionToken(sessionToken);
+  return sessionToken && auth.isValidSessionToken(sessionToken);
 }
 
 function redirectToLogin(req, res) {
