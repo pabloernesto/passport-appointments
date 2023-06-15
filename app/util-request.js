@@ -2,7 +2,7 @@ import querystring from 'node:querystring';
 
 const MAX_BODY_SIZE = 1024 * 1024; // 1MB limit
 
-class RequestBodyParsingError extends Error {
+export class RequestBodyParsingError extends Error {
   constructor(message) {
     super(message);
     this.name = 'RequestBodyParsingError';
