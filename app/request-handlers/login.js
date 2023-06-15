@@ -39,7 +39,7 @@ async function attemptLogin(req, res, database) {
     if (error instanceof RequestBodyParsingError) {
       logRequestBodyParsingError(error, req);
     } else {
-      sendErrorResponse(res, 400, error.message);
+      sendErrorResponse(res, error);
     }
   }
 }
@@ -60,6 +60,12 @@ RequestBodyParsingError:
 ${headerstr}
   Client IP: ${clientIP}
 `);
+}
+
+function sendErrorResponse(res, err) {
+  res.statusCode = 400;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end(err.toString());
 }
 
 function isLoggedIn(req) {
