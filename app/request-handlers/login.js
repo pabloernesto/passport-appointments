@@ -24,7 +24,7 @@ export function respond(req, res, database) {
 async function attemptLogin(req, res, database) {
   try {
     const { username, password } = await formBody(req);
-    const passedAuth = await authenticateUser(username, password);
+    const passedAuth = await authenticateUser(username, password, database);
 
     if (!passedAuth) {
       sendInvalidCredentialsResponse(res);
