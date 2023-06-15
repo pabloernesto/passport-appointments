@@ -128,7 +128,11 @@ function match(req) {
 function getAssetByURL(url, assets) {
   const cleanURL = url.split('?')[0]; // Remove query string from URL
   const urlWithoutExt = cleanURL.replace(/\.[^/.]+$/, ""); // Remove file extension from URL
-  return assets.find((asset) => asset.url.startsWith(urlWithoutExt));
+
+  return assets.find((asset) => {
+    const assetWithoutExt = asset.url.replace(/\.[^/.]+$/, "");
+    return assetWithoutExt === urlWithoutExt;
+  });
 }
 
 async function respond(req, res, db) {
