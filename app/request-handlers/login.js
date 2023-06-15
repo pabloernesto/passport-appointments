@@ -1,5 +1,6 @@
 import { formBody, RequestBodyParsingError } from '../util-request.js';
 import { authenticateUser, generateSessionToken, isValidSessionToken } from '../authentication.js';
+import querystring from 'node:querystring';
 
 const loggedInEndpoints = [
   '/appointment'
@@ -91,6 +92,7 @@ function redirectToRedirectPage(req, res) {
 }
 
 function getRedirectURL(req) {
-  const redirectParam = req.query.redirect;
+  const queryParams = querystring.parse(req.url.split('?')[1] || '');
+  const redirectParam = queryParams?.redirect;
   return redirectParam ? decodeURIComponent(redirectParam) : '/';
 }
