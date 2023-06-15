@@ -4,6 +4,8 @@ import querystring from 'node:querystring';
 import { database } from '../database-wrapper.js';
 
 const auth = new Authentication(database);
+// TODO: remove
+auth.createUser("Jim", "jim@example.com", "1234");
 
 const loggedInEndpoints = [
   '/appointment'

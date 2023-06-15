@@ -20,6 +20,21 @@ class Authentication {
     setInterval(() => this.invalidateExpiredTokens(), TOKEN_INVALIDATION_PERIOD);
   }
 
+  createUser(username, email, password) {
+    // one base64 char is 6 bits of entropy (2^6 = 64)
+    // one random byte is 8 bits of entropy
+    // so 3 random bytes have the same entropy as 4 random base64 chars
+    //   (3*8 = 4*6 = 24)
+    // 16 base64 chars requires 16*3/4 = 12 random bytes
+    const salt = randomBytes(12).toString('base64url');
+    return this.database.addUser({
+      user_id: username,
+      email: email,
+      salt: salt,
+      hash: hash(password + salt)
+    });
+  }
+
   async authenticateUser(username, password) {
     const user = await this.database.getUser(username);
     return user && user.hash === hash(password + user.salt);
