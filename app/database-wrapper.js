@@ -18,24 +18,20 @@ class DatabaseWrapper {
   }
 
   addUser(userobj) {
+    const query = "insert into users (user_id, email, salt, hash)"
+      + " values (?, ?, ?, ?)";
+    const { user_id, email, hash, salt } = userobj;
     return new Promise((resolve, reject) => {
-      this.db.serialize(() => {
-        this.db.run(
-          `insert into users (user_id, email) values (?, ?)`,
-          ["user_id", "email"],
-          (err, res) => {
-            if (err !== undefined)
-              reject(err)
-            else
-              resolve(res);
-          }
-        );
+      this.db.run(query, [ user_id, email, salt, hash ], (err, res) => {
+        err
+          ? reject(err)
+          : resolve(res);
       });
     });
   }
 
   getUser(username) {
-    const query = `select * from users where username = ?`;
+    const query = `select * from users where user_id = ?`;
 
     return new Promise((resolve, reject) => {
       this.db.get(query, [ username ], (err, row) => {
@@ -48,20 +44,15 @@ class DatabaseWrapper {
 
   // if first digit is 1, has appointment
   hasUser(userobj) {
+    const query = "select count(*) as count from users where user_id = ?;";
+    const { user_id } = userobj;
     return new Promise((resolve, reject) => {
-      this.db.serialize(() => {
-        this.db.get(
-          `select count(*) as count from users where user_id = ? and email = ?;`,
-          [ userobj.userid, userobj.mail ],
-          (err, res) => {
-            if (err !== null)
-              reject(err)
-            else
-              resolve(res.count === 1);
-          }
-        );
-      })
-    })
+      this.db.get(query, [ user_id ], (err, res) => {
+        err
+          ? reject(err)
+          : resolve(res);
+      });
+    });
   }
 
   // takes a user that is known to exist
