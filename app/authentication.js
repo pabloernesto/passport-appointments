@@ -8,7 +8,7 @@ const TOKEN_VALIDITY = 60 * 60 * 1000; // 1 hour
 const TOKEN_INVALIDATION_PERIOD = 5 * 60 * 1000; // 5 minutes
 
 export async function authenticateUser(username, password, database) {
-  const user = database.getUser(username);
+  const user = await database.getUser(username);
   return user && user.hash === hash(password + user.salt);
 }
 

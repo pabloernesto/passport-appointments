@@ -34,6 +34,18 @@ class DatabaseWrapper {
     });
   }
 
+  getUser(username) {
+    const query = `select * from users where username = ?`;
+
+    return new Promise((resolve, reject) => {
+      this.db.get(query, [ username ], (err, row) => {
+        err
+          ? reject(err)
+          : resolve(row);
+      });
+    });
+  }
+
   // if first digit is 1, has appointment
   hasUser(userobj) {
     return new Promise((resolve, reject) => {
