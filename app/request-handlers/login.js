@@ -7,8 +7,7 @@ const loggedInEndpoints = [
 
 export const match = (req) =>
   loggedInEndpoints.includes(req.url)                     // logged in endpoint
-  && (!req.cookies.sessionToken                           // no token
-    || !isValidSessionToken(req.cookies.sessionToken))    // invalid token
+    && !isLoggedIn(req)
   || (req.method === 'POST' && req.url === '/login');     // handle logins
 
 export function respond(req, res, database) {
@@ -63,7 +62,12 @@ ${headerstr}
 }
 
 function isLoggedIn(req) {
-  const sessionToken = req.cookies.sessionToken;
+  // Extract cookies from the cookie header using querystring.parse()
+  // If the cookie header is undefined, provide an empty string as the default value
+  // Cookies are joined with "; "
+  const cookies = querystring.parse(req.headers?.cookie || '', '; ');
+
+  const sessionToken = cookies.sessionToken;
   return sessionToken && isValidSessionToken(sessionToken);
 }
 
