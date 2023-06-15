@@ -17,7 +17,7 @@ export function respond(req, res, database) {
   else if (req.method === 'POST' && req.url === '/login')
     attemptLogin(req, res, database);
   
-  return true;
+  return false;
 }
 
 async function attemptLogin(req, res, database) {
