@@ -8,12 +8,18 @@
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
   <!-- <meta name="description" content="blurb for google search" />  -->
-  <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
+  <link rel="canonical" href="/login" >
 
   <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <a href="/appointment">Get an appointment</a>
+  <form method="POST">
+    <label for="username">Your id</label>
+    <input type="text" id="username" name="username">
+    <label for="password">Your password</label>
+    <input type="password" id="password" name="password">
+    <button>Login</button>
+  </form>
 </body>
 </html>

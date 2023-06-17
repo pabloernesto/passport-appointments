@@ -122,13 +122,23 @@ function match(req) {
   const { method, url } = req;
   if (method !== "GET") return false;
   const request_url = new URL(url, "file:").pathname;   // URL-encode the path
-  return known_assets.some(asset => asset.url === request_url);
+  return getAssetByURL(request_url, known_assets) !== undefined;
+}
+
+function getAssetByURL(url, assets) {
+  const cleanURL = url.split('?')[0]; // Remove query string from URL
+  const urlWithoutExt = cleanURL.replace(/\.[^/.]+$/, ""); // Remove file extension from URL
+
+  return assets.find((asset) => {
+    const assetWithoutExt = asset.url.replace(/\.[^/.]+$/, "");
+    return assetWithoutExt === urlWithoutExt;
+  });
 }
 
 async function respond(req, res, db) {
   req.statusCode = 200;
   const request_url = new URL(req.url, "file:").pathname; // URL-encode the path
-  const asset_path = known_assets.find(asset => asset.url === request_url)["path"];
+  const asset_path = getAssetByURL(request_url, known_assets)["path"];
   res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
   let f = await fs.open(asset_path);
   f.createReadStream(asset_path).pipe(res);
