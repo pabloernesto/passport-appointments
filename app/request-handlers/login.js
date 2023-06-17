@@ -1,33 +1,36 @@
 import { formBody, RequestBodyParsingError } from '../util-request.js';
 import Authentication from '../authentication.js';
 import querystring from 'node:querystring';
-import { database } from '../database-wrapper.js';
-
-const auth = new Authentication(database);
-// TODO: remove
-auth.createUser("Jim", "jim@example.com", "1234");
 
 const loggedInEndpoints = [
   '/appointment'
 ];
 
-export const match = (req) =>
-  loggedInEndpoints.includes(req.url)                     // logged in endpoint
-    && !isLoggedIn(req)
-  || (req.method === 'POST'
-    && req.url.split('?')[0] === '/login');               // handle logins
+export default class LoginEndpoint {
+  constructor(database) {
+    this.auth = new Authentication(database);
+    // TODO: remove
+    this.auth.createUser("Jim", "jim@example.com", "1234");
+  }
 
-export function respond(req, res, database) {
-  if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
-    redirectToLogin(req, res);
+  match = (req) =>
+    loggedInEndpoints.includes(req.url)             // logged in endpoint
+      && !isLoggedIn(req, this.auth)
+    || (req.method === 'POST'
+      && req.url.split('?')[0] === '/login');       // handle logins
 
-  else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
-    attemptLogin(req, res, database);
+  respond(req, res) {
+    if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
+      redirectToLogin(req, res);
 
-  return false;
+    else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
+      attemptLogin(req, res, this.auth);
+
+    return false;
+  }
 }
 
-async function attemptLogin(req, res, database) {
+async function attemptLogin(req, res, auth) {
   try {
     const { username, password } = await formBody(req);
     const passedAuth = await auth.authenticateUser(username, password);
@@ -74,7 +77,7 @@ function sendErrorResponse(res, err) {
   res.end(err.toString());
 }
 
-function isLoggedIn(req) {
+function isLoggedIn(req, auth) {
   // Extract cookies from the cookie header using querystring.parse()
   // If the cookie header is undefined, provide an empty string as the default value
   // Cookies are joined with "; "
@@ -108,6 +111,3 @@ function getRedirectURL(req) {
   const redirectParam = queryParams?.redirect;
   return redirectParam ? decodeURIComponent(redirectParam) : '/';
 }
-
-
-export default { match, respond }
