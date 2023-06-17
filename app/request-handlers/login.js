@@ -14,13 +14,14 @@ const loggedInEndpoints = [
 export const match = (req) =>
   loggedInEndpoints.includes(req.url)                     // logged in endpoint
     && !isLoggedIn(req)
-  || (req.method === 'POST' && req.url === '/login');     // handle logins
+  || (req.method === 'POST'
+    && req.url.split('?')[0] === '/login');               // handle logins
 
 export function respond(req, res, database) {
   if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
     redirectToLogin(req, res);
 
-  else if (req.method === 'POST' && req.url === '/login')
+  else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
     attemptLogin(req, res, database);
 
   return false;

@@ -11,7 +11,7 @@ class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
-      db.run(`create table users (user_id primary key, email);`);
+      db.run(`create table users (user_id primary key, email, salt, hash);`);
     });
 
     return new DatabaseWrapper(db);
