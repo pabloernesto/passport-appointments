@@ -1,5 +1,5 @@
 import LoginEndpoint from './request-handlers/login.js';
-import route_appointment from './request-handlers/appointment.js';
+import AppointmentEndpoint from './request-handlers/appointment.js';
 import route_static from './request-handlers/static.js';
 import route_404 from './request-handlers/404.js';
 
@@ -7,6 +7,7 @@ import http from 'http';
 import { database } from './database-wrapper.js';
 
 const route_login = new LoginEndpoint(database);
+const route_appointment = new AppointmentEndpoint(database);
 
 //const hostname = '127.0.0.1';
 const hostname = '0.0.0.0';
