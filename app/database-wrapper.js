@@ -61,12 +61,12 @@ class DatabaseWrapper {
   async hasAppointment(user_id) {
     const query = "SELECT count(*) as count FROM appointments WHERE user_id = ?;";
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user_id ], 
+      this.db.get(query, [ user_id ], 
         (err, res) => {
         if(err || !res) {
           reject(err);
         } else {
-          resolve(res.appt_id != null);
+          resolve(res.count != 0);
         }
       });
     });

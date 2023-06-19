@@ -77,6 +77,7 @@ function sendErrorResponse(res, err) {
   res.end(err.toString());
 }
 
+// TODO: BUG: null under certain circumstances
 function isLoggedIn(req, auth) {
   // Extract cookies from the cookie header using querystring.parse()
   // If the cookie header is undefined, provide an empty string as the default value
@@ -84,7 +85,7 @@ function isLoggedIn(req, auth) {
   const cookies = querystring.parse(req.headers?.cookie || '', '; ');
 
   const sessionToken = cookies.sessionToken;
-  return sessionToken && auth.isValidSessionToken(sessionToken);
+  return sessionToken && auth && auth.isValidSessionToken(sessionToken);
 }
 
 function redirectToLogin(req, res) {
