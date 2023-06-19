@@ -13,7 +13,7 @@ async function getAppointment(body, database) {
     console.log("creating user...");
     database.addUser(body);
   }
-  const appt = await database.hasAppointment(body);
+  const appt = await database.hasAppointment(body.userid);
   if(appt) {
     console.log("fetching appointment...");
     return database.fetchAppointment(body);
@@ -30,6 +30,7 @@ async function respond(req, res, db) {
   const appointment = await getAppointment(body, db)
     .catch(
       (reason) => console.log(reason));
+  print("Hello");
   res.end(render(body, db, appointment));
 }
 

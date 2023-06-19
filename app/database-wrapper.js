@@ -11,7 +11,8 @@ class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
-      db.run(`create table users (user_id primary key, email, salt, hash);`);
+      db.run(`CREATE TABLE users (user_id int NOT NULL, email varchar(255), salt varchar(255), hash varchar(255), PRIMARY KEY (user_id));`);
+      db.run(`CREATE TABLE appointments (pass_id int NOT NULL, date varchar(255), user_id int, FOREIGN KEY (user_id) REFERENCES users (user_id), PRIMARY KEY (pass_id));`);
     });
 
     return new DatabaseWrapper(db);
@@ -22,7 +23,8 @@ class DatabaseWrapper {
       + " values (?, ?, ?, ?)";
     const { user_id, email, hash, salt } = userobj;
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user_id, email, salt, hash ], (err, res) => {
+      this.db.run(query, [ user_id, email, salt, hash], 
+        (err, res) => {
         err
           ? reject(err)
           : resolve(res);
@@ -56,9 +58,18 @@ class DatabaseWrapper {
   }
 
   // takes a user that is known to exist
-  // TEMP: if even, the user has an appointment
-  async hasAppointment(userobj) {
-    return (userobj.userid % 2 == 0);
+  async hasAppointment(user_id) {
+    const query = "SELECT count(*) as count FROM appointments WHERE user_id = ?;";
+    return new Promise((resolve, reject) => {
+      this.db.run(query, [ user_id ], 
+        (err, res) => {
+        if(err || !res) {
+          reject(err);
+        } else {
+          resolve(res.appt_id != null);
+        }
+      });
+    });
   }
 
   fetchAppointment(userobj) {
