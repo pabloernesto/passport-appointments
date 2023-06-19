@@ -1,9 +1,24 @@
-import { database } from '../database-wrapper.js';
 import { formBody } from '../util-request.js';
 
-function match(req) {
-  const { method, url } = req;
-  return method === "POST" && url === "/appointment";
+export default class AppointmentEndpoint {
+  constructor(database) {
+    this.database = database;
+  }
+
+  match(req) {
+    const { method, url } = req;
+    return method === "POST" && url === "/appointment";
+  }
+
+  async respond(req, res) {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html');
+    const body = await formBody(req);
+    const appointment = await getAppointment(body, this.database)
+      .catch(
+        (reason) => console.log(reason));
+    res.end(render(body, appointment));
+  }
 }
 
 async function getAppointment(body, database) {
@@ -23,18 +38,7 @@ async function getAppointment(body, database) {
   }
 }
 
-async function respond(req, res, db) {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/html');
-  const body = await formBody(req);
-  const appointment = await getAppointment(body, db)
-    .catch(
-      (reason) => console.log(reason));
-  print("Hello");
-  res.end(render(body, db, appointment));
-}
-
-function render(body, db, appointment) {
+function render(body, appointment) {
   return `\
 <!DOCTYPE html>
 <html lang="en" class="booting">
@@ -56,5 +60,3 @@ function render(body, db, appointment) {
 </body>
 </html>`
 }
-
-export default { match, respond };
