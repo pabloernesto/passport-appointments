@@ -18,7 +18,9 @@ export default class LoginEndpoint {
     loggedInEndpoints.includes(req.url)             // logged in endpoint
       && !isLoggedIn(req, this.auth)
     || (req.method === 'POST'
-      && req.url.split('?')[0] === '/login');       // handle logins
+      && req.url.split('?')[0] === '/login')        // handle logins
+    || (req.method === 'POST'
+      && req.url.split('?')[0] === '/register');    // handle registrations
 
   respond(req, res) {
     if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
@@ -26,6 +28,9 @@ export default class LoginEndpoint {
 
     else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
       attemptLogin(req, res, this.auth);
+
+    else if (req.method === 'POST' && req.url.split('?')[0] === '/register')
+      attemptRegistration(req, res, this.auth);
 
     return false;
   }
@@ -116,4 +121,61 @@ function getRedirectURL(req) {
   const queryParams = querystring.parse(req.url.split('?')[1] || '');
   const redirectParam = queryParams?.redirect;
   return redirectParam ? decodeURIComponent(redirectParam) : '/';
+}
+
+async function attemptRegistration(req, res, auth) {
+  let username, email, password;
+  try {
+    ({ username, email, password } = await formBody(req));
+    await auth.createUser(username, email, password);
+
+    const sessionToken = auth.generateSessionToken();
+    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
+    redirectToRedirectPage(req, res);
+
+  } catch (error) {
+    if (error instanceof RequestBodyParsingError) {
+      logRequestBodyParsingError(error, req);
+    } else if (error.message === "Failed to add user"
+        && error.cause.toString().includes('UNIQUE constraint failed')) {
+      sendUserOrPasswordExistsResponse(req, res, username, email);
+    } else {
+      sendErrorResponse(res, error);
+    }
+  }
+}
+
+function sendUserOrPasswordExistsResponse(req, res, username, email) {
+  res.statusCode = 409;
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  // TODO: bugfix. drops redirect
+  const body = `\
+<!DOCTYPE html>
+<html lang="en" class="booting">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>bookmarkname</title>
+
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
+  <!-- <meta name="description" content="blurb for google search" />  -->
+  <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
+
+  <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
+  <!-- <script src="main.js" module></script> -->
+</head>
+<body>
+  <p>
+  The <span class="username">${ username }</span> username
+  and/or <span class="email">${ email }</span> email
+  are already in use.
+  </p>
+  <p>
+  Please
+  <a href="/register">try again</a>.
+  </p>
+</body>
+</html>`;
+  res.end(body);
 }
