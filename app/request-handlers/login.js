@@ -1,6 +1,7 @@
 import { formBody, RequestBodyParsingError } from '../util-request.js';
 import Authentication from '../authentication.js';
 import querystring from 'node:querystring';
+import { URL } from 'url';
 
 const loggedInEndpoints = [
   '/appointment'
@@ -88,9 +89,14 @@ function isLoggedIn(req, auth) {
 }
 
 function redirectToLogin(req, res) {
+  let queryParams = new URLSearchParams();
+
   const currentURL = req.url;
+  const redirectURL = getRedirectURL(req) || currentURL;
+  queryParams.set('redirect', encodeURIComponent(redirectURL));
+
   res.statusCode = 302;
-  res.setHeader('Location', `/login?redirect=${encodeURIComponent(currentURL)}`);
+  res.setHeader('Location', `/login?${queryParams.toString()}`);
   res.end();
 }
 
