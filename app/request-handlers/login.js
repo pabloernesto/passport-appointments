@@ -98,6 +98,7 @@ function redirectToLogin(req, res) {
 
   const currentURL = req.url;
   const redirectURL = getRedirectURL(req) || currentURL;
+  res.setHeader('Set-Cookie', `redirect=${encodeURIComponent(redirectURL)}; Path=/`);
   queryParams.set('redirect', encodeURIComponent(redirectURL));
 
   res.statusCode = 302;
