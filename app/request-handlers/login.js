@@ -94,15 +94,12 @@ function isLoggedIn(req, auth) {
 }
 
 function redirectToLogin(req, res) {
-  let queryParams = new URLSearchParams();
-
   const currentURL = req.url;
   const redirectURL = getRedirectURL(req) || currentURL;
-  res.setHeader('Set-Cookie', `redirect=${encodeURIComponent(redirectURL)}; Path=/`);
-  queryParams.set('redirect', encodeURIComponent(redirectURL));
+  res.setHeader('Set-Cookie', `redirect=${redirectURL}; Path=/`);
 
   res.statusCode = 302;
-  res.setHeader('Location', `/login?${queryParams.toString()}`);
+  res.setHeader('Location', '/login');
   res.end();
 }
 
@@ -112,16 +109,23 @@ function sendInvalidCredentialsResponse(res) {
 }
 
 function redirectToRedirectPage(req, res) {
-  const redirectURL = getRedirectURL(req);
+  const redirectURL = getRedirectURL(req) ?? '/';
   res.statusCode = 302;
   res.setHeader('Location', redirectURL);
   res.end();
 }
 
 function getRedirectURL(req) {
-  const queryParams = querystring.parse(req.url.split('?')[1] || '');
-  const redirectParam = queryParams?.redirect;
-  return redirectParam ? decodeURIComponent(redirectParam) : '/';
+  // note: `req.headers.cookie`, if present, will be a `; `-separated string
+  // of `key=value` pairs. any given key may appear more than once.
+  //
+  // querystring will turn the cookie string into a null-prototype object.
+  // duplicated keys in the cookie string result in an Array-typed value.
+  // the cookie string is automatically passed through decodeURIComponent
+  // see: https://nodejs.org/dist/latest-v18.x/docs/api/querystring.html
+  const cookies = querystring.parse(req.headers?.cookie || '', '; ');
+
+  return cookies.redirect;
 }
 
 async function attemptRegistration(req, res, auth) {
@@ -131,7 +135,7 @@ async function attemptRegistration(req, res, auth) {
     await auth.createUser(username, email, password);
 
     const sessionToken = auth.generateSessionToken();
-    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
+    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
@@ -149,7 +153,6 @@ async function attemptRegistration(req, res, auth) {
 function sendUserOrPasswordExistsResponse(req, res, username, email) {
   res.statusCode = 409;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  // TODO: bugfix. drops redirect
   const body = `\
 <!DOCTYPE html>
 <html lang="en" class="booting">
