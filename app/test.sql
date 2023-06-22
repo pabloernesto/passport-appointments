@@ -1,1 +1,0 @@
-CREATE TABLE users (PRIMARY KEY (user_id), email, salt, hash);
