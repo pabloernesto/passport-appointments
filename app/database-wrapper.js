@@ -11,7 +11,7 @@ export default class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
-      db.run(`CREATE TABLE users (user_id int NOT NULL, email varchar(255), salt varchar(255), hash varchar(255), PRIMARY KEY (user_id));`);
+      db.run(`CREATE TABLE users (user_id int NOT NULL, email varchar(255) UNIQUE, salt varchar(255), hash varchar(255), PRIMARY KEY (user_id));`);
       db.run(`CREATE TABLE appointments (pass_id int NOT NULL, date varchar(255), user_id int, FOREIGN KEY (user_id) REFERENCES users (user_id), PRIMARY KEY (pass_id));`);
     });
 
