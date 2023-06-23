@@ -45,7 +45,7 @@ export default class DatabaseWrapper {
           err.params = { user_id: username };
           reject(new Error("Failed to get user", { cause: err }));
         } else {
-          resolve(res);
+          resolve(row);
         }
       });
     });
