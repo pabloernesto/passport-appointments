@@ -23,7 +23,7 @@ export default class LoginEndpoint {
       && req.url.split('?')[0] === '/register');    // handle registrations
 
   respond(req, res) {
-    if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
+    if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req, this.auth))
       redirectToLogin(req, res);
 
     else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
