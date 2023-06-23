@@ -47,7 +47,10 @@ async function attemptLogin(req, res, auth) {
     }
 
     const sessionToken = auth.generateSessionToken();
-    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
+    res.setHeader('Set-Cookie', [
+      ...(res.getHeader('Set-Cookie') || []),
+      `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`
+    ]);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
@@ -96,7 +99,10 @@ function isLoggedIn(req, auth) {
 function redirectToLogin(req, res) {
   const currentURL = req.url;
   const redirectURL = getRedirectURL(req) || currentURL;
-  res.setHeader('Set-Cookie', `redirect=${redirectURL}; Path=/`);
+  res.setHeader('Set-Cookie', [
+    ...(res.getHeader('Set-Cookie') || []),
+    `redirect=${redirectURL}; Path=/`
+  ]);
 
   res.statusCode = 302;
   res.setHeader('Location', '/login');
@@ -135,7 +141,10 @@ async function attemptRegistration(req, res, auth) {
     await auth.createUser(username, email, password);
 
     const sessionToken = auth.generateSessionToken();
-    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
+    res.setHeader('Set-Cookie', [
+      ...(res.getHeader('Set-Cookie') || []),
+      `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`
+    ]);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
