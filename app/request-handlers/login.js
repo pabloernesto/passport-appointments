@@ -47,10 +47,7 @@ async function attemptLogin(req, res, auth) {
     }
 
     const sessionToken = auth.generateSessionToken();
-    res.setHeader('Set-Cookie', [
-      ...(res.getHeader('Set-Cookie') || []),
-      `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`
-    ]);
+    addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
@@ -99,10 +96,7 @@ function isLoggedIn(req, auth) {
 function redirectToLogin(req, res) {
   const currentURL = req.url;
   const redirectURL = getRedirectURL(req) || currentURL;
-  res.setHeader('Set-Cookie', [
-    ...(res.getHeader('Set-Cookie') || []),
-    `redirect=${redirectURL}; Path=/`
-  ]);
+  addCookie(res, `redirect=${redirectURL}; Path=/`);
 
   res.statusCode = 302;
   res.setHeader('Location', '/login');
@@ -118,10 +112,7 @@ function redirectToRedirectPage(req, res) {
   res.statusCode = 302;
   const redirectURL = getRedirectURL(req) ?? '/';
   res.setHeader('Location', redirectURL);
-  res.setHeader('Set-Cookie', [
-    ...(res.getHeader('Set-Cookie') || []),
-    `redirect=; Path=/; Max-Age=0`
-  ]);
+  addCookie(res, `redirect=; Path=/; Max-Age=0`);
   res.end();
 }
 
@@ -145,10 +136,7 @@ async function attemptRegistration(req, res, auth) {
     await auth.createUser(username, email, password);
 
     const sessionToken = auth.generateSessionToken();
-    res.setHeader('Set-Cookie', [
-      ...(res.getHeader('Set-Cookie') || []),
-      `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`
-    ]);
+    addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
@@ -195,4 +183,13 @@ function sendUserOrPasswordExistsResponse(req, res, username, email) {
 </body>
 </html>`;
   res.end(body);
+}
+
+function addCookie(res, cookiestr) {
+  const curcookies = res.getHeader('Set-Cookie');
+  if (curcookies === undefined) {
+    res.setHeader('Set-Cookie', [ cookiestr ]);
+  } else {
+    curcookies.push(cookiestr);
+  }
 }
