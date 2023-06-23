@@ -115,9 +115,13 @@ function sendInvalidCredentialsResponse(res) {
 }
 
 function redirectToRedirectPage(req, res) {
-  const redirectURL = getRedirectURL(req) ?? '/';
   res.statusCode = 302;
+  const redirectURL = getRedirectURL(req) ?? '/';
   res.setHeader('Location', redirectURL);
+  res.setHeader('Set-Cookie', [
+    ...(res.getHeader('Set-Cookie') || []),
+    `redirect=; Path=/; Max-Age=0`
+  ]);
   res.end();
 }
 
