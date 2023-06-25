@@ -17,22 +17,37 @@ export default class LoginEndpoint {
   match = (req) =>
     loggedInEndpoints.includes(req.url)             // logged in endpoint
       && !isLoggedIn(req, this.auth)
-    || (req.method === 'POST'
-      && req.url.split('?')[0] === '/login')        // handle logins
-    || (req.method === 'POST'
-      && req.url.split('?')[0] === '/register');    // handle registrations
+    || [ "/login", "/register" ].includes(req.url.split('?')[0]);
 
   respond(req, res) {
-    if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req, this.auth))
+    // redirect unauthenticated requests
+    if (loggedInEndpoints.includes(req.url)) {
       redirectToLogin(req, res);
+      return false;
+    }
 
-    else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
+    // prevent double login or registration
+    if (isLoggedIn(req, this.auth)) {
+      req.url = "/already-logged-in.html"
+      return true;
+    }
+
+    // let static files handle GET requests
+    if (req.method !== 'POST') {
+      return true;
+    }
+
+    if (req.url.split('?')[0] === '/login') {
       attemptLogin(req, res, this.auth);
+      return false;
+    }
 
-    else if (req.method === 'POST' && req.url.split('?')[0] === '/register')
+    if (req.url.split('?')[0] === '/register') {
       attemptRegistration(req, res, this.auth);
+      return false;
+    }
 
-    return false;
+    console.error("Didn't know what to do with request", req);
   }
 }
 
