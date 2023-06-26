@@ -31,10 +31,10 @@ async function getAppointment(body, database) {
   const appt = await database.hasAppointment(body.userid);
   if(appt) {
     console.log("fetching appointment...");
-    return database.fetchAppointment(body);
+    return database.fetchAppointment(body.userid);
   } else {
     console.log("creating appointment...");
-    return database.createAppointment(body);
+    return database.createAppointment(body.userid);
   }
 }
 

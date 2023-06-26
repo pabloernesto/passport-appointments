@@ -72,12 +72,30 @@ class DatabaseWrapper {
     });
   }
 
-  fetchAppointment(userobj) {
-    return "saturday the 14th";
+  fetchAppointment(user_id) {
+    const query = `select * from appointments where user_id = ?`;
+
+    return new Promise((resolve, reject) => {
+      this.db.get(query, [ user_id ], (err, row) => {
+        err
+          ? reject(err)
+          : resolve(row);
+      });
+    });
   }
 
-  createAppointment(userobj) {
-    return "sunday the 15th";
+  createAppointment(user_id) {
+    const query = "insert into users (user_id, email, salt, hash)"
+      + " values (?, ?, ?, ?)";
+    const { user_id, email, hash, salt } = userobj;
+    return new Promise((resolve, reject) => {
+      this.db.run(query, [ user_id, email, salt, hash], 
+        (err, res) => {
+        err
+          ? reject(err)
+          : resolve(res);
+      });
+    });
   }
 }
   
