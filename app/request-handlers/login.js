@@ -1,6 +1,7 @@
 import { formBody, RequestBodyParsingError } from '../util-request.js';
 import Authentication from '../authentication.js';
 import querystring from 'node:querystring';
+import { URL } from 'url';
 
 const loggedInEndpoints = [
   '/appointment'
@@ -16,17 +17,37 @@ export default class LoginEndpoint {
   match = (req) =>
     loggedInEndpoints.includes(req.url)             // logged in endpoint
       && !isLoggedIn(req, this.auth)
-    || (req.method === 'POST'
-      && req.url.split('?')[0] === '/login');       // handle logins
+    || [ "/login", "/register" ].includes(req.url.split('?')[0]);
 
   respond(req, res) {
-    if (loggedInEndpoints.includes(req.url) && !isLoggedIn(req))
+    // redirect unauthenticated requests
+    if (loggedInEndpoints.includes(req.url)) {
       redirectToLogin(req, res);
+      return false;
+    }
 
-    else if (req.method === 'POST' && req.url.split('?')[0] === '/login')
+    // prevent double login or registration
+    if (isLoggedIn(req, this.auth)) {
+      req.url = "/already-logged-in.html"
+      return true;
+    }
+
+    // let static files handle GET requests
+    if (req.method !== 'POST') {
+      return true;
+    }
+
+    if (req.url.split('?')[0] === '/login') {
       attemptLogin(req, res, this.auth);
+      return false;
+    }
 
-    return false;
+    if (req.url.split('?')[0] === '/register') {
+      attemptRegistration(req, res, this.auth);
+      return false;
+    }
+
+    console.error("Didn't know what to do with request", req);
   }
 }
 
@@ -41,7 +62,7 @@ async function attemptLogin(req, res, auth) {
     }
 
     const sessionToken = auth.generateSessionToken();
-    res.setHeader('Set-Cookie', `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict`);
+    addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
@@ -90,8 +111,11 @@ function isLoggedIn(req, auth) {
 
 function redirectToLogin(req, res) {
   const currentURL = req.url;
+  const redirectURL = getRedirectURL(req) || currentURL;
+  addCookie(res, `redirect=${redirectURL}; Path=/`);
+
   res.statusCode = 302;
-  res.setHeader('Location', `/login?redirect=${encodeURIComponent(currentURL)}`);
+  res.setHeader('Location', '/login');
   res.end();
 }
 
@@ -101,14 +125,87 @@ function sendInvalidCredentialsResponse(res) {
 }
 
 function redirectToRedirectPage(req, res) {
-  const redirectURL = getRedirectURL(req);
   res.statusCode = 302;
+  const redirectURL = getRedirectURL(req) ?? '/';
   res.setHeader('Location', redirectURL);
+  addCookie(res, `redirect=; Path=/; Max-Age=0`);
   res.end();
 }
 
 function getRedirectURL(req) {
-  const queryParams = querystring.parse(req.url.split('?')[1] || '');
-  const redirectParam = queryParams?.redirect;
-  return redirectParam ? decodeURIComponent(redirectParam) : '/';
+  // note: `req.headers.cookie`, if present, will be a `; `-separated string
+  // of `key=value` pairs. any given key may appear more than once.
+  //
+  // querystring will turn the cookie string into a null-prototype object.
+  // duplicated keys in the cookie string result in an Array-typed value.
+  // the cookie string is automatically passed through decodeURIComponent
+  // see: https://nodejs.org/dist/latest-v18.x/docs/api/querystring.html
+  const cookies = querystring.parse(req.headers?.cookie || '', '; ');
+
+  return cookies.redirect;
+}
+
+async function attemptRegistration(req, res, auth) {
+  let username, email, password;
+  try {
+    ({ username, email, password } = await formBody(req));
+    await auth.createUser(username, email, password);
+
+    const sessionToken = auth.generateSessionToken();
+    addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
+    redirectToRedirectPage(req, res);
+
+  } catch (error) {
+    if (error instanceof RequestBodyParsingError) {
+      logRequestBodyParsingError(error, req);
+    } else if (error.message === "Failed to add user"
+        && error.cause.toString().includes('UNIQUE constraint failed')) {
+      sendUserOrPasswordExistsResponse(req, res, username, email);
+    } else {
+      sendErrorResponse(res, error);
+    }
+  }
+}
+
+function sendUserOrPasswordExistsResponse(req, res, username, email) {
+  res.statusCode = 409;
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  const body = `\
+<!DOCTYPE html>
+<html lang="en" class="booting">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>bookmarkname</title>
+
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
+  <!-- <meta name="description" content="blurb for google search" />  -->
+  <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
+
+  <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
+  <!-- <script src="main.js" module></script> -->
+</head>
+<body>
+  <p>
+  The <span class="username">${ username }</span> username
+  and/or <span class="email">${ email }</span> email
+  are already in use.
+  </p>
+  <p>
+  Please
+  <a href="/register">try again</a>.
+  </p>
+</body>
+</html>`;
+  res.end(body);
+}
+
+function addCookie(res, cookiestr) {
+  const curcookies = res.getHeader('Set-Cookie');
+  if (curcookies === undefined) {
+    res.setHeader('Set-Cookie', [ cookiestr ]);
+  } else {
+    curcookies.push(cookiestr);
+  }
 }

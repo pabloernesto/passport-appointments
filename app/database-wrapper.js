@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3';
 // TODO: 'userobj' is the same as the form in index.html
 
-class DatabaseWrapper {
+export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
   }
@@ -11,7 +11,7 @@ class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
-      db.run(`CREATE TABLE users (user_id int NOT NULL, email varchar(255), salt varchar(255), hash varchar(255), PRIMARY KEY (user_id));`);
+      db.run(`CREATE TABLE users (user_id int NOT NULL, email varchar(255) UNIQUE, salt varchar(255), hash varchar(255), PRIMARY KEY (user_id));`);
       db.run(`CREATE TABLE appointments (pass_id int NOT NULL, date varchar(255), user_id int, FOREIGN KEY (user_id) REFERENCES users (user_id), PRIMARY KEY (pass_id));`);
     });
 
@@ -23,11 +23,14 @@ class DatabaseWrapper {
       + " values (?, ?, ?, ?)";
     const { user_id, email, hash, salt } = userobj;
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user_id, email, salt, hash], 
-        (err, res) => {
-        err
-          ? reject(err)
-          : resolve(res);
+      this.db.run(query, [ user_id, email, salt, hash], (err, res) => {
+        if (err) {
+            err.query = query;
+            err.params = { user_id, email, hash, salt };
+            reject(new Error("Failed to add user", { cause: err }));
+        } else {
+          resolve(res);
+        }
       });
     });
   }
@@ -37,9 +40,13 @@ class DatabaseWrapper {
 
     return new Promise((resolve, reject) => {
       this.db.get(query, [ username ], (err, row) => {
-        err
-          ? reject(err)
-          : resolve(row);
+        if (err) {
+          err.query = query;
+          err.params = { user_id: username };
+          reject(new Error("Failed to get user", { cause: err }));
+        } else {
+          resolve(row);
+        }
       });
     });
   }
@@ -50,9 +57,13 @@ class DatabaseWrapper {
     const { user_id } = userobj;
     return new Promise((resolve, reject) => {
       this.db.get(query, [ user_id ], (err, res) => {
-        err
-          ? reject(err)
-          : resolve(res);
+        if (err) {
+          err.query = query;
+          err.params = { user_id };
+          reject(new Error("Failed to check user existence", { cause: err }));
+        } else {
+          resolve(res);
+        }
       });
     });
   }
@@ -82,4 +93,3 @@ class DatabaseWrapper {
 }
   
 export const database = DatabaseWrapper.fromNewTestDB();
-export default { database };
