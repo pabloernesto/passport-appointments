@@ -56,7 +56,7 @@ function render(body, appointment) {
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <p>User ${ body.userid }, you have your appointment at ${ appointment }.<p/>
+  <p>User ${ body.userid }, you have your appointment at ${ appointment }.</p>
 </body>
 </html>`
 }
