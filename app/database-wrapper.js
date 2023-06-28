@@ -11,8 +11,17 @@ export default class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
-      db.run(`CREATE TABLE users (user_id int NOT NULL, email varchar(255) UNIQUE, salt varchar(255), hash varchar(255), PRIMARY KEY (user_id));`);
-      db.run(`CREATE TABLE appointments (pass_id int NOT NULL, date varchar(255), user_id int, FOREIGN KEY (user_id) REFERENCES users (user_id), PRIMARY KEY (pass_id));`);
+      db.run(`CREATE TABLE users (
+        user_id INT NOT NULL, 
+        email varchar(255) UNIQUE, 
+        salt varchar(255), 
+        hash varchar(255), 
+        PRIMARY KEY (user_id));`);
+      db.run(`CREATE TABLE appointments (
+        pass_id INTEGER PRIMARY KEY NOT NULL, 
+        date varchar(255), 
+        user_id int, 
+        FOREIGN KEY (user_id) REFERENCES users (user_id));`);
     });
 
     return new DatabaseWrapper(db);
@@ -95,16 +104,28 @@ export default class DatabaseWrapper {
     });
   }
 
+
   createAppointment(user_id) {
-    const query = "insert into users (user_id, email, salt, hash)"
-      + " values (?, ?, ?, ?)";
-    const { user_id, email, hash, salt } = userobj;
+    /* 
+      USER ID MUST EXIST. 
+    */
+
+      // note: uses appt_id auto increment
+    const query = "INSERT INTO appointments (date, user_id)"
+      + " values (?, ?)";
+
+    // TODO: real date system
+    const date = "sunday the 15th";
+
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user_id, email, salt, hash], 
-        (err, res) => {
-        err
-          ? reject(err)
-          : resolve(res);
+      this.db.run(query, [date, user_id], (err, res) => {
+        if (err) {
+            err.query = query;
+            err.params = {date, user_id};
+            reject(new Error("Failed to add user", { cause: err }));
+        } else {
+          resolve(res);
+        }
       });
     });
   }
