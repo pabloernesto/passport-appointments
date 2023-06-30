@@ -17,7 +17,7 @@ export default class AppointmentEndpoint {
     const appointment = await getAppointment(body, this.database)
       .catch(
         (reason) => console.log(reason));
-    res.end(render(body, appointment));
+    res.end(render(body, appointment.date));
   }
 }
 
@@ -34,7 +34,8 @@ async function getAppointment(body, database) {
     return database.fetchAppointment(body.userid);
   } else {
     console.log("creating appointment...");
-    return database.createAppointment(body.userid);
+    await database.createAppointment(body.userid);
+    return database.fetchAppointment(body.userid);
   }
 }
 
