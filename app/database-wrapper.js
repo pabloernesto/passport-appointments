@@ -4,6 +4,7 @@ import sqlite3 from 'sqlite3';
 export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
+    this.test_date = 1;
   }
 
   // real db init could fail or take a long time.
@@ -114,16 +115,17 @@ export default class DatabaseWrapper {
     const query = "INSERT INTO appointments (date, user_id)"
       + " values (?, ?)";
 
-    // TODO: real date system
-    const date = "sunday the 15th";
+    // TODO: real date & queue system
+    const date = `sunday the ${this.test_date}th`;
 
     return new Promise((resolve, reject) => {
       this.db.run(query, [date, user_id], (err, res) => {
         if (err) {
             err.query = query;
             err.params = {date, user_id};
-            reject(new Error("Failed to add user", { cause: err }));
+            reject(new Error("Failed to create appt", { cause: err }));
         } else {
+          this.test_date += 1;
           resolve(res);
         }
       });
