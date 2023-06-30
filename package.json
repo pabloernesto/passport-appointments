@@ -6,10 +6,13 @@
   "dependencies": {
     "sqlite3": "^5.1.6"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/jest": "^29.5.2",
+    "jest": "^29.5.0"
+  },
   "scripts": {
     "start": "node app/main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -20,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/pabloernesto/passport-appointments/issues"
   },
-  "homepage": "https://github.com/pabloernesto/passport-appointments#readme"
+  "homepage": "https://github.com/pabloernesto/passport-appointments#readme",
+  "jest": {
+    "transform": {}
+  }
 }
