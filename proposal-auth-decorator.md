@@ -149,3 +149,7 @@ class AuthDecorator {
   }
 }
 ```
+
+Problem: `AuthDecorator` checks the user is authenticated (ie logged in),
+_not_ if they have permission to run a particular request.
+There is no way to say "users can cancel appointments, but only for themselves".
