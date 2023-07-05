@@ -9,7 +9,7 @@ class Appointments {
   /* appointments */
 
   // create
-  requestAppointment() {}
+  requestAppointment(user) {}
 
   // read
   getAppointment(user) {}
@@ -39,17 +39,12 @@ class Appointments {
 
 
 
-Manual Authentication
+Authentication as a library
 ```js
-class SecureAppointments {
-  constructor(appointments, storage) {
-    this.appointments = appointments;
+class Authentication {
+  constructor(storage) {
     this.storage = storage;
   }
-
-
-
-  /* authentication */
 
   // create
   createUser(user, email, password) {}
@@ -57,20 +52,88 @@ class SecureAppointments {
   // read
   authenticate(user, password) {} // returns token or undefined (throws?)
   isValidToken(token) {}
+  getTokenRecord(token) {}
 
   // update
-  changeMail(user, new_email) {}
+  updateUser(user, { newuser, newemail, newpassword }) {}
 
   // delete
-  userFromToken(token) {}
   invalidateToken(token) {}
+}
+```
+
+
+
+Authorization as a library
+```js
+class Authorization {
+  constructor(storage) {
+    this.storage = storage;
+  }
+
+  isAuthorized(user, action) {
+    const rules = this.storage.iterateRules();
+    let history = [];
+    let last;
+    for (rule of rules) {
+      last = {
+        rulename: rule.name,
+        // rules must be executable
+        result: rule.apply(user, action, history)
+      };
+      history.push(last);
+      if (last.result !== undefined)
+        break;
+    }
+    return { value: last.result, history };
+  }
+
+  addRule(rule) {
+    // rules must be serializable
+    this.storage.addRule();
+  }
+
+  getRules() {
+    return this.storage.getRules();
+  }
+
+  deleteRule(rule) {
+    // rules must support equality
+    this.storage.deleteRule()
+  }
+}
+```
+
+
+
+Secure appointments
+```js
+class SecureAppointments {
+  constructor(appointments, authentication, authorization) {
+    this._appointments = appointments;
+    this._authentication = authentication;
+    this._authorization = authorization;
+  }
 
 
 
   /* appointments */
 
   // create
-  requestAppointment(token) {}
+  requestAppointment(token) {
+    if (!this._authentication.isValidToken(token))
+      throw new Error('Invalid Token');
+
+    const { user } = this._authentication.getTokenRecord(token);
+    const action = {
+      name: 'requestAppointment',
+      params: [ user ]
+    };
+    if (!this._authorization.isAuthorized(user, action))
+      throw new Error('Unauthorized');
+
+    this._appointments.requestAppointment(...params);
+  }
 
   // read
   getAppointment(token) {}
@@ -85,7 +148,7 @@ class SecureAppointments {
   /* administration */
 
   // create
-  createAppointments(token, appointments) {} // takes [ [date, number_of_slots]... ]
+  createAppointments(token, appointments) {}
 
   // read
   getAppointments(token) {}
@@ -97,59 +160,3 @@ class SecureAppointments {
   deleteAppointments(token, appointments) {}
 }
 ```
-
-
-
-Automatic Authentication
-```js
-class AuthDecorator {
-  constructor(base) {
-    this.base = base;
-    AuthDecorator.decorate(this, base);
-  }
-
-
-
-  /* authentication */
-
-  // create
-  createUser(user, email, password) {}
-
-  // read
-  authenticate(user, password) {} // returns token or undefined (throws?)
-  isValidToken(token) {}
-
-  // update
-  changeMail(user, new_email) {}
-
-  // delete
-  userFromToken(token) {}
-  invalidateToken(token) {}
-
-
-
-  /* metaprogramming */
-  static decorate(decorator, base) {
-    Object.entries(base)
-    .filter(([ prop, value ]) => typeof value === 'function')
-    .map(([ prop, f ]) => [ prop, AuthDecorator.wrapCall(f, decorator, base) ])
-    .forEach(([ prop, f ]) => {
-      if (decorator[prop])
-        throw new Error(`Decorator has property ${ prop }`);
-      decorator[prop] = f;
-    });
-  }
-
-  static wrapCall(f, decorator, base) {
-    return (token, ...args) =>  {
-      if (!decorator.isTokenValid(token))
-        throw new Error('Invalid token');
-      return f.apply(base, args);
-    }
-  }
-}
-```
-
-Problem: `AuthDecorator` checks the user is authenticated (ie logged in),
-_not_ if they have permission to run a particular request.
-There is no way to say "users can cancel appointments, but only for themselves".
