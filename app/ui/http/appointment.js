@@ -1,4 +1,4 @@
-import { formBody } from '../util-request.js';
+import { formBody } from '../../lib/http/util-request.js';
 
 export default class AppointmentEndpoint {
   constructor(database) {

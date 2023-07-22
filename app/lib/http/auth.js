@@ -1,7 +1,6 @@
-import { formBody, RequestBodyParsingError } from '../util-request.js';
-import Authentication from '../authentication.js';
+import { formBody, RequestBodyParsingError } from './util-request.js';
+import Authentication from '../auth.js';
 import querystring from 'node:querystring';
-import { URL } from 'url';
 
 const loggedInEndpoints = [
   '/appointment'

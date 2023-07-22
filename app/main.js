@@ -1,13 +1,13 @@
-import { Server, http404MW } from './lib/http/server.js';
+import Server from './lib/http/server.js';
 import AuthenticationMW from './lib/http/auth.js';
-import AppointmentsMW from './ui/http/appointments.js';
-import AdminMW from './admin/http/admin.js';
+import AppointmentsMW from './ui/http/appointment.js';
+// import AdminMW from './admin/http/admin.js';
 
-import { DummyStore } from './storage/sqlite-store.js';
-import SecureAppointments from 'model/appointments-secure.js';
+import DatabaseWrapper from './storage/sqlite3/store.js';
+import Appointments from './model/appointments.js';
 
-let store = new DummyStore();
-let model = new SecureAppointments(store);
+let store = DatabaseWrapper.fromNewTestDB();
+let model = new Appointments(store);
 
 let server = new Server();
 server.add_middleware(new AuthenticationMW(model));

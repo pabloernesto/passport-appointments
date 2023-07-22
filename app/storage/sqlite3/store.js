@@ -130,5 +130,3 @@ export default class DatabaseWrapper {
     });
   }
 }
-  
-export const database = DatabaseWrapper.fromNewTestDB();
