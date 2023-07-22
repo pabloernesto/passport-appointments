@@ -10,7 +10,7 @@ let store = DatabaseWrapper.fromNewTestDB();
 let model = new Appointments(store);
 
 let server = new Server();
-server.add_middleware(new AuthenticationMW(model));
+server.add_middleware(new AuthenticationMW(store));
 server.add_middleware(new AppointmentsMW(model));
 // server.add_middleware(new AdminMW(model));
 // server.add_middleware(new http404MW());  // ?
