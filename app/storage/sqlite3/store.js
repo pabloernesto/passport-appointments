@@ -71,7 +71,7 @@ export default class DatabaseWrapper {
           err.params = { user_id };
           reject(new Error("Failed to check user existence", { cause: err }));
         } else {
-          resolve(res);
+          resolve(res.count > 0);
         }
       });
     });
