@@ -98,9 +98,12 @@ export default class DatabaseWrapper {
 
     return new Promise((resolve, reject) => {
       this.db.get(query, [ user_id ], (err, row) => {
-        err
-          ? reject(err)
-          : resolve(row);
+        if (err)
+          reject(err);
+        resolve({
+          user: user_id,
+          date: row.date,
+        });
       });
     });
   }
