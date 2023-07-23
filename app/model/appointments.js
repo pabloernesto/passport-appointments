@@ -12,7 +12,7 @@ export default class Appointments {
     if(has) {
       const appt = await this._database.hasAppointment(user);
       if(!appt) {
-        this._database.createAppointment(body.userid);
+        this._database.createAppointment(user);
       } else {
         throw Error("Already has appointment");
       }
