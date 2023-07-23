@@ -1,43 +1,33 @@
 import { formBody } from '../../lib/http/util-request.js';
 
-export default class AppointmentEndpoint {
-  constructor(database) {
-    this.database = database;
-  }
-
-  match(req) {
-    const { method, url } = req;
-    return method === "POST" && url === "/appointment";
+export default class AppointmentsMW {
+  constructor(model) {
+    this._model = model;
   }
 
   async respond(req, res) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    const body = await formBody(req);
-    const appointment = await getAppointment(body, this.database)
-      .catch(
-        (reason) => console.log(reason));
-    res.end(render(body, appointment));
+    const { method, url } = req;
+
+    if (method === "POST" && url === "/appointment") {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      const body = await formBody(req);
+      // TODO: make auth middleware hide token -> user mapping.
+      const user = body.userid;
+      const appointment = await this._getAppointment(user)
+        .catch((reason) => console.log(reason));
+      res.end(render(body, appointment));
+    }
+
+    return false; // ignore request
+  }
+
+  async _getAppointment(user) {
+    return await this._model.requestAppointment(user);
   }
 }
 
-async function getAppointment(body, database) {
-  // TODO: put this logic in separate login code
-  const has = await database.hasUser(body);
-  if(!has) {
-    console.log("creating user...");
-    database.addUser(body);
-  }
-  const appt = await database.hasAppointment(body.userid);
-  if(appt) {
-    console.log("fetching appointment...");
-    return database.fetchAppointment(body.userid);
-  } else {
-    console.log("creating appointment...");
-    return database.createAppointment(body.userid);
-  }
-}
-
+// TODO: handle pending appointments
 function render(body, appointment) {
   return `\
 <!DOCTYPE html>
