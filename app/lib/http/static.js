@@ -15,8 +15,8 @@ export default class StaticFilesMW {
     if (method !== "GET") return false;
 
     const request_url = new URL(req.url, "file:").pathname; // URL-encode the path
-    const asset_path = getAssetByURL(request_url, known_assets)["path"];
-    if (asset_path === undefined) return false;
+    const asset_path = getAssetByURL(request_url, this._known_assets)?.["path"];
+    if (asset_path === undefined) return false; // no such resource
 
     req.statusCode = 200;
     res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
@@ -25,14 +25,14 @@ export default class StaticFilesMW {
     return true;
   }
 
-  static async fromPath(path) {
-    const dir = await fs.opendir(path);
+  static async fromPath(_path) {
+    const dir = await fs.opendir(_path);
     const asset_list = (await listFiles(dir)).map(s => ({
       // rebase and URL-encode the path
       path: s,
       url: new URL(path.relative(dir.path, s), "file:").pathname
     }));
-    return new StaticFilesMW(path, asset_list);
+    return new StaticFilesMW(_path, asset_list);
   }
 }
 
