@@ -17,28 +17,28 @@ export default class AuthenticationMW {
     // redirect unauthenticated requests
     if (loggedInEndpoints.includes(req.url)) {
       redirectToLogin(req, res);
-      return false;
+      return true;
     }
 
     // prevent double login or registration
     if (isLoggedIn(req, this.auth)) {
       req.url = "/already-logged-in.html"
-      return true;
+      return false;
     }
 
     // let static files handle GET requests
     if (req.method !== 'POST') {
-      return true;
+      return false;
     }
 
     if (req.url.split('?')[0] === '/login') {
       attemptLogin(req, res, this.auth);
-      return false;
+      return true;
     }
 
     if (req.url.split('?')[0] === '/register') {
       attemptRegistration(req, res, this.auth);
-      return false;
+      return true;
     }
 
     return false; // not a handled request
