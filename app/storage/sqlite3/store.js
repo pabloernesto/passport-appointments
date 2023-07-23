@@ -78,6 +78,7 @@ export default class DatabaseWrapper {
   }
 
   // takes a user that is known to exist
+  // returns whether there is an appointment
   async hasAppointment(user_id) {
     const query = "SELECT count(*) as count FROM appointments WHERE user_id = ?;";
     return new Promise((resolve, reject) => {

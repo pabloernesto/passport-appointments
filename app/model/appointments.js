@@ -6,29 +6,53 @@ export default class Appointments {
   /* appointments */
 
   // create
-  requestAppointment(user) {}
+  async requestAppointment(user) {
+    // TODO: fix ugly object
+    const has = await this._database.hasUser( { user_id: user} );
+    if(has) {
+      const appt = await this._database.hasAppointment(user);
+      if(!appt) {
+        this._database.createAppointment(body.userid);
+      } else {
+        throw Error("Already has appointment");
+      }
+    } else {
+      throw Error("No such user :/");
+    }
+    
+  }
 
   // read
-  getAppointment(user) {}
+  async getAppointment(user) {
+    const has = await this._database.hasUser(body);
+    if(has) {
+      const appt = await this._database.hasAppointment(body.userid);
+      if(!appt) {
+        console.log("No appointment");
+      }
+      return
+    }
+    throw Error("No such user exists!");
+  }
 
   // update
 
   // delete
-  cancelAppointment(user) {}
+  async cancelAppointment(user) {}
 
 
 
   /* administration */
 
   // create
-  createAppointments(appointments) {} // takes [ [date, number_of_slots]... ]
+  async createAppointments(appointments) {} // takes [ [date, number_of_slots]... ]
 
   // read
-  getAppointments() {}
+  async getAppointments() {}
 
   // update
-  freezeAppointments(frozen) {} // takes boolean
+  async freezeAppointments(frozen) {} // takes boolean
 
   // delete
-  deleteAppointments(appointments) {}
+  async deleteAppointments(appointments) {}
 }
