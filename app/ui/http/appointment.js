@@ -17,6 +17,7 @@ export default class AppointmentsMW {
       const appointment = await this._getAppointment(user)
         .catch((reason) => console.log(reason));
       res.end(render(body, appointment));
+      return true;
     }
 
     return false; // ignore request
