@@ -14,31 +14,34 @@ export default class AuthenticationMW {
   }
 
   respond(req, res) {
-    // redirect unauthenticated requests
     // TODO: only synchronous bc we store tokens in memory, EW!!!
     const logged = isLoggedIn(req, this.auth);
+
+    // redirect unauthenticated requests
     if (loggedInEndpoints.includes(req.url) && !logged) {
       redirectToLogin(req, res);
       return true;
     }
 
+    const operation = (
+      req.url.split('?')[0] === '/login' ? 'login'
+      : req.url.split('?')[0] === '/register' ? 'register'
+      : undefined
+    );
+
     // prevent double login or registration
-    if (logged) {
-      req.url = "/already-logged-in.html"
+    if (operation && logged) {
+      req.url = "/already-logged-in.html";
+      req.method = "GET";
       return false;
     }
 
-    // let static files handle GET requests
-    if (req.method !== 'POST') {
-      return false;
-    }
-
-    if (req.url.split('?')[0] === '/login') {
+    if (req.method === 'POST' && operation === 'login' && !logged) {
       attemptLogin(req, res, this.auth);
       return true;
     }
 
-    if (req.url.split('?')[0] === '/register') {
+    if (req.method === 'POST' && operation === 'register' && !logged) {
       attemptRegistration(req, res, this.auth);
       return true;
     }
