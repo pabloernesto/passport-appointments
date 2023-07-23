@@ -15,13 +15,15 @@ export default class AuthenticationMW {
 
   respond(req, res) {
     // redirect unauthenticated requests
-    if (loggedInEndpoints.includes(req.url)) {
+    // TODO: only synchronous bc we store tokens in memory, EW!!!
+    const logged = isLoggedIn(req, this.auth);
+    if (loggedInEndpoints.includes(req.url) && !logged) {
       redirectToLogin(req, res);
       return true;
     }
 
     // prevent double login or registration
-    if (isLoggedIn(req, this.auth)) {
+    if (logged) {
       req.url = "/already-logged-in.html"
       return false;
     }
