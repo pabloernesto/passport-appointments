@@ -3,7 +3,7 @@ import http from 'http';
 export default class Server {
   constructor() {
     this._middleware = [];
-    this._http = http.createServer(route);
+    this._http = http.createServer((req, res) => this._route(req, res));
   }
 
   add_middleware(handler) {
@@ -17,12 +17,12 @@ export default class Server {
       console.log(`Server running at http://${hostname}:${port}/`);
     });
   }
-}
 
-async function route(req, res) {
-  for (const handler of this._middleware) {
-    const is_captured = await handler(req, res);
-    if (is_captured)
-      break;
+  async _route(req, res) {
+    for (const m of this._middleware) {
+      const is_captured = await m.respond(req, res);
+      if (is_captured)
+        break;
+    }
   }
 }

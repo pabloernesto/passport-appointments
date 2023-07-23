@@ -6,17 +6,12 @@ const loggedInEndpoints = [
   '/appointment'
 ];
 
-export default class LoginEndpoint {
+export default class AuthenticationMW {
   constructor(database) {
     this.auth = new Authentication(database);
     // TODO: remove
     this.auth.createUser("Jim", "jim@example.com", "1234");
   }
-
-  match = (req) =>
-    loggedInEndpoints.includes(req.url)             // logged in endpoint
-      && !isLoggedIn(req, this.auth)
-    || [ "/login", "/register" ].includes(req.url.split('?')[0]);
 
   respond(req, res) {
     // redirect unauthenticated requests
@@ -46,7 +41,7 @@ export default class LoginEndpoint {
       return false;
     }
 
-    console.error("Didn't know what to do with request", req);
+    return false; // not a handled request
   }
 }
 
