@@ -86,6 +86,14 @@ SQLite3 for the database via the `sqlite3` npm package.
 
 nginx?
 
+## Tests
+
+run with
+node --experimental-vm-modules node_modules/jest/bin/jest.js
+
+### Test framework
+https://jestjs.io/docs/ecmascript-modules
+
 # hexagonal
 The project is organized like this:
 
