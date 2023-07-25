@@ -1,7 +1,18 @@
 import Store from '../app/storage/sqlite3/store';
 
+
+
+/* Test context */
+let database;
+
+beforeEach(() => {
+  database = Store.fromNewTestDB();
+})
+
+
+
+/* Tests */
 test('create 3 users and 1 appointment', async () => {
-  let database = Store.fromNewTestDB()
   await database.addUser({
     user_id: "Superman",
     email: "superman@un.org",
@@ -31,7 +42,6 @@ test('create 3 users and 1 appointment', async () => {
 });
 
 test('create 3 appointments', async () => {
-  let database = Store.fromNewTestDB()
   let pending_users = [];
   pending_users +=  database.addUser({
     user_id: "Superman",
