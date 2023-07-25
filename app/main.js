@@ -1,33 +1,20 @@
-import LoginEndpoint from './request-handlers/login.js';
-import AppointmentEndpoint from './request-handlers/appointment.js';
-import route_static from './request-handlers/static.js';
-import route_404 from './request-handlers/404.js';
+import Server from './lib/http/server.js';
+import http404MW from './lib/http/404.js';
+import AuthenticationMW from './lib/http/auth.js';
+import StaticFilesMW from './lib/http/static.js';
+import AppointmentsMW from './ui/http/appointment.js';
+// import AdminMW from './admin/http/admin.js';
 
-import http from 'http';
-import { database } from './database-wrapper.js';
+import DatabaseWrapper from './storage/sqlite3/store.js';
+import Appointments from './model/appointments.js';
 
-const route_login = new LoginEndpoint(database);
-const route_appointment = new AppointmentEndpoint(database);
+let store = DatabaseWrapper.fromNewTestDB();
+let model = new Appointments(store);
 
-//const hostname = '127.0.0.1';
-const hostname = '0.0.0.0';
-const port = 3000;
-
-const routes = [
-  route_login,
-  route_appointment,
-  route_static,
-  route_404,
-];
-
-async function route(req, res) {
-  for (const route of routes) {
-    if (route.match(req) && !(await route.respond(req, res, database)))
-      break;
-  }
-}
-const server = http.createServer(route);
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
-});
+let server = new Server();
+server.add_middleware(new AuthenticationMW(store));
+server.add_middleware(new AppointmentsMW(model));
+server.add_middleware(await StaticFilesMW.fromPath("./app/assets"));
+// server.add_middleware(new AdminMW(model));
+server.add_middleware(new http404MW());
+server.listen('127.0.0.1', 3000);

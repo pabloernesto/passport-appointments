@@ -72,13 +72,14 @@ export default class DatabaseWrapper {
           err.params = { user_id };
           reject(new Error("Failed to check user existence", { cause: err }));
         } else {
-          resolve(res);
+          resolve(res.count > 0);
         }
       });
     });
   }
 
   // takes a user that is known to exist
+  // returns whether there is an appointment
   async hasAppointment(user_id) {
     const query = "SELECT count(*) as count FROM appointments WHERE user_id = ?;";
     return new Promise((resolve, reject) => {
@@ -93,14 +94,18 @@ export default class DatabaseWrapper {
     });
   }
 
+  // structure: {pass_id, date, user_id}
   fetchAppointment(user_id) {
     const query = `select * from appointments where user_id = ?`;
 
     return new Promise((resolve, reject) => {
       this.db.get(query, [ user_id ], (err, row) => {
-        err
-          ? reject(err)
-          : resolve(row);
+        if (err)
+          reject(err);
+        resolve({
+          user: user_id,
+          date: row.date,
+        });
       });
     });
   }
@@ -132,5 +137,3 @@ export default class DatabaseWrapper {
     });
   }
 }
-  
-export const database = DatabaseWrapper.fromNewTestDB();

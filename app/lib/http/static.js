@@ -4,6 +4,38 @@ import { pipeline } from 'node:stream';
 
 const statics_path = "public";
 
+export default class StaticFilesMW {
+  constructor(path, asset_list) {
+    this._statics_path = path;
+    this._known_assets = asset_list;
+  }
+
+  async respond(req, res) {
+    const { method, url } = req;
+    if (method !== "GET") return false;
+
+    const request_url = new URL(req.url, "file:").pathname; // URL-encode the path
+    const asset_path = getAssetByURL(request_url, this._known_assets)?.["path"];
+    if (asset_path === undefined) return false; // no such resource
+
+    req.statusCode = 200;
+    res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
+    let f = await fs.open(asset_path);
+    f.createReadStream(asset_path).pipe(res);
+    return true;
+  }
+
+  static async fromPath(_path) {
+    const dir = await fs.opendir(_path);
+    const asset_list = (await listFiles(dir)).map(s => ({
+      // rebase and URL-encode the path
+      path: s,
+      url: new URL(path.relative(dir.path, s), "file:").pathname
+    }));
+    return new StaticFilesMW(_path, asset_list);
+  }
+}
+
 /* source: https://github.com/nginx/nginx/blob/master/conf/mime.types */
 const mimetypes = {
   html: 'text/html',
@@ -110,21 +142,6 @@ const mimetypes = {
   wmv: 'video/x-ms-wmv',
   avi: 'video/x-msvideo'
 }
-const dir = await fs.opendir(statics_path);
-const known_assets = (await listFiles(dir))
-  .map(s => ({
-    // rebase and URL-encode the path
-    path: s,
-    url: new URL(path.relative(dir.path, s), "file:").pathname
-  }));
-
-function match(req) {
-  const { method, url } = req;
-  if (method !== "GET") return false;
-  const request_url = new URL(url, "file:").pathname;   // URL-encode the path
-  return getAssetByURL(request_url, known_assets) !== undefined;
-}
-
 function getAssetByURL(url, assets) {
   const cleanURL = url.split('?')[0]; // Remove query string from URL
   const urlWithoutExt = cleanURL.replace(/\.[^/.]+$/, ""); // Remove file extension from URL
@@ -133,15 +150,6 @@ function getAssetByURL(url, assets) {
     const assetWithoutExt = asset.url.replace(/\.[^/.]+$/, "");
     return assetWithoutExt === urlWithoutExt;
   });
-}
-
-async function respond(req, res, db) {
-  req.statusCode = 200;
-  const request_url = new URL(req.url, "file:").pathname; // URL-encode the path
-  const asset_path = getAssetByURL(request_url, known_assets)["path"];
-  res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
-  let f = await fs.open(asset_path);
-  f.createReadStream(asset_path).pipe(res);
 }
 
 async function listFiles(dir) {
@@ -156,5 +164,3 @@ async function listFiles(dir) {
   }
   return files;
 }
-
-export default { match, respond }

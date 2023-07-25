@@ -1,53 +1,52 @@
-import { formBody, RequestBodyParsingError } from '../util-request.js';
-import Authentication from '../authentication.js';
+import { formBody, RequestBodyParsingError } from './util-request.js';
+import Authentication from '../auth.js';
 import querystring from 'node:querystring';
-import { URL } from 'url';
 
 const loggedInEndpoints = [
   '/appointment'
 ];
 
-export default class LoginEndpoint {
+export default class AuthenticationMW {
   constructor(database) {
     this.auth = new Authentication(database);
     // TODO: remove
     this.auth.createUser("Jim", "jim@example.com", "1234");
   }
 
-  match = (req) =>
-    loggedInEndpoints.includes(req.url)             // logged in endpoint
-      && !isLoggedIn(req, this.auth)
-    || [ "/login", "/register" ].includes(req.url.split('?')[0]);
-
   respond(req, res) {
+    // TODO: only synchronous bc we store tokens in memory, EW!!!
+    const logged = isLoggedIn(req, this.auth);
+
     // redirect unauthenticated requests
-    if (loggedInEndpoints.includes(req.url)) {
+    if (loggedInEndpoints.includes(req.url) && !logged) {
       redirectToLogin(req, res);
-      return false;
+      return true;
     }
+
+    const operation = (
+      req.url.split('?')[0] === '/login' ? 'login'
+      : req.url.split('?')[0] === '/register' ? 'register'
+      : undefined
+    );
 
     // prevent double login or registration
-    if (isLoggedIn(req, this.auth)) {
-      req.url = "/already-logged-in.html"
-      return true;
+    if (operation && logged) {
+      req.url = "/already-logged-in.html";
+      req.method = "GET";
+      return false;
     }
 
-    // let static files handle GET requests
-    if (req.method !== 'POST') {
-      return true;
-    }
-
-    if (req.url.split('?')[0] === '/login') {
+    if (req.method === 'POST' && operation === 'login' && !logged) {
       attemptLogin(req, res, this.auth);
-      return false;
+      return true;
     }
 
-    if (req.url.split('?')[0] === '/register') {
+    if (req.method === 'POST' && operation === 'register' && !logged) {
       attemptRegistration(req, res, this.auth);
-      return false;
+      return true;
     }
 
-    console.error("Didn't know what to do with request", req);
+    return false; // not a handled request
   }
 }
 

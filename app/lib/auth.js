@@ -60,10 +60,10 @@ class Authentication {
   invalidateExpiredTokens() {
     const expirationTime = new Date().getTime() - TOKEN_VALIDITY;
 
-    for (const { token } of this.validTokens.values()) {
-      if (token.emitted.getTime() <= expirationTime)
+    for (const { token, emitted } of this.validTokens.values()) {
+      if (emitted.getTime() <= expirationTime)
         // modifying the map while iterating it doesn't seem to break the iterator
-        validTokens.delete(token);
+        this.validTokens.delete(token);
     }
   }
 }
