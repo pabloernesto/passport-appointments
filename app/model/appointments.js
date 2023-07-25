@@ -7,14 +7,14 @@ export default class Appointments {
 
   // create
   async requestAppointment(user) {
-    // TODO: fix ugly object
     const has = await this._database.hasUser( { user_id: user} );
     if(has) {
       const appt = await this._database.hasAppointment(user);
       if(!appt) {
         await this._database.createAppointment(user);
 
-        return await this._database.fetchAppointment(user);
+        let db_object = await this._database.fetchAppointment(user);
+        return db_object.date;
       } else {
         throw Error("Already has appointment");
       }

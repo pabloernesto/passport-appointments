@@ -93,6 +93,7 @@ export default class DatabaseWrapper {
     });
   }
 
+  // structure: {pass_id, date, user_id}
   fetchAppointment(user_id) {
     const query = `select * from appointments where user_id = ?`;
 
