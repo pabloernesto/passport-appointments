@@ -9,8 +9,6 @@ const loggedInEndpoints = [
 export default class AuthenticationMW {
   constructor(database) {
     this.auth = new Authentication(database);
-    // TODO: remove
-    this.auth.createUser("Jim", "jim@example.com", "1234");
   }
 
   respond(req, res) {

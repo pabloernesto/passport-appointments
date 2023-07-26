@@ -122,14 +122,9 @@ export default class DatabaseWrapper {
     const query = "INSERT INTO appointments (date, user_id)"
       + " values (?, ?)";
 
-<<<<<<< HEAD:app/storage/sqlite3/store.js
     // TODO: real date system
     const date = new Date();
     let sql_date = fecha.format(date, 'YYYY-MM-DD HH:mm:ss')
-=======
-    // TODO: real date & queue system
-    const date = `sunday the ${this.test_date}th`;
->>>>>>> master:app/database-wrapper.js
 
     return new Promise((resolve, reject) => {
       this.db.run(query, [sql_date, user_id], (err, res) => {
