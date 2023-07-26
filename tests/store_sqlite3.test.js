@@ -52,3 +52,15 @@ test('create 3 appointments', async () => {
   appt = await database.createAppointment("Batman", when);
   expect(appt.date).toBe(when);
 });
+
+test('fail to create two appointments for the same person', async () => {
+  await database.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
+
+  let when = "2023-01-01 12:00";
+  let appt = await database.createAppointment("Wonder Woman", when);
+  expect(appt.date).toBe(when);
+
+  when = "2023-01-02 12:00";
+  expect(() => database.createAppointment("Wonder Woman", when))
+  .toThrow('Wonder Woman already has an appointment.');
+})
