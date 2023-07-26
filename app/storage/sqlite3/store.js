@@ -52,8 +52,12 @@ export default class DatabaseWrapper {
       this.db.get(query, [ user ], (err, row) => {
         if (err) {
           err.query = query;
-          err.params = { user_id: username };
+          err.params = { user_id: user };
           reject(new Error("Failed to get user", { cause: err }));
+
+        } else if (row === undefined) {
+          reject(new Error(`${ user } is not a user.`))
+
         } else {
           resolve({
             user: row.user_id,
@@ -126,8 +130,7 @@ export default class DatabaseWrapper {
    */
   async createAppointment(user, date) {
     // ensure that the user id exists
-    if (!user)
-      throw new Error("User ID must be provided.");
+    await this.getUser(user);
 
     const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
 
