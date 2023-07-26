@@ -4,6 +4,7 @@
   "main": "app/main.js",
   "type": "module",
   "dependencies": {
+    "fecha": "^4.2.3",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {

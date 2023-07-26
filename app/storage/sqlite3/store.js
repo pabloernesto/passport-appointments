@@ -1,6 +1,8 @@
 import sqlite3 from 'sqlite3';
+//https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
 // TODO: 'userobj' is the same as the form in index.html
 
+import fecha from 'fecha'
 export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
@@ -120,11 +122,12 @@ export default class DatabaseWrapper {
     const query = "INSERT INTO appointments (date, user_id)"
       + " values (?, ?)";
 
-    // TODO: real date & queue system
-    const date = `sunday the ${this.test_date}th`;
+    // TODO: real date system
+    const date = new Date();
+    let sql_date = fecha.format(date, 'YYYY-MM-DD HH:mm:ss')
 
     return new Promise((resolve, reject) => {
-      this.db.run(query, [date, user_id], (err, res) => {
+      this.db.run(query, [sql_date, user_id], (err, res) => {
         if (err) {
             err.query = query;
             err.params = {date, user_id};
