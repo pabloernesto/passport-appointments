@@ -53,6 +53,12 @@ test('create 3 appointments', async () => {
   expect(appt.date).toBe(when);
 });
 
+test('fail to create appointment for unknown user', async () => {
+  let when = "2023-01-01 12:00";
+  expect(() => database.createAppointment("Wonder Woman", when))
+  .toThrow('Wonder Woman is not a user.');
+})
+
 test('fail to create two appointments for the same person', async () => {
   await database.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
 
