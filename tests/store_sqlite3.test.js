@@ -55,8 +55,8 @@ test('create 3 appointments', async () => {
 
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00";
-  expect(() => database.createAppointment("Wonder Woman", when))
-  .toThrow('Wonder Woman is not a user.');
+  await expect(database.createAppointment("Wonder Woman", when))
+  .rejects.toThrow('Wonder Woman is not a user.');
 })
 
 test('fail to create two appointments for the same person', async () => {
@@ -67,6 +67,6 @@ test('fail to create two appointments for the same person', async () => {
   expect(appt.date).toBe(when);
 
   when = "2023-01-02 12:00";
-  expect(() => database.createAppointment("Wonder Woman", when))
-  .toThrow('Wonder Woman already has an appointment.');
+  await expect(database.createAppointment("Wonder Woman", when))
+  .rejects.toThrow('Wonder Woman already has an appointment.');
 })
