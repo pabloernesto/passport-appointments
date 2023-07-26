@@ -30,15 +30,14 @@ export default class DatabaseWrapper {
     return new DatabaseWrapper(db);
   }
 
-  addUser(userobj) {
+  addUser(user, email, hash, salt) {
     const query = "insert into users (user_id, email, salt, hash)"
       + " values (?, ?, ?, ?)";
-    const { user_id, email, hash, salt } = userobj;
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user_id, email, salt, hash], (err, res) => {
+      this.db.run(query, [ user, email, salt, hash], (err, res) => {
         if (err) {
             err.query = query;
-            err.params = { user_id, email, hash, salt };
+            err.params = { user_id: user, email, hash, salt };
             reject(new Error("Failed to add user", { cause: err }));
         } else {
           resolve(res);
@@ -47,17 +46,22 @@ export default class DatabaseWrapper {
     });
   }
 
-  getUser(username) {
+  getUser(user) {
     const query = `select * from users where user_id = ?`;
 
     return new Promise((resolve, reject) => {
-      this.db.get(query, [ username ], (err, row) => {
+      this.db.get(query, [ user ], (err, row) => {
         if (err) {
           err.query = query;
           err.params = { user_id: username };
           reject(new Error("Failed to get user", { cause: err }));
         } else {
-          resolve(row);
+          resolve({
+            user: row.user_id,
+            email: row.email,
+            hash: row.hash,
+            salt: row.salt
+          });
         }
       });
     });
