@@ -29,7 +29,7 @@ test('create 3 users and 1 appointment', async () => {
   await database.addUser("Batman", "batman@bat_base.org", "ABCD", "EFGH");
   await database.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
   
-  let when = "2023-01-01";
+  let when = "2023-01-01 12:00";
   let appt = await database.createAppointment("Wonder Woman", when);
   
   expect(appt.date).toBe(when);
