@@ -14,7 +14,7 @@ export default class Appointments {
         await this._database.createAppointment(user);
 
         let db_object = await this._database.fetchAppointment(user);
-        return db_object.date;
+        return new String(db_object.date);
       } else {
         throw Error("Already has appointment");
       }
