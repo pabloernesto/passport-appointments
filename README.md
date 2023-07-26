@@ -80,11 +80,22 @@ When a batch of appointments is released, the system will attempt to fulfill as 
 # Technical notes
 We're building this in Node.js v18.16.0 LTS so we can share code between front and backend, should we need to.
 
-Start the project with `node run start`.
+- launch with `npm start`
+- run tests with `npm test`
 
-SQLite3 for the database via the `sqlite3` npm package.
+## Dependencies
 
-nginx?
+- `sqlite3`: database management
+  - https://www.npmjs.com/package/sqlite3
+  - https://github.com/TryGhost/node-sqlite3/wiki/API
+  - https://www.sqlite.org
+- `jest`: javascript unit test harness
+  - https://jestjs.io/
+- `fecha`: date parsing and formatting
+  - https://github.com/taylorhakes/fecha
+  - rationale [as stackoverflow answer][so-fecha]
+
+[so-fecha]: https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
 
 ## Tests
 
