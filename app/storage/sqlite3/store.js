@@ -115,28 +115,36 @@ export default class DatabaseWrapper {
     });
   }
 
+  /**
+   * Creates a new appointment for a given user with the provided date.
+   *
+   * @param {number} user - The user ID for whom the appointment will be created.
+   * @param {string} date - The date of the appointment in 'YYYY-MM-DD HH:mm:ss' format.
+   * @returns {Promise} A promise that resolves with the appointment parameters if successful.
+   * @throws {Error} If there is an error during the database operation, the user ID is missing,
+   *                 or the date provided is not in the correct format.
+   */
+  async createAppointment(user, date) {
+    // ensure that the user id exists
+    if (!user)
+      throw new Error("User ID must be provided.");
 
-  createAppointment(user_id) {
-    /* 
-      USER ID MUST EXIST. 
-    */
+    const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
 
-      // note: uses appt_id auto increment
-    const query = "INSERT INTO appointments (date, user_id)"
-      + " values (?, ?)";
-
-    // TODO: real date system
-    const date = new Date();
-    let sql_date = fecha.format(date, 'YYYY-MM-DD HH:mm:ss')
+    // check the date is valid
+    // fecha.parse() throws when the date string does not obey the format
+    const dateobj = fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
 
     return new Promise((resolve, reject) => {
-      this.db.run(query, [sql_date, user_id], (err, res) => {
+      this.db.run(query, [dateobj, user], (err, res) => {
+        const params = { user, date };
         if (err) {
-            err.query = query;
-            err.params = {date, user_id};
-            reject(new Error("Failed to create appt", { cause: err }));
+          err.query = query;
+          err.params = params;
+          reject(new Error("Failed to create appointment", { cause: err }));
+
         } else {
-          resolve(res);
+          resolve(params);
         }
       });
     });
