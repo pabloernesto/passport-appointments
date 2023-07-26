@@ -94,3 +94,10 @@ The project is organized like this:
 - For every adapter to a port, there is a subfolder in the port's folder, containing the code for that adapter.
 - There is a 'lib' folder for code that is implementation detail but shared between adapters.
 - main.js is the start point. Hooks up concrete runtime implementation of our code. (Which modules are on and off?)
+## Tests
+
+run with
+node --experimental-vm-modules node_modules/jest/bin/jest.js
+
+### Test framework
+https://jestjs.io/docs/ecmascript-modules
