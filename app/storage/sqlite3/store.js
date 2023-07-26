@@ -6,7 +6,6 @@ import fecha from 'fecha'
 export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
-    this.test_date = 1;
   }
 
   // real db init could fail or take a long time.
@@ -137,7 +136,6 @@ export default class DatabaseWrapper {
             err.params = {date, user_id};
             reject(new Error("Failed to create appt", { cause: err }));
         } else {
-          this.test_date += 1;
           resolve(res);
         }
       });
