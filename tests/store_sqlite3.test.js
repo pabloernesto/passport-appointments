@@ -58,3 +58,15 @@ test('fail to create appointment for unknown user', async () => {
   await expect(database.createAppointment("Wonder Woman", when))
   .rejects.toThrow('Wonder Woman is not a user.');
 })
+
+test('fail to create appointment for null user', async () => {
+  let when = "2023-01-01 12:00";
+  await expect(database.createAppointment(null, when))
+  .rejects.toThrow();
+})
+
+test('fail to create appointment for undefined user', async () => {
+  let when = "2023-01-01 12:00";
+  await expect(database.createAppointment(null, when))
+  .rejects.toThrow();
+})
