@@ -13,6 +13,7 @@ export default class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
+      db.run("PRAGMA foreign_keys = ON");
       db.run(`CREATE TABLE users (
         user_id INT NOT NULL, 
         email varchar(255) UNIQUE, 
