@@ -23,7 +23,7 @@ export default class DatabaseWrapper {
       db.run(`CREATE TABLE appointments (
         pass_id INTEGER PRIMARY KEY NOT NULL, 
         date varchar(255), 
-        user_id int, 
+        user_id INT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users (user_id));`);
     });
 
