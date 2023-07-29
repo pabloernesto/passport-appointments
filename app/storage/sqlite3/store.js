@@ -137,10 +137,10 @@ export default class DatabaseWrapper {
 
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
-    const dateobj = fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
+    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
 
     return new Promise((resolve, reject) => {
-      this.db.run(query, [dateobj, user], (err, res) => {
+      this.db.run(query, [date, user], (err, res) => {
         const params = { user, date };
         if (err) {
           err.query = query;
