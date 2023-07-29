@@ -105,11 +105,14 @@ export default class DatabaseWrapper {
   }
 
   // structure: {pass_id, date, user_id}
-  fetchAppointment(user_id) {
+  async fetchAppointment(user) {
+    // ensure that the user id exists
+    await this.getUser(user);
+
     const query = `select * from appointments where user_id = ?`;
 
     return new Promise((resolve, reject) => {
-      this.db.get(query, [ user_id ], (err, row) => {
+      this.db.get(query, [ user ], (err, row) => {
         if (err) {
           reject(err);
 
@@ -118,7 +121,7 @@ export default class DatabaseWrapper {
 
         } else {
           resolve({
-            user: user_id,
+            user: user,
             date: row.date,
           });
         }
