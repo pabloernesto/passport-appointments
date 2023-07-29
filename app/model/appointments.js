@@ -26,15 +26,7 @@ export default class Appointments {
 
   // read
   async getAppointment(user) {
-    const has = await this._database.hasUser(body);
-    if(has) {
-      const appt = await this._database.hasAppointment(body.userid);
-      if(!appt) {
-        console.log("No appointment");
-      }
-      return
-    }
-    throw Error("No such user exists!");
+    return this._database.fetchAppointment(user);
   }
 
   // update
