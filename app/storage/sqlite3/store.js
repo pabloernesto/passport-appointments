@@ -6,7 +6,6 @@ import fecha from 'fecha'
 export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
-    this.test_date = 1;
   }
 
   // real db init could fail or take a long time.
@@ -14,6 +13,7 @@ export default class DatabaseWrapper {
   static fromNewTestDB() {
     const db = new sqlite3.Database(':memory:');
     db.serialize(() => {
+      db.run("PRAGMA foreign_keys = ON");
       db.run(`CREATE TABLE users (
         user_id INT NOT NULL, 
         email varchar(255) UNIQUE, 
@@ -23,22 +23,21 @@ export default class DatabaseWrapper {
       db.run(`CREATE TABLE appointments (
         pass_id INTEGER PRIMARY KEY NOT NULL, 
         date varchar(255), 
-        user_id int, 
+        user_id INT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users (user_id));`);
     });
 
     return new DatabaseWrapper(db);
   }
 
-  addUser(userobj) {
+  addUser(user, email, hash, salt) {
     const query = "insert into users (user_id, email, salt, hash)"
       + " values (?, ?, ?, ?)";
-    const { user_id, email, hash, salt } = userobj;
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user_id, email, salt, hash], (err, res) => {
+      this.db.run(query, [ user, email, salt, hash], (err, res) => {
         if (err) {
             err.query = query;
-            err.params = { user_id, email, hash, salt };
+            err.params = { user_id: user, email, hash, salt };
             reject(new Error("Failed to add user", { cause: err }));
         } else {
           resolve(res);
@@ -47,17 +46,26 @@ export default class DatabaseWrapper {
     });
   }
 
-  getUser(username) {
+  getUser(user) {
     const query = `select * from users where user_id = ?`;
 
     return new Promise((resolve, reject) => {
-      this.db.get(query, [ username ], (err, row) => {
+      this.db.get(query, [ user ], (err, row) => {
         if (err) {
           err.query = query;
-          err.params = { user_id: username };
+          err.params = { user_id: user };
           reject(new Error("Failed to get user", { cause: err }));
+
+        } else if (row === undefined) {
+          reject(new Error(`${ user } is not a user.`))
+
         } else {
-          resolve(row);
+          resolve({
+            user: row.user_id,
+            email: row.email,
+            hash: row.hash,
+            salt: row.salt
+          });
         }
       });
     });
@@ -97,44 +105,59 @@ export default class DatabaseWrapper {
   }
 
   // structure: {pass_id, date, user_id}
-  fetchAppointment(user_id) {
+  async fetchAppointment(user) {
+    // ensure that the user id exists
+    await this.getUser(user);
+
     const query = `select * from appointments where user_id = ?`;
 
     return new Promise((resolve, reject) => {
-      this.db.get(query, [ user_id ], (err, row) => {
-        if (err)
+      this.db.get(query, [ user ], (err, row) => {
+        if (err) {
           reject(err);
-        resolve({
-          user: user_id,
-          date: row.date,
-        });
+
+        } else if (!row) {
+          resolve(undefined);
+
+        } else {
+          resolve({
+            user: user,
+            date: row.date,
+          });
+        }
       });
     });
   }
 
+  /**
+   * Creates a new appointment for a given user with the provided date.
+   *
+   * @param {number} user - The user ID for whom the appointment will be created.
+   * @param {string} date - The date of the appointment in 'YYYY-MM-DD HH:mm:ss' format.
+   * @returns {Promise} A promise that resolves with the appointment parameters if successful.
+   * @throws {Error} If there is an error during the database operation, the user ID is missing,
+   *                 or the date provided is not in the correct format.
+   */
+  async createAppointment(user, date) {
+    // ensure that the user id exists
+    await this.getUser(user);
 
-  createAppointment(user_id) {
-    /* 
-      USER ID MUST EXIST. 
-    */
+    const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
 
-      // note: uses appt_id auto increment
-    const query = "INSERT INTO appointments (date, user_id)"
-      + " values (?, ?)";
-
-    // TODO: real date system
-    const date = new Date();
-    let sql_date = fecha.format(date, 'YYYY-MM-DD HH:mm:ss')
+    // check the date is valid
+    // fecha.parse() throws when the date string does not obey the format
+    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
 
     return new Promise((resolve, reject) => {
-      this.db.run(query, [sql_date, user_id], (err, res) => {
+      this.db.run(query, [date, user], (err, res) => {
+        const params = { user, date };
         if (err) {
-            err.query = query;
-            err.params = {date, user_id};
-            reject(new Error("Failed to create appt", { cause: err }));
+          err.query = query;
+          err.params = params;
+          reject(new Error("Failed to create appointment", { cause: err }));
+
         } else {
-          this.test_date += 1;
-          resolve(res);
+          resolve(params);
         }
       });
     });

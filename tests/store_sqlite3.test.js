@@ -1,73 +1,98 @@
 import Store from '../app/storage/sqlite3/store';
 
+
+
+/* Test context */
+let database;
+
+beforeEach(() => {
+  database = Store.fromNewTestDB();
+})
+
+async function fillWithSuperheroes(database) {
+  const superheroes = [
+    ["Superman", "superman@un.org", "ABCD", "EFGH"],
+    ["Batman", "batman@bat_base.org", "ABCD", "EFGH"],
+    ["Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH"],
+  ];
+  await Promise.all(superheroes.map(hero => database.addUser(...hero)));
+}
+
+
+
+/* Tests */
+test('creating a user', async () => {
+  await fillWithSuperheroes(database);
+  let user = await database.getUser("Superman");
+
+  expect(user.user).toBe("Superman");
+  expect(user.email).toBe("superman@un.org");
+  expect(user.hash).toBe("ABCD");
+  expect(user.salt).toBe("EFGH");
+})
+
+// TODO: change this to fail if the appointment slot isn't available
+// TODO: change this to require an embassy site parameter
 test('create 3 users and 1 appointment', async () => {
-  let database = Store.fromNewTestDB()
-  await database.addUser({
-    user_id: "Superman",
-    email: "superman@un.org",
-    salt: "ABCD",
-    hash: "EFGH"
-  });
-
-  await database.addUser({
-  user_id: "Batman",
-  email: "batman@bat_base.org",
-  salt: "ABCD",
-  hash: "EFGH"
-  });
+  await fillWithSuperheroes(database);
   
-  await database.addUser({
-  user_id: "Wonder Woman",
-  email: "wonderwoman@un.org",
-  salt: "ABCD",
-  hash: "EFGH"
-  });
-
-  let user = await database.getUser("Wonder Woman");
-    
-  await database.createAppointment(user.user_id);
-  let appt = await database.fetchAppointment(user.user_id)
-  expect(appt.date).toBe("sunday the 1th");
+  let when = "2023-01-01 12:00";
+  let appt = await database.createAppointment("Wonder Woman", when);
+  
+  expect(appt.date).toBe(when);
 });
 
 test('create 3 appointments', async () => {
-  let database = Store.fromNewTestDB()
-  let pending_users = [];
-  pending_users +=  database.addUser({
-    user_id: "Superman",
-    email: "superman@un.org",
-    salt: "ABCD",
-    hash: "EFGH"
-  });
-
-  pending_users += database.addUser({
-  user_id: "Batman",
-  email: "batman@bat_base.org",
-  salt: "ABCD",
-  hash: "EFGH"
-  });
+  await fillWithSuperheroes(database);
   
-  pending_users += database.addUser({
-  user_id: "Wonder Woman",
-  email: "wonderwoman@un.org",
-  salt: "ABCD",
-  hash: "EFGH"
-  });
+  let when = "2023-01-01 12:00";
+  let appt = await database.createAppointment("Wonder Woman", when);
+  expect(appt.date).toBe(when);
 
-  await Promise.all(pending_users);
-  
-  let user = await database.getUser("Wonder Woman");
-  await database.createAppointment(user.user_id);
-  let appt = await database.fetchAppointment(user.user_id)
-  expect(appt.date).toBe("sunday the 1th");
+  when = "2023-01-02 12:00";
+  appt = await database.createAppointment("Superman", when);
+  expect(appt.date).toBe(when);
 
-  user = await database.getUser("Batman");
-  await database.createAppointment(user.user_id);
-  appt = await database.fetchAppointment(user.user_id)
-  expect(appt.date).toBe("sunday the 2th");
-
-  user = await database.getUser("Superman");
-  await database.createAppointment(user.user_id);
-  appt = await database.fetchAppointment(user.user_id)
-  expect(appt.date).toBe("sunday the 3th");
+  when = "2023-01-03 12:00";
+  appt = await database.createAppointment("Batman", when);
+  expect(appt.date).toBe(when);
 });
+
+test('given an existing appointment, store.fetchAppointment() returns it', async () => {
+  await fillWithSuperheroes(database);
+  let when = "2023-01-01 12:00";
+  await database.createAppointment("Wonder Woman", when);
+
+  await expect(database.fetchAppointment("Wonder Woman"))
+  .resolves.toEqual({ user: "Wonder Woman", date: when });
+})
+
+test('given no appointment, store.fetchAppointment() returns undefined', async () => {
+  await fillWithSuperheroes(database);
+
+  await expect(database.fetchAppointment("Wonder Woman"))
+  .resolves.toBe(undefined);
+})
+
+test('given an empty store, store.fetchAppointment() throws', async () => {
+  await expect(database.fetchAppointment("Wonder Woman"))
+  .rejects.toThrow('Wonder Woman is not a user.');
+})
+
+test('fail to create appointment for unknown user', async () => {
+  let when = "2023-01-01 12:00";
+  await expect(database.createAppointment("Wonder Woman", when))
+  .rejects.toThrow('Wonder Woman is not a user.');
+})
+
+test('fail to create appointment for null user', async () => {
+  let when = "2023-01-01 12:00";
+  await expect(database.createAppointment(null, when))
+  .rejects.toThrow();
+})
+
+test('fail to create appointment for undefined user', async () => {
+  let when = "2023-01-01 12:00";
+  await expect(database.createAppointment(null, when))
+  .rejects.toThrow();
+})
