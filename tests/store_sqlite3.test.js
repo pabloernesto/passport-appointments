@@ -74,6 +74,11 @@ test('given no appointment, store.fetchAppointment() returns undefined', async (
   .resolves.toBe(undefined);
 })
 
+test('given an empty store, store.fetchAppointment() throws', async () => {
+  await expect(database.fetchAppointment("Wonder Woman"))
+  .rejects.toThrow('Wonder Woman is not a user.');
+})
+
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00";
   await expect(database.createAppointment("Wonder Woman", when))
