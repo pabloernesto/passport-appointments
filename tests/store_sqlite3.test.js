@@ -67,6 +67,13 @@ test('given an existing appointment, store.fetchAppointment() returns it', async
   .resolves.toEqual({ user: "Wonder Woman", date: when });
 })
 
+test('given no appointment, store.fetchAppointment() returns undefined', async () => {
+  await fillWithSuperheroes(database);
+
+  await expect(database.fetchAppointment("Wonder Woman"))
+  .resolves.toBe(undefined);
+})
+
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00";
   await expect(database.createAppointment("Wonder Woman", when))
