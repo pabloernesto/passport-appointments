@@ -17,7 +17,9 @@ class Authentication {
     this.validTokens = new Map();
 
     // Set up repeating timer to invalidate expired tokens
-    setInterval(() => this.invalidateExpiredTokens(), TOKEN_INVALIDATION_PERIOD);
+    // TODO: move this out of constructor so it can be controlled explicitly;
+    //   it is interfering with test code.
+    // setInterval(() => this.invalidateExpiredTokens(), TOKEN_INVALIDATION_PERIOD);
   }
 
   createUser(username, email, password) {
@@ -27,12 +29,7 @@ class Authentication {
     //   (3*8 = 4*6 = 24)
     // 16 base64 chars requires 16*3/4 = 12 random bytes
     const salt = randomBytes(12).toString('base64url');
-    return this.database.addUser({
-      user_id: username,
-      email: email,
-      salt: salt,
-      hash: hash(password + salt)
-    });
+    return this.database.addUser(username, email, hash(password + salt), salt);
   }
 
   async authenticateUser(username, password) {
