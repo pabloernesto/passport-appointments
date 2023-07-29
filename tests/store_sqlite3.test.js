@@ -58,6 +58,15 @@ test('create 3 appointments', async () => {
   expect(appt.date).toBe(when);
 });
 
+test('given an existing appointment, store.fetchAppointment() returns it', async () => {
+  await fillWithSuperheroes(database);
+  let when = "2023-01-01 12:00";
+  await database.createAppointment("Wonder Woman", when);
+
+  await expect(database.fetchAppointment("Wonder Woman"))
+  .resolves.toEqual({ user: "Wonder Woman", date: when });
+})
+
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00";
   await expect(database.createAppointment("Wonder Woman", when))
