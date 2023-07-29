@@ -33,6 +33,6 @@ test('given a single user, when given wrong password, authentication fails', asy
 
 test('given a single user, authentication succeeds', async () => {
   await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
-  await expect(auth.authenticateUser("Wonder Woman", "69"))
-  .resolves;
+  await expect(auth.authenticateUser("Wonder Woman", "1984"))
+  .resolves.toBe(true);
 })
