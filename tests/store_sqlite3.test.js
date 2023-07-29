@@ -9,11 +9,20 @@ beforeEach(() => {
   database = Store.fromNewTestDB();
 })
 
+async function fillWithSuperheroes(database) {
+  const superheroes = [
+    ["Superman", "superman@un.org", "ABCD", "EFGH"],
+    ["Batman", "batman@bat_base.org", "ABCD", "EFGH"],
+    ["Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH"],
+  ];
+  await Promise.all(superheroes.map(hero => database.addUser(...hero)));
+}
+
 
 
 /* Tests */
 test('creating a user', async () => {
-  await database.addUser("Superman", "superman@un.org", "ABCD", "EFGH");
+  await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
 
   expect(user.user).toBe("Superman");
@@ -25,9 +34,7 @@ test('creating a user', async () => {
 // TODO: change this to fail if the appointment slot isn't available
 // TODO: change this to require an embassy site parameter
 test('create 3 users and 1 appointment', async () => {
-  await database.addUser("Superman", "superman@un.org", "ABCD", "EFGH");
-  await database.addUser("Batman", "batman@bat_base.org", "ABCD", "EFGH");
-  await database.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
+  await fillWithSuperheroes(database);
   
   let when = "2023-01-01 12:00";
   let appt = await database.createAppointment("Wonder Woman", when);
@@ -36,9 +43,7 @@ test('create 3 users and 1 appointment', async () => {
 });
 
 test('create 3 appointments', async () => {
-  await database.addUser("Superman", "superman@un.org", "ABCD", "EFGH");
-  await database.addUser("Batman", "batman@bat_base.org", "ABCD", "EFGH");
-  await database.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
+  await fillWithSuperheroes(database);
   
   let when = "2023-01-01 12:00";
   let appt = await database.createAppointment("Wonder Woman", when);
