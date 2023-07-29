@@ -20,7 +20,7 @@ test('given an empty store, model.getAppointment() throws with missing user', as
   .rejects.toThrow('Wonder Woman is not a user.');
 })
 
-// test('given a store with no appointments, model.getAppointment() returns undefined', async () => {
-//   await store.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
-//   expect(model.getAppointment()).resolves.toBe(undefined);
-// })
+test('given a store with no appointments, model.getAppointment() returns undefined', async () => {
+  await store.addUser("Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH");
+  expect(model.getAppointment("Wonder Woman")).resolves.toBe(undefined);
+})
