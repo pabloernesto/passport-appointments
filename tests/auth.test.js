@@ -15,7 +15,7 @@ beforeEach(() => {
 
 
 /* Tests */
-test('given an empty store, model.getAppointment() throws with missing user', async () => {
+test('given an empty store, auth.createUser() resolves', async () => {
   await expect(auth.createUser("Wonder Woman", "wonderwoman@un.org", "1234"))
   .resolves;
 })
