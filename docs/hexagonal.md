@@ -10,11 +10,14 @@ The project is organized like this:
 - main.js is the start point. Hooks up concrete runtime implementation of our code. (Which modules are on and off?)
 
 ## Translating hexagonal architecture into code
+
+### Background
 The hexagonal (ports and adapters) pattern stipulates that modules in a system are to be connected through interfaces known as ports.
 A module implementing such an interface is called an adapter for that port.
 
 ![](hexagonal-architecture-example-cockburn-emergency.png)
 
+### Objects
 This translates into modules represented as objects, connected through composition:
 
 ```
@@ -38,6 +41,8 @@ class GUIAdministration {
 ```
 
 The point of the separation is to allow the modules to be swapped out.
+
+### Folders
 This structure has some obvious implications on project structure:
 
 ```
@@ -68,6 +73,7 @@ They will be depended on by the same code.
 They will respond in the same way to tests (assuming that no errors are present).
 And given that the interfaces they consume and support are understood, they can be studied in isolation from the rest of the system.
 
+### When should you have a new port?
 Cockburn's original article on the hexagonal architecture<sup>[[2]](#2)</sup>
 gives a criterion for the creation of ports:
 
