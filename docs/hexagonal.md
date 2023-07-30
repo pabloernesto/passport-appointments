@@ -60,9 +60,19 @@ L administration/
   L app_to_app/
 ```
 
-The interfaces in the system will...
-Every implementation of the same port shares most of its interface with the others.
+The interfaces in the system form natural categories to divide code into.
+They are the places where the programmers have found they keep code mostly ignorant from the rest of the system, which means their _programmers_ can remain mostly ignorant from the rest of the system.
+
+Every implementation of the same port shares the same interface<sup>[[1]](#1)</sup>.
 They will be depended on by the same code.
 They will respond in the same way to tests (assuming that no errors are present).
+And given that the interfaces they consume and support are understood, they can be studied in isolation from the rest of the system.
 
 EXPLAIN HOW INTERACTION WITH THE OUTSIDE WORLD IS THE CRITERION FOR NEW PORTS
+
+# Notes
+
+<sup><span id="1">1</span></sup>
+...mostly.
+Adapters share all methods that are part of the port contract, but are free to have more public methods, to have different dependencies, etc.
+In brief: adapters must obey the Liskov substitution principle (they have to be _interchangeable_ from the perpective of their users) but that is all they need to be.
