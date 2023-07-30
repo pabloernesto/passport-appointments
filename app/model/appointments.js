@@ -1,13 +1,15 @@
+import fecha from 'fecha'
 export default class Appointments {
   constructor(database) {
     this._database = database;
   }
 
-  async findOpenAppointmentFor(user) {
-    
-  }
 
   /* appointments */
+
+  async findOpenAppointmentFor(user) {
+    return fecha.format(Date.now(),  'YYYY-MM-DD HH:mm:ss');
+  }
 
   // create
   async requestAppointment(user) {
@@ -17,7 +19,7 @@ export default class Appointments {
     const appt = await this._database.hasAppointment(user);
     if(appt) throw Error("Already has appointment");
 
-    await this._database.createAppointment(user, "1999-10-10 00:00:00");
+    await this._database.createAppointment(user, await this.findOpenAppointmentFor(user));
 
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
