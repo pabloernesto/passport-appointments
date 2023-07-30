@@ -96,3 +96,11 @@ test('fail to create appointment for undefined user', async () => {
   await expect(database.createAppointment(null, when))
   .rejects.toThrow();
 })
+
+// create slot
+test('create slot', async () => {
+  let when = "2023-01-01 12:00";
+  await expect(database.getNearestAppointmentSlot("1971-01-01 12:00")).resolves.toBe(undefined);
+  await expect(database.createAppointmentSlot(when)).resolves.toEqual({"date": when });
+  await expect(database.getNearestAppointmentSlot("1971-01-01 12:00")).resolves.toEqual({"date": when, "slot_id":1 });
+})

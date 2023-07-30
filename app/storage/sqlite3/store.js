@@ -20,11 +20,15 @@ export default class DatabaseWrapper {
         salt varchar(255), 
         hash varchar(255), 
         PRIMARY KEY (user_id));`);
+        // TODO: rename pass_id
       db.run(`CREATE TABLE appointments (
         pass_id INTEGER PRIMARY KEY NOT NULL, 
         date varchar(255), 
         user_id INT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users (user_id));`);
+      db.run(`CREATE TABLE slots (
+        slot_id INTEGER PRIMARY KEY NOT NULL, 
+        date varchar(255));`);
     });
 
     return new DatabaseWrapper(db);
@@ -158,6 +162,54 @@ export default class DatabaseWrapper {
 
         } else {
           resolve(params);
+        }
+      });
+    });
+  }
+
+
+  async createAppointmentSlot(date) {
+    const query = "INSERT INTO slots (date) VALUES (?)";
+
+    // check the date is valid
+    // fecha.parse() throws when the date string does not obey the format
+    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
+
+    return new Promise((resolve, reject) => {
+      this.db.run(query, [date], (err, res) => {
+        const params = { date };
+        if (err) {
+          err.query = query;
+          err.params = params;
+          reject(new Error("Failed to create appointment", { cause: err }));
+
+        } else {
+          resolve(params);
+        }
+      });
+    });
+  }
+
+  // TODO: implement sensibly
+  async getNearestAppointmentSlot(date_threshold) {
+    const query = `SELECT * FROM slots where date > ?`; // TODO:check that its after a certain date
+
+    // check the date is valid
+    // fecha.parse() throws when the date string does not obey the format
+    fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+
+    return new Promise((resolve, reject) => {
+      this.db.all(query, [ date_threshold ], (err, rows) => {
+        if (err) {
+          reject(err);
+
+        } else if (!rows) {
+          resolve(rows);
+
+        } else {
+          console.log(rows);
+          if(rows.length) resolve(rows[0]);
+          resolve(undefined)
         }
       });
     });
