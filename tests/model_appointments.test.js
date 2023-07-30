@@ -24,6 +24,6 @@ test('given an empty store, model.getAppointment() throws with missing user', as
 })
 
 test('given a store with no appointments, model.getAppointment() returns undefined', async () => {
-  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1234");
+  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
   await expect(model.getAppointment("Wonder Woman")).resolves.toBe(undefined);
 })

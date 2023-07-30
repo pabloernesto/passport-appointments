@@ -15,7 +15,24 @@ beforeEach(() => {
 
 
 /* Tests */
-test('given an empty store, model.getAppointment() throws with missing user', async () => {
-  await expect(auth.createUser("Wonder Woman", "wonderwoman@un.org", "1234"))
+test('given an empty store, auth.createUser() resolves', async () => {
+  await expect(auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984"))
   .resolves;
+})
+
+test('given an empty store, authentication fails', async () => {
+  await expect(auth.authenticateUser("Wonder Woman", "1984"))
+  .resolves.toBe(false);
+})
+
+test('given a single user, when given wrong password, authentication fails', async () => {
+  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
+  await expect(auth.authenticateUser("Wonder Woman", "69"))
+  .resolves.toBe(false);
+})
+
+test('given a single user, authentication succeeds', async () => {
+  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
+  await expect(auth.authenticateUser("Wonder Woman", "1984"))
+  .resolves.toBe(true);
 })

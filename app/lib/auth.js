@@ -33,8 +33,8 @@ class Authentication {
   }
 
   async authenticateUser(username, password) {
-    const user = await this.database.getUser(username);
-    return user && user.hash === hash(password + user.salt);
+    const user = await this.database.getUser(username).catch(err => undefined);
+    return !!user && user.hash === hash(password + user.salt);
   }
 
   generateSessionToken() {
