@@ -11,7 +11,7 @@ export default class Appointments {
     if(has) {
       const appt = await this._database.hasAppointment(user);
       if(!appt) {
-        await this._database.createAppointment(user);
+        await this._database.createAppointment(user, "1999-10-10 00:00:00");
 
         let db_object = await this._database.fetchAppointment(user);
         return new String(db_object.date);
