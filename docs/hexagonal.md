@@ -63,6 +63,7 @@ L administration/
   L GUI/
   L http/
   L app_to_app/
+L main.js
 ```
 
 The interfaces in the system form natural categories to divide code into.
@@ -72,6 +73,11 @@ Every implementation of the same port shares the same interface<sup>[[1]](#1)</s
 They will be depended on by the same code.
 They will respond in the same way to tests (assuming that no errors are present).
 And given that the interfaces they consume and support are understood, they can be studied in isolation from the rest of the system.
+
+There will be code that, while necessary, is shared between adapters and may even make sense separately from the rest of the project.
+This is what the `lib/` folder is for.
+
+EXPLAIN MAIN.JS
 
 ### When should you have a new port?
 Cockburn's original article on the hexagonal architecture<sup>[[2]](#2)</sup>
