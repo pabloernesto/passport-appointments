@@ -11,9 +11,9 @@ beforeEach(() => {
 
 async function fillWithSuperheroes(database) {
   const superheroes = [
-    ["Superman", "superman@un.org", "ABCD", "EFGH"],
-    ["Batman", "batman@bat_base.org", "ABCD", "EFGH"],
-    ["Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH"],
+    ["Superman", "superman@un.org", "ABCD", "EFGH", "u"],
+    ["Batman", "batman@bat_base.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH", "u"],
   ];
   await Promise.all(superheroes.map(hero => database.addUser(...hero)));
 }
@@ -29,6 +29,7 @@ test('creating a user', async () => {
   expect(user.email).toBe("superman@un.org");
   expect(user.hash).toBe("ABCD");
   expect(user.salt).toBe("EFGH");
+  expect(user.role).toBe("u");
 })
 
 // TODO: change this to fail if the appointment slot isn't available
