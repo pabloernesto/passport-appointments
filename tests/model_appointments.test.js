@@ -1,7 +1,6 @@
 import Appointments from "../app/model/appointments";
 import Store from '../app/storage/sqlite3/store';
 import Authentication from '../app/lib/auth'
-import fecha from 'fecha'
 
 
 /* Test context */
