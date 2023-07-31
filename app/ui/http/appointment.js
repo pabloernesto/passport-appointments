@@ -1,8 +1,12 @@
 import { formBody } from '../../lib/http/util-request.js';
-
+import fecha from 'fecha'
 export default class AppointmentsMW {
   constructor(model) {
     this._model = model;
+
+    // TODO: ad-hoc appointment slot for testing
+    let date = fecha.format(Date.now(), 'YYYY-MM-DD HH:mm:ss')
+    this._model._database.createAppointmentSlot(date)
   }
 
   async respond(req, res) {
