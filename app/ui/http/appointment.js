@@ -30,6 +30,7 @@ export default class AppointmentsMW {
 
 // TODO: handle pending appointments
 function render(body, appointment) {
+  let text = appointment ? `<p>User ${ body.userid }, you have your appointment at ${ appointment }.</p>` : `<p>No appointment slots are available.</p>`
   return `\
 <!DOCTYPE html>
 <html lang="en" class="booting">
@@ -47,7 +48,7 @@ function render(body, appointment) {
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <p>User ${ body.userid }, you have your appointment at ${ appointment }.</p>
+  ${ text }
 </body>
 </html>`
 }
