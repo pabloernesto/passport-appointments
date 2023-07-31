@@ -210,14 +210,12 @@ export default class DatabaseWrapper {
       this.db.all(query, params, (err, rows) => {
         if (err) {
           reject(err);
-
         } else if (!rows) {
-          resolve(rows);
-
+          throw Error("Bad database outcome");
         } else {
           console.log(rows);
           if(rows.length) resolve(rows[0]);
-          resolve(undefined)
+          resolve(undefined);
         }
       });
     });

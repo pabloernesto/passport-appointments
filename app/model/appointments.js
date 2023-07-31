@@ -8,8 +8,8 @@ export default class Appointments {
   /* appointments */
 
   async findOpenAppointmentFor(user) {
-    this._database.getNearestAppointmentSlot()
-    return fecha.format(Date.now(),  'YYYY-MM-DD HH:mm:ss');
+    let nearest = await this._database.getNearestAppointmentSlot();
+    return nearest ? nearest.date : undefined;
   }
 
   // create
@@ -20,7 +20,9 @@ export default class Appointments {
     const appt = await this._database.hasAppointment(user);
     if(appt) throw Error("Already has appointment");
 
-    await this._database.createAppointment(user, await this.findOpenAppointmentFor(user));
+    let date = await this.findOpenAppointmentFor(user);
+    if(!date) throw Error("No appointment available");
+    await this._database.createAppointment(user, date);
 
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
