@@ -40,6 +40,5 @@ test('request appointment', async () => {
 test('request appointment without slot', async () => {
   let when = "2023-01-01 12:00:00";
   await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
-  await model.requestAppointment("Wonder Woman");
-  await expect(model.getAppointment("Wonder Woman")).rejects.toThrow("No appointment available");
+  await expect(model.requestAppointment("Wonder Woman")).rejects.toThrow("No appointment available");
 })
