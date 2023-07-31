@@ -3,11 +3,26 @@
 ## Summary
 The project is organized like this:
 
+```
+app/
+L model/
+L storage/
+  L sqlite3/
+L ui/
+  L http/
+L admin/
+  L http/
+L lib/
+L main.js
+```
+
 - There is a model folder, which contains the logic of the app, independent of implementation detail.
-- For each port of the app, there is a folder for that port.
-- For every adapter to a port, there is a subfolder in the port's folder, containing the code for that adapter.
-- There is a 'lib' folder for code that is implementation detail but shared between adapters.
-- main.js is the start point. Hooks up concrete runtime implementation of our code. (Which modules are on and off?)
+- For every connection between the app and the outside world, there is a port (interface).
+- For each port, there is a folder for that port (`storage/`).
+- For every adapter to a port (implementation of that interface), there is a subfolder for that adapter (`storage/sqlite3/`).
+- There is a 'lib' folder for code that is implementation detail, but shared between adapters.
+- main.js is the code that wires the rest together.
+  It decides which modules are on/off (should decide based on environment?).
 
 ## Translating hexagonal architecture into code
 
