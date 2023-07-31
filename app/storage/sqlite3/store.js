@@ -192,14 +192,22 @@ export default class DatabaseWrapper {
 
   // TODO: implement sensibly
   async getNearestAppointmentSlot(date_threshold) {
-    const query = `SELECT * FROM slots where date > ?`; // TODO:check that its after a certain date
-
-    // check the date is valid
-    // fecha.parse() throws when the date string does not obey the format
-    fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+    let params;
+    let query;
+    if(date_threshold) {
+      query = `SELECT * FROM slots where date > ?`; // TODO:check that its after a certain date
+      // check the date is valid
+      // fecha.parse() throws when the date string does not obey the format
+      fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+      params = [ date_threshold ];
+    } else {
+      query = `SELECT * FROM slots`; // TODO:check that its after a certain date
+      params = [ ];
+    }
+    
 
     return new Promise((resolve, reject) => {
-      this.db.all(query, [ date_threshold ], (err, rows) => {
+      this.db.all(query, params, (err, rows) => {
         if (err) {
           reject(err);
 

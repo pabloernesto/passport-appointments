@@ -8,6 +8,7 @@ export default class Appointments {
   /* appointments */
 
   async findOpenAppointmentFor(user) {
+    this._database.getNearestAppointmentSlot()
     return fecha.format(Date.now(),  'YYYY-MM-DD HH:mm:ss');
   }
 
