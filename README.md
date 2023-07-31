@@ -25,7 +25,10 @@ Instead of making people wait/guess on the site, set them up for a queue.
 - ~~keep html templates away from response code: move to render function~~
 - ~~parse form data in HTTP POST requests~~
 - ~~hide database behind interface object~~
-- do a login
+- ~~do a login~~
 - research: how does sql work?
+- appointment slots
+- admin interface
+- embassies
 
 [date]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
