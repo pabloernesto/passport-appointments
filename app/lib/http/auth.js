@@ -3,15 +3,17 @@ import Authentication from '../auth.js';
 import querystring from 'node:querystring';
 
 const loggedInEndpoints = [
-  '/appointment'
+  '/appointment', '/admin'
 ];
+
+const adminEndpoints = [ '/admin' ];
 
 export default class AuthenticationMW {
   constructor(database) {
     this.auth = new Authentication(database);
   }
 
-  respond(req, res) {
+  async respond(req, res) {
     // TODO: only synchronous bc we store tokens in memory, EW!!!
     const logged = isLoggedIn(req, this.auth);
 
@@ -40,9 +42,17 @@ export default class AuthenticationMW {
     }
 
     if (req.method === 'POST' && operation === 'register' && !logged) {
-      attemptRegistration(req, res, this.auth);
+      attemptRegistration(req, res, this.auth)
       return true;
     }
+
+    // authorization
+    if(adminEndpoints.includes(req.url) && logged) {
+      const { username, password } = await formBody(req);
+      const authorization = await this.auth.userHasPermission(username, "a");
+      if(authorization) return true;
+    }
+    
 
     return false; // not a handled request
   }

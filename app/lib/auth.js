@@ -67,6 +67,12 @@ class Authentication {
         this.validTokens.delete(token);
     }
   }
+
+    // TODO: better information flow
+  async userHasPermission(username, perm) {
+    const user = await this.getUser(username);
+    return user.role.includes(perm);
+  }
 }
 
 export default Authentication;
