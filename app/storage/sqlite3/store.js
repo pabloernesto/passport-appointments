@@ -18,7 +18,8 @@ export default class DatabaseWrapper {
         user_id INT NOT NULL, 
         email varchar(255) UNIQUE, 
         salt varchar(255), 
-        hash varchar(255), 
+        hash varchar(255),
+        role varchar(255) NOT NULL,
         PRIMARY KEY (user_id));`);
         // TODO: rename pass_id
       db.run(`CREATE TABLE appointments (
@@ -35,13 +36,14 @@ export default class DatabaseWrapper {
   }
 
   addUser(user, email, hash, salt) {
-    const query = "insert into users (user_id, email, salt, hash)"
-      + " values (?, ?, ?, ?)";
+    const role = "u"
+    const query = "insert into users (user_id, email, salt, hash, role)"
+      + " values (?, ?, ?, ?, ?)";
     return new Promise((resolve, reject) => {
-      this.db.run(query, [ user, email, salt, hash], (err, res) => {
+      this.db.run(query, [ user, email, salt, hash, role], (err, res) => {
         if (err) {
             err.query = query;
-            err.params = { user_id: user, email, hash, salt };
+            err.params = { user_id: user, email, salt, hash, role};
             reject(new Error("Failed to add user", { cause: err }));
         } else {
           resolve(res);
@@ -68,7 +70,8 @@ export default class DatabaseWrapper {
             user: row.user_id,
             email: row.email,
             hash: row.hash,
-            salt: row.salt
+            salt: row.salt,
+            role: row.role
           });
         }
       });
