@@ -48,12 +48,13 @@ export default class AuthenticationMW {
 
     // authorization
     if(adminEndpoints.includes(req.url) && logged) {
-      const { username, password } = await formBody(req);
-      const authorization = await this.auth.userHasPermission(username, "a");
+      const token = getTokenFromRequest(req);
+
+      const token_obj = this.auth.userTokens.get(token)
+
+      const authorization = await this.auth.userHasPermission(token_obj.user_id, "a");
       if(authorization) return true;
     }
-    
-
     return false; // not a handled request
   }
 }
@@ -68,7 +69,7 @@ async function attemptLogin(req, res, auth) {
       return;
     }
 
-    const sessionToken = auth.generateSessionToken();
+    const sessionToken = auth.generateLoginSessionToken(username);
     addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
@@ -107,13 +108,16 @@ function sendErrorResponse(res, err) {
 
 // TODO: BUG: null under certain circumstances
 function isLoggedIn(req, auth) {
+  const sessionToken = getTokenFromRequest(req)
+  return sessionToken && auth && auth.isValidSessionToken(sessionToken);
+}
+
+function getTokenFromRequest(req) {
   // Extract cookies from the cookie header using querystring.parse()
   // If the cookie header is undefined, provide an empty string as the default value
   // Cookies are joined with "; "
   const cookies = querystring.parse(req.headers?.cookie || '', '; ');
-
-  const sessionToken = cookies.sessionToken;
-  return sessionToken && auth && auth.isValidSessionToken(sessionToken);
+  return cookies.sessionToken;
 }
 
 function redirectToLogin(req, res) {
@@ -158,7 +162,7 @@ async function attemptRegistration(req, res, auth) {
     ({ username, email, password } = await formBody(req));
     await auth.createUser(username, email, password);
 
-    const sessionToken = auth.generateSessionToken();
+    const sessionToken = auth.generateLoginSessionToken(username);
     addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 

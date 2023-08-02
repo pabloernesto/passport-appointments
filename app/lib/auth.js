@@ -14,7 +14,8 @@ class Authentication {
     this.database = database;
     // key: token
     // value: { token: token, emitted: date }
-    this.validTokens = new Map();
+    this.userTokens = new Map();
+    // NOTE: potentially add anon tokens
 
     // Set up repeating timer to invalidate expired tokens
     // TODO: move this out of constructor so it can be controlled explicitly;
@@ -41,30 +42,32 @@ class Authentication {
     return !!user && user.hash === hash(password + user.salt);
   }
 
-  generateSessionToken() {
+  generateLoginSessionToken(user_id) {
     let sessionToken;
+    if(!user_id) throw Error("Must have valid user id to create session");
     do {
       const bytes = randomBytes(16);
       sessionToken = bytes.toString('base64url');
-    } while (this.validTokens.has(sessionToken));
-    this.validTokens.set(sessionToken, {
+    } while (this.userTokens.has(sessionToken));
+    this.userTokens.set(sessionToken, {
       token: sessionToken,
+      user_id: user_id,
       emitted: new Date(),
     });
     return sessionToken;
   }
 
   isValidSessionToken(s) {
-    return this.validTokens.has(s);
+    return this.userTokens.has(s);
   }
 
   invalidateExpiredTokens() {
     const expirationTime = new Date().getTime() - TOKEN_VALIDITY;
 
-    for (const { token, emitted } of this.validTokens.values()) {
+    for (const { token, emitted } of this.userTokens.values()) {
       if (emitted.getTime() <= expirationTime)
         // modifying the map while iterating it doesn't seem to break the iterator
-        this.validTokens.delete(token);
+        this.userTokens.delete(token);
     }
   }
 
