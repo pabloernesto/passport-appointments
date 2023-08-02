@@ -52,7 +52,7 @@ export default class DatabaseWrapper {
   }
 
   addUser(user, email, hash, salt) {
-    this.addUserWithRole(user, email, hash, salt, "u");
+    return this.addUserWithRole(user, email, hash, salt, "u");
   }
 
   getUser(user) {
