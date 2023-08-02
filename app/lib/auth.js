@@ -80,6 +80,10 @@ class Authentication {
     }
   }
 
+  invalidateToken(token) {
+    this.userTokens.delete(token);
+  }
+
     // TODO: better information flow
   async userHasPermission(username, perm) {
     const user = await this.getUser(username);

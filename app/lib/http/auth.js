@@ -36,6 +36,8 @@ export default class AuthenticationMW {
       : undefined
     );
 
+    const logout = (req.url.split('?')[0] === '/logout' ? 'logout' : undefined);
+
     // prevent double login or registration
     if (operation && logged) {
       req.url = "/already-logged-in.html";
@@ -49,8 +51,16 @@ export default class AuthenticationMW {
     }
 
     if (req.method === 'POST' && operation === 'register' && !logged) {
-      attemptRegistration(req, res, this.auth)
+      attemptRegistration(req, res, this.auth);
       return true;
+    }
+
+    // logout
+    if (logout) {
+      if(logged) {
+        attemptLogout(req, res, this.auth);
+        return true;
+      }
     }
 
     // authorization
@@ -98,6 +108,20 @@ async function attemptLogin(req, res, auth) {
   }
 }
 
+async function attemptLogout(req, res, auth) {
+  try {
+    const sessionToken = getTokenFromRequest(req);
+    await auth.invalidateToken(sessionToken);
+    redirectHome(req, res);
+  } catch (error) {
+    if (error instanceof RequestBodyParsingError) {
+      logRequestBodyParsingError(error, req);
+    } else {
+      sendErrorResponse(res, error);
+    }
+  }
+}
+
 function logRequestBodyParsingError(error, request) {
   const { method, url, headers } = request;
   const clientIP = getClientIP(request);
@@ -124,7 +148,7 @@ function sendErrorResponse(res, err) {
 
 // TODO: BUG: null under certain circumstances
 function isLoggedIn(req, auth) {
-  const sessionToken = getTokenFromRequest(req)
+  const sessionToken = getTokenFromRequest(req);
   return sessionToken && auth && auth.isValidSessionToken(sessionToken);
 }
 
@@ -156,6 +180,13 @@ function redirectToRedirectPage(req, res) {
   const redirectURL = getRedirectURL(req) ?? '/';
   res.setHeader('Location', redirectURL);
   addCookie(res, `redirect=; Path=/; Max-Age=0`);
+  res.end();
+}
+
+function redirectHome(req, res) {
+  res.statusCode = 302;
+  res.setHeader('Location', '/index');
+  addCookie(res, `redirect=; Path=/index; Max-Age=0`);
   res.end();
 }
 
