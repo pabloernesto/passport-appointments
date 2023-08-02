@@ -4,7 +4,6 @@ export default class Appointments {
     this._database = database;
   }
 
-
   /* appointments */
 
   async findOpenAppointmentFor(user) {

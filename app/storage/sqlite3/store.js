@@ -35,8 +35,7 @@ export default class DatabaseWrapper {
     return new DatabaseWrapper(db);
   }
 
-  addUser(user, email, hash, salt) {
-    const role = "u"
+  addUserWithRole(user, email, hash, salt, role) {
     const query = "insert into users (user_id, email, salt, hash, role)"
       + " values (?, ?, ?, ?, ?)";
     return new Promise((resolve, reject) => {
@@ -50,6 +49,10 @@ export default class DatabaseWrapper {
         }
       });
     });
+  }
+
+  addUser(user, email, hash, salt) {
+    this.addUserWithRole(user, email, hash, salt, "u");
   }
 
   getUser(user) {

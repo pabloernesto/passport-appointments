@@ -7,9 +7,9 @@ import Authentication from '../app/lib/auth'
 let auth;
 let store;
 
-beforeEach(() => {
+beforeEach(async () => {
   store = Store.fromNewTestDB();
-  auth = new Authentication(store);
+  auth = await Authentication.fromDatabase(store);
 })
 
 

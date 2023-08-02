@@ -8,10 +8,10 @@ let model;
 let auth;
 let store;
 
-beforeEach(() => {
+beforeEach(async () => {
   store = Store.fromNewTestDB();
   model = new Appointments(store);
-  auth = new Authentication(store);
+  auth = await Authentication.fromDatabase(store);
 })
 
 

@@ -9,8 +9,15 @@ const loggedInEndpoints = [
 const adminEndpoints = [ '/admin' ];
 
 export default class AuthenticationMW {
-  constructor(database) {
-    this.auth = new Authentication(database);
+  // @private
+  constructor(auth) {
+    this.auth = auth;
+  }
+
+  // static async constructor. Do not use actual constructor.
+  static async fromDatabase(database) {
+    let auth = await Authentication.fromDatabase(database);
+    return new AuthenticationMW(auth);
   }
 
   async respond(req, res) {

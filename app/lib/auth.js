@@ -10,10 +10,11 @@ function hash(data) {
 }
 
 class Authentication {
+  //@private
   constructor(database) {
     this.database = database;
     // key: token
-    // value: { token: token, emitted: date }
+    // value: { token: token, user_id: id, emitted: date }
     this.userTokens = new Map();
     // NOTE: potentially add anon tokens
 
@@ -21,6 +22,14 @@ class Authentication {
     // TODO: move this out of constructor so it can be controlled explicitly;
     //   it is interfering with test code.
     // setInterval(() => this.invalidateExpiredTokens(), TOKEN_INVALIDATION_PERIOD);
+  }
+
+  static async fromDatabase(database) {
+    // TODO: VULNERABLE: hardcoded admin account
+    let password = "1234";
+    let salt = randomBytes(12).toString('base64url');
+    await database.addUserWithRole("Wonder Woman", "q@q.q", hash(password + salt), salt, "a");
+    return new Authentication(database);
   }
 
   createUser(username, email, password) {
