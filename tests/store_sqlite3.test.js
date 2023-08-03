@@ -116,6 +116,11 @@ test('create slot', async () => {
 
 
 // Queue
+test('given an empty queue, when getting first user return undefined', async () => {
+  await expect(database.getFirstUserInQueue())
+  .resolves.toBe(undefined);
+})
+
 test('add user to queue', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
