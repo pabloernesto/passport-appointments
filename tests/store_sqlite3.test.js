@@ -123,7 +123,6 @@ test('given an empty queue, when getting first user return undefined', async () 
 
 test('add user to queue', async () => {
   await fillWithSuperheroes(database);
-  let user = await database.getUser("Superman");
-  await expect(database.addUserToQueue("Superman")).resolves;
+  await database.addUserToQueue("Superman");
   await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
 })
