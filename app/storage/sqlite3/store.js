@@ -30,6 +30,12 @@ export default class DatabaseWrapper {
       db.run(`CREATE TABLE slots (
         slot_id INTEGER PRIMARY KEY NOT NULL, 
         date varchar(255));`);
+
+      // https://medium.com/datadenys/implementing-simple-job-queue-with-mysql-8-0-and-php-pdo-6023724ace99
+      db.run(`CREATE TABLE appt_queue (
+        queue_id SERIAL PRIMARY KEY,
+        user_id INTEGER, 
+        FOREIGN KEY (user_id) REFERENCES users (user_id));`);
     });
 
     return new DatabaseWrapper(db);
@@ -210,7 +216,6 @@ export default class DatabaseWrapper {
       query = `SELECT * FROM slots`; // TODO:check that its after a certain date
       params = [ ];
     }
-    
 
     return new Promise((resolve, reject) => {
       this.db.all(query, params, (err, rows) => {
@@ -219,11 +224,58 @@ export default class DatabaseWrapper {
         } else if (!rows) {
           throw Error("Bad database outcome");
         } else {
-          console.log(rows);
           if(rows.length) resolve(rows[0]);
           resolve(undefined);
         }
       });
     });
+  }
+
+  // appointment queue
+  // adds user id to the queue
+  async addUserToQueue(user) {
+    const query = "INSERT INTO appt_queue (user_id)"
+      + " values (?)";
+
+    // wrap in promise
+    return new Promise((resolve, reject) => {
+      // serialize every user insert
+      this.db.run(query, [ user ], (err, res) => {
+        if (err) {
+          err.query = query;
+          err.params = { user_id: user};
+          reject(new Error("Failed to add to queue", { cause: err }));
+        } else {
+          resolve(res);
+        }
+      });
+    });
+  }
+  // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
+  async getFirstUserInQueue(match) {
+    const query = `select * from appt_queue ORDER BY queue_id LIMIT 0,1`;
+
+    return new Promise((resolve, reject) => {
+      this.db.get(query, [ ], (err, row) => {
+        if (err) {
+          err.query = query;
+          err.params = { };
+          reject(new Error("Failed to get user", { cause: err }));
+
+        } else if (row === undefined) {
+          reject(new Error(`${ user } is not a user.`))
+
+        } else {
+          resolve({
+            user: row.user_id,
+            email: row.email,
+            hash: row.hash,
+            salt: row.salt,
+            role: row.role
+          });
+        }
+      });
+    });
+
   }
 }

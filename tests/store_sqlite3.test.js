@@ -13,7 +13,7 @@ async function fillWithSuperheroes(database) {
   const superheroes = [
     ["Superman", "superman@un.org", "ABCD", "EFGH", "u"],
     ["Batman", "batman@bat_base.org", "ABCD", "EFGH", "u"],
-    ["Wonder Woman", "wonderwoman@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman2", "wonderwoman@un.org", "ABCD", "EFGH", "u"],
   ];
   await Promise.all(superheroes.map(hero => database.addUser(...hero)));
 }
@@ -38,7 +38,7 @@ test('create 3 users and 1 appointment', async () => {
   await fillWithSuperheroes(database);
   
   let when = "2023-01-01 12:00:00";
-  let appt = await database.createAppointment("Wonder Woman", when);
+  let appt = await database.createAppointment("Wonder Woman2", when);
   
   expect(appt.date).toBe(when);
 });
@@ -47,7 +47,7 @@ test('create 3 appointments', async () => {
   await fillWithSuperheroes(database);
   
   let when = "2023-01-01 12:00:00";
-  let appt = await database.createAppointment("Wonder Woman", when);
+  let appt = await database.createAppointment("Wonder Woman2", when);
   expect(appt.date).toBe(when);
 
   when = "2023-01-02 12:00:00";
@@ -62,28 +62,28 @@ test('create 3 appointments', async () => {
 test('given an existing appointment, store.fetchAppointment() returns it', async () => {
   await fillWithSuperheroes(database);
   let when = "2023-01-01 12:00:00";
-  await database.createAppointment("Wonder Woman", when);
+  await database.createAppointment("Wonder Woman2", when);
 
-  await expect(database.fetchAppointment("Wonder Woman"))
-  .resolves.toEqual({ user: "Wonder Woman", date: when });
+  await expect(database.fetchAppointment("Wonder Woman2"))
+  .resolves.toEqual({ user: "Wonder Woman2", date: when });
 })
 
 test('given no appointment, store.fetchAppointment() returns undefined', async () => {
   await fillWithSuperheroes(database);
 
-  await expect(database.fetchAppointment("Wonder Woman"))
+  await expect(database.fetchAppointment("Wonder Woman2"))
   .resolves.toBe(undefined);
 })
 
 test('given an empty store, store.fetchAppointment() throws', async () => {
-  await expect(database.fetchAppointment("Wonder Woman"))
-  .rejects.toThrow('Wonder Woman is not a user.');
+  await expect(database.fetchAppointment("Wonder Woman2"))
+  .rejects.toThrow('Wonder Woman2 is not a user.');
 })
 
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00:00";
-  await expect(database.createAppointment("Wonder Woman", when))
-  .rejects.toThrow('Wonder Woman is not a user.');
+  await expect(database.createAppointment("Wonder Woman2", when))
+  .rejects.toThrow('Wonder Woman2 is not a user.');
 })
 
 test('fail to create appointment for null user', async () => {
@@ -104,4 +104,11 @@ test('create slot', async () => {
   await expect(database.getNearestAppointmentSlot()).resolves.toBe(undefined);
   await expect(database.createAppointmentSlot(when)).resolves.toEqual({"date": when });
   await expect(database.getNearestAppointmentSlot()).resolves.toEqual({"date": when, "slot_id":1 });
+})
+
+test('add user to queue', async () => {
+  await fillWithSuperheroes(database);
+  let user = await database.getUser("Superman");
+  await expect(database.addUserToQueue("Superman")).resolves;
+  await expect(database.getFirstUserInQueue("Superman")).resolves;
 })

@@ -18,26 +18,26 @@ beforeEach(async () => {
 
 /* Tests */
 test('given an empty store, model.getAppointment() throws with missing user', async () => {
-  await expect(model.getAppointment("Wonder Woman"))
-  .rejects.toThrow('Wonder Woman is not a user.');
+  await expect(model.getAppointment("Wonder Woman2"))
+  .rejects.toThrow('Wonder Woman2 is not a user.');
 })
 
 test('given a store with no appointments, model.getAppointment() returns undefined', async () => {
-  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
-  await expect(model.getAppointment("Wonder Woman")).resolves.toBe(undefined);
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
+  await expect(model.getAppointment("Wonder Woman2")).resolves.toBe(undefined);
 })
 
 test('request appointment', async () => {
   let when = "2023-01-01 12:00:00";
-  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await store.createAppointmentSlot(when);
-  await model.requestAppointment("Wonder Woman");
-  await expect(model.getAppointment("Wonder Woman")).resolves.toEqual({"date": when, "user": "Wonder Woman"});
+  await model.requestAppointment("Wonder Woman2");
+  await expect(model.getAppointment("Wonder Woman2")).resolves.toEqual({"date": when, "user": "Wonder Woman2"});
 })
 
 
 test('request appointment without slot', async () => {
   let when = "2023-01-01 12:00:00";
-  await auth.createUser("Wonder Woman", "wonderwoman@un.org", "1984");
-  await expect(model.requestAppointment("Wonder Woman")).rejects.toThrow("No appointment available");
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
+  await expect(model.requestAppointment("Wonder Woman2")).rejects.toThrow("No appointment available");
 })

@@ -31,7 +31,6 @@ export function formBody(request) {
 
     }).on('end', () => {
       body = querystring.parse(Buffer.concat(body).toString());
-      console.log(body);
       resolve(body);
 
     }).on('error', (e) => {
