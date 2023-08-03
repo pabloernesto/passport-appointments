@@ -48,5 +48,6 @@ Instead of making people wait/guess on the site, set them up for a queue.
   - Unauthorized access page
 - Prettify CSS (low urgency, low importance)
 - Email everything that isn't the appointment
+- App config: host and port as parameters
 
 [date]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
