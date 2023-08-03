@@ -263,7 +263,7 @@ export default class DatabaseWrapper {
           reject(new Error("Failed to get user", { cause: err }));
 
         } else if (row === undefined) {
-          reject(new Error(`${ user } is not a user.`))
+          resolve(undefined);
 
         } else {
           resolve(row.user_id);
