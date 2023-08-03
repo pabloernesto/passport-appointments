@@ -110,5 +110,5 @@ test('add user to queue', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
   await expect(database.addUserToQueue("Superman")).resolves;
-  await expect(database.getFirstUserInQueue("Superman")).resolves.toEqual("Superman");
+  await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
 })

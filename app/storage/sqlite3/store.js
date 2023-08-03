@@ -252,7 +252,7 @@ export default class DatabaseWrapper {
     });
   }
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
-  async getFirstUserInQueue(match) {
+  async getFirstUserInQueue() {
     const query = `select * from appt_queue ORDER BY queue_id LIMIT 1`;
 
     return new Promise((resolve, reject) => {
