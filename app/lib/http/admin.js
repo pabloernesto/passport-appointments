@@ -1,11 +1,11 @@
-import {adminEndpoints, loggedInEndpoints} from './const.js';
-
-export default class AuthenticationMW {
-  constructor(database) {
-    this._database = database // TODO: replace with implementation object
+import { formBody, RequestBodyParsingError } from './util-request.js';
+export default class AdminMW {
+  constructor(database, model) {
+    this._database = database; // TODO: replace with implementation object
+    this._model = model;
   }
 
-  respond(req, res) {
+  async respond(req, res) {
     if(req.url == "/admin") {
       res.end(`\
 <!DOCTYPE html>
@@ -33,6 +33,7 @@ export default class AuthenticationMW {
 </html>`);
       return true;
     } else if (req.url == "/single_slot") {
+      await this.handleSingleSlot(req, res);
       res.end(`\
 <!DOCTYPE html>
 <html lang="en" class="booting">
@@ -63,5 +64,13 @@ export default class AuthenticationMW {
     }
     return false;
   }
+  async handleSingleSlot(req, res) {
+    const { single_slot } = await formBody(req);
+    console.log("single slot:");
+    console.log(single_slot);
+    await this._model.createAppointments([Date.now()]);
+  }
     
 }
+
+

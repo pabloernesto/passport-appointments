@@ -45,7 +45,15 @@ export default class Appointments {
   /* administration */
 
   // create
-  async createAppointments(appointments) {} // takes [ [date, number_of_slots]... ]
+  async createAppointments(dates) {
+    /*
+      dates: list of js DateTime object, UTC
+      TODO: take multiple dates or maybe a custom appt object
+    */
+    // check 1 week from current time
+    let date = fecha.format(dates[0], 'YYYY-MM-DD HH:mm:ss')
+    await this._database.createAppointmentSlot(date);
+  } // takes [ [date, number_of_slots]... ]
 
   // read
   async getAppointments() {}

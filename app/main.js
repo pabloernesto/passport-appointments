@@ -15,6 +15,6 @@ let server = new Server();
 server.add_middleware(await AuthenticationMW.fromDatabase(store));
 server.add_middleware(new AppointmentsMW(model));
 server.add_middleware(await StaticFilesMW.fromPath("./app/assets"));
-server.add_middleware(new AdminMW(model));
+server.add_middleware(new AdminMW(store, model));
 server.add_middleware(new http404MW());
 server.listen('127.0.0.1', 3000);
