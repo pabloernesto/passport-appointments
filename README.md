@@ -27,7 +27,6 @@ Instead of making people wait/guess on the site, set them up for a queue.
 - admin interface
   - Admin can create appointment slots web interface
   - Admin can create appointment slots in bulk web interface
-- embassies
 - Appointment queue
   - When user tries to make an appointment and there are no slots, they are added to a database
   - The user is told they were added to the queue
@@ -37,11 +36,17 @@ Instead of making people wait/guess on the site, set them up for a queue.
   - Users can see where they are in the queue (two significant figures)
   - Admin can see the queue
   - Don't give out appointments less than one week away
-- Rethink page flow (Mafer doesn't like it, I think it's ok)
+- Page templates for the app (Mafer wants React, Pablo thinks that's too much)
+- Rethink page flow (Mafer doesn't like it, Pablo thinks it's ok)
 - Cancel appointment
+- embassies
 - Leave appointment queue
-- Email everything that isn't the appointment
+- User with admin role but without user role cannot ask for appointment
+- Auth UI
+  - Display username everywhere
+  - Log out from anywhere in the app
+  - Unauthorized access page
 - Prettify CSS (low urgency, low importance)
-
+- Email everything that isn't the appointment
 
 [date]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date
