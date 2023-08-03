@@ -266,13 +266,7 @@ export default class DatabaseWrapper {
           reject(new Error(`${ user } is not a user.`))
 
         } else {
-          resolve({
-            user: row.user_id,
-            email: row.email,
-            hash: row.hash,
-            salt: row.salt,
-            role: row.role
-          });
+          resolve(row.user_id);
         }
       });
     });
