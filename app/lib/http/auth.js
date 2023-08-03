@@ -1,12 +1,7 @@
 import { formBody, RequestBodyParsingError } from './util-request.js';
 import Authentication from '../auth.js';
 import querystring from 'node:querystring';
-
-const loggedInEndpoints = [
-  '/appointment', '/admin'
-];
-
-const adminEndpoints = [ '/admin' ];
+import {adminEndpoints, loggedInEndpoints} from './const.js';
 
 export default class AuthenticationMW {
   // @private
