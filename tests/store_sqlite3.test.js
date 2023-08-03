@@ -21,6 +21,8 @@ async function fillWithSuperheroes(database) {
 
 
 /* Tests */
+
+// Users
 test('creating a user', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
@@ -32,6 +34,9 @@ test('creating a user', async () => {
   expect(user.role).toBe("u");
 })
 
+
+
+// Appointments
 // TODO: change this to fail if the appointment slot isn't available
 // TODO: change this to require an embassy site parameter
 test('create 3 users and 1 appointment', async () => {
@@ -98,7 +103,9 @@ test('fail to create appointment for undefined user', async () => {
   .rejects.toThrow();
 })
 
-// create slot
+
+
+// Slots
 test('create slot', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.getNearestAppointmentSlot()).resolves.toBe(undefined);
@@ -106,6 +113,9 @@ test('create slot', async () => {
   await expect(database.getNearestAppointmentSlot()).resolves.toEqual({"date": when, "slot_id":1 });
 })
 
+
+
+// Queue
 test('add user to queue', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
