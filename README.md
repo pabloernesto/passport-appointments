@@ -25,8 +25,8 @@ Instead of making people wait/guess on the site, set them up for a queue.
 - ~~hide database behind interface object~~
 - ~~do a login~~
 - admin interface
-  - Admin appointment slots
-  - Admin appointment slots web interface
+  - Admin can create appointment slots web interface
+  - Admin can create appointment slots in bulk web interface
 - embassies
 - Appointment queue
   - When user tries to make an appointment and there are no slots, they are added to a database
