@@ -253,33 +253,62 @@ export default class DatabaseWrapper {
   }
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
   async getFirstUserInQueue() {
-    const query = `select * from appt_queue ORDER BY queue_id LIMIT 1`;
-    const query_delete = `DELETE FROM appt_queue WHERE queue_id = ?`;
+    const query_lock = `BEGIN TRANSACTION;`;
+    const query_get = `select * from appt_queue ORDER BY queue_id LIMIT 1;`;
+    const query_delete = `DELETE FROM appt_queue WHERE queue_id = ?;`;
+    const query_unlock = `END TRANSACTION;`;
 
-    return new Promise((resolve, reject) => {
-      // TODO serialize
-      this.db.get(query, [ ], (err, row) => {
-        if (err) {
-          err.query = query;
+    await new Promise((resolve, reject) => {
+      this.db.run(query_lock, [], (err, ret) => {
+        if(err) {
+          err.query = query_lock;
           err.params = { };
-          reject(new Error("Failed to get queued user", { cause: err }));
-
-        } else if (row === undefined) {
-          resolve(undefined);
+          reject(new Error("Failed to start transaction", { cause: err }));
         } else {
-          let top_of_queue = row;
-          this.db.run(query_delete, [ top_of_queue.queue_id ], (err, ret) => {
-            if(err) {
-              err.query = query_delete;
-              err.params = { id: top_of_queue.queue_id };
-              reject(new Error("Failed to get queued user", { cause: err }));
-            } else {
-              resolve(top_of_queue.user_id);
-            }
-          })
+          resolve(undefined);
         }
       });
     });
+    const row = await new Promise((resolve, reject) => {
+      this.db.get(query_get, [], (err, row) => {
+        if(err) {
+          err.query = query_get;
+          err.params = { };
+          reject(new Error("Failed to get", { cause: err }));
+        } else if(!row) {
+          resolve(undefined);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+
+    if(row) {
+      await new Promise((resolve, reject) => {
+        this.db.run(query_delete, [ row.queue_id ], (err, ret) => {
+          if(err) {
+            err.query = query_delete;
+            err.params = { id: row.queue_id };
+            reject(new Error("Failed to delete", { cause: err }));
+          } else {
+            resolve(undefined);
+          }
+        });
+      });
+    }
+
+    await new Promise((resolve, reject) => {
+      this.db.run(query_unlock, [], (err, ret) => {
+        if(err) {
+          err.query = query_unlock;
+          err.params = { };
+          reject(new Error("Failed to end transaction", { cause: err }));
+        } else {
+          resolve(undefined);
+        }
+      });
+    });
+    return row ? row.user_id : undefined;
 
   }
 }
