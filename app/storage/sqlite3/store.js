@@ -33,7 +33,7 @@ export default class DatabaseWrapper {
 
       // https://medium.com/datadenys/implementing-simple-job-queue-with-mysql-8-0-and-php-pdo-6023724ace99
       db.run(`CREATE TABLE appt_queue (
-        queue_id SERIAL PRIMARY KEY,
+        queue_id SERIAL PRIMARY KEY DEFAULT 0,
         user_id INTEGER, 
         FOREIGN KEY (user_id) REFERENCES users (user_id));`);
     });
@@ -254,19 +254,29 @@ export default class DatabaseWrapper {
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
   async getFirstUserInQueue() {
     const query = `select * from appt_queue ORDER BY queue_id LIMIT 1`;
+    const query_delete = `DELETE FROM appt_queue WHERE queue_id = ?`;
 
     return new Promise((resolve, reject) => {
+      // TODO serialize
       this.db.get(query, [ ], (err, row) => {
         if (err) {
           err.query = query;
           err.params = { };
-          reject(new Error("Failed to get user", { cause: err }));
+          reject(new Error("Failed to get queued user", { cause: err }));
 
         } else if (row === undefined) {
           resolve(undefined);
-
         } else {
-          resolve(row.user_id);
+          let top_of_queue = row;
+          this.db.run(query_delete, [ top_of_queue.queue_id ], (err, ret) => {
+            if(err) {
+              err.query = query_delete;
+              err.params = { id: top_of_queue.queue_id };
+              reject(new Error("Failed to get queued user", { cause: err }));
+            } else {
+              resolve(top_of_queue.user_id);
+            }
+          })
         }
       });
     });
