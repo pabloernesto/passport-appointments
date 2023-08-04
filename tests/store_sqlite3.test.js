@@ -127,6 +127,15 @@ test('add user to queue', async () => {
   await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
 })
 
+test('add users to queue', async () => {
+  await fillWithSuperheroes(database);
+  await database.addUserToQueue("Superman");
+  await database.addUserToQueue("Batman");
+  await database.addUserToQueue("Wonder Woman2");
+  await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
+})
+
+
 test('given a queue with a user, when getting first user remove them from the queue', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");

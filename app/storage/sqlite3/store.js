@@ -33,7 +33,7 @@ export default class DatabaseWrapper {
 
       // https://medium.com/datadenys/implementing-simple-job-queue-with-mysql-8-0-and-php-pdo-6023724ace99
       db.run(`CREATE TABLE appt_queue (
-        queue_id SERIAL PRIMARY KEY DEFAULT 0,
+        queue_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT 0,
         user_id INTEGER, 
         FOREIGN KEY (user_id) REFERENCES users (user_id));`);
     });
