@@ -144,3 +144,17 @@ test('given a queue with a user, when getting first user remove them from the qu
   await expect(database.getFirstUserInQueue())
   .resolves.toBe(undefined);
 })
+
+test('given a queue, add 3 users and view 2 non sequentially then one is left', async () => {
+  await fillWithSuperheroes(database);
+  await Promise.all([
+    database.addUserToQueue("Superman"),
+    database.addUserToQueue("Batman"),
+    database.addUserToQueue("Wonder Woman2"),
+    database.getFirstUserInQueue(),
+    database.getFirstUserInQueue()
+  ])
+  let leftover = await database.getFirstUserInQueue();
+  await expect(["Superman", "Batman", "Wonder Woman2"].includes(leftover)).toEqual(true);
+  await expect(database.getFirstUserInQueue()).resolves.toBe(undefined);
+})
