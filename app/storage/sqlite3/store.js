@@ -77,6 +77,7 @@ export default class DatabaseWrapper {
 
   // structure: {pass_id, date, user_id}
   async fetchAppointment(user) {
+    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
     const query = this.db.prepare( `select * from appointments where user_id = ?`);
     const row = query.get([ user ]);
     return row ? {"user": row.user_id, "date": row.date} : undefined;
@@ -92,8 +93,9 @@ export default class DatabaseWrapper {
    *                 or the date provided is not in the correct format.
    */
   async createAppointment(user, date) {
-    const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
+    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
 
+    const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
     fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
