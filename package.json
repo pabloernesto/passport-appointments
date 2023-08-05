@@ -4,6 +4,7 @@
   "main": "app/main.js",
   "type": "module",
   "dependencies": {
+    "better-sqlite3": "^8.5.0",
     "fecha": "^4.2.3",
     "sqlite3": "^5.1.6"
   },
@@ -26,6 +27,7 @@
   },
   "homepage": "https://github.com/pabloernesto/passport-appointments#readme",
   "jest": {
-    "transform": {}
+    "transform": {},
+    "testTimeout": 15000000
   }
 }

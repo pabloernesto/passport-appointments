@@ -1,4 +1,4 @@
-import sqlite3 from 'sqlite3';
+import Database from 'better-sqlite3';
 //https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
 // TODO: 'userobj' is the same as the form in index.html
 
@@ -11,50 +11,42 @@ export default class DatabaseWrapper {
   // real db init could fail or take a long time.
   // for a discussion of async constructors see https://dev.to/somedood/the-proper-way-to-write-async-constructors-in-javascript-1o8c
   static fromNewTestDB() {
-    const db = new sqlite3.Database(':memory:');
-    db.serialize(() => {
-      db.run("PRAGMA foreign_keys = ON");
-      db.run(`CREATE TABLE users (
-        user_id INT NOT NULL, 
-        email varchar(255) UNIQUE, 
-        salt varchar(255), 
-        hash varchar(255),
-        role varchar(255) NOT NULL,
-        PRIMARY KEY (user_id));`);
-        // TODO: rename pass_id
-      db.run(`CREATE TABLE appointments (
-        pass_id INTEGER PRIMARY KEY NOT NULL, 
-        date varchar(255), 
-        user_id INT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users (user_id));`);
-      db.run(`CREATE TABLE slots (
-        slot_id INTEGER PRIMARY KEY NOT NULL, 
-        date varchar(255));`);
+    this.db = Database(':memory:');
+    const createUsers = this.db.prepare(`CREATE TABLE users (
+      user_id INT NOT NULL, 
+      email varchar(255) UNIQUE, 
+      salt varchar(255), 
+      hash varchar(255),
+      role varchar(255) NOT NULL,
+      PRIMARY KEY (user_id));`);
+    const createAppts = this.db.prepare(`CREATE TABLE appointments (
+      pass_id INTEGER PRIMARY KEY NOT NULL, 
+      date varchar(255), 
+      user_id INT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (user_id));`);
+    const createSlots = this.db.prepare(`CREATE TABLE slots (
+      slot_id INTEGER PRIMARY KEY NOT NULL, 
+      date varchar(255));`);
+    const createQueue = this.db.prepare(`CREATE TABLE appt_queue (
+      queue_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT 0,
+      user_id INTEGER, 
+      FOREIGN KEY (user_id) REFERENCES users (user_id));`);
 
-      // https://medium.com/datadenys/implementing-simple-job-queue-with-mysql-8-0-and-php-pdo-6023724ace99
-      db.run(`CREATE TABLE appt_queue (
-        queue_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT 0,
-        user_id INTEGER, 
-        FOREIGN KEY (user_id) REFERENCES users (user_id));`);
+    const insertTables = this.db.transaction(() => {
+      createUsers.run();
+      createAppts.run();
+      createSlots.run();
+      createQueue.run();
     });
-
-    return new DatabaseWrapper(db);
+    insertTables();
+    return new DatabaseWrapper(this.db);
   }
 
   addUserWithRole(user, email, hash, salt, role) {
     const query = "insert into users (user_id, email, salt, hash, role)"
       + " values (?, ?, ?, ?, ?)";
-    return new Promise((resolve, reject) => {
-      this.db.run(query, [ user, email, salt, hash, role], (err, res) => {
-        if (err) {
-            err.query = query;
-            err.params = { user_id: user, email, salt, hash, role};
-            reject(new Error("Failed to add user", { cause: err }));
-        } else {
-          resolve(res);
-        }
-      });
-    });
+    const insert = this.db.prepare(query);
+    const info = insert.run([ user, email, salt, hash, role]);
   }
 
   addUser(user, email, hash, salt) {
@@ -62,87 +54,32 @@ export default class DatabaseWrapper {
   }
 
   getUser(user) {
-    const query = `select * from users where user_id = ?`;
-
-    return new Promise((resolve, reject) => {
-      this.db.get(query, [ user ], (err, row) => {
-        if (err) {
-          err.query = query;
-          err.params = { user_id: user };
-          reject(new Error("Failed to get user", { cause: err }));
-
-        } else if (row === undefined) {
-          reject(new Error(`${ user } is not a user.`))
-
-        } else {
-          resolve({
-            user: row.user_id,
-            email: row.email,
-            hash: row.hash,
-            salt: row.salt,
-            role: row.role
-          });
-        }
-      });
-    });
+    const query = this.db.prepare(`select * from users where user_id = ?`);
+    const row = query.get([ user ]);
+    return row;
   }
 
   // if first digit is 1, has appointment
   hasUser(userobj) {
-    const query = "select count(*) as count from users where user_id = ?;";
+    const query = this.db.prepare("select count(*) as count from users where user_id = ?;");
     const { user_id } = userobj;
-    return new Promise((resolve, reject) => {
-      this.db.get(query, [ user_id ], (err, res) => {
-        if (err) {
-          err.query = query;
-          err.params = { user_id };
-          reject(new Error("Failed to check user existence", { cause: err }));
-        } else {
-          resolve(res.count > 0);
-        }
-      });
-    });
+    const result = query.get([ user_id ]);
+    return result.count > 0;
   }
 
   // takes a user that is known to exist
   // returns whether there is an appointment
   async hasAppointment(user_id) {
-    const query = "SELECT count(*) as count FROM appointments WHERE user_id = ?;";
-    return new Promise((resolve, reject) => {
-      this.db.get(query, [ user_id ], 
-        (err, res) => {
-        if(err || !res) {
-          reject(err);
-        } else {
-          resolve(res.count != 0);
-        }
-      });
-    });
+    const query =this.db.prepare( "SELECT count(*) as count FROM appointments WHERE user_id = ?;");
+    const result = query.get([ user_id ]);
+    return result.count > 0;
   }
 
   // structure: {pass_id, date, user_id}
   async fetchAppointment(user) {
-    // ensure that the user id exists
-    await this.getUser(user);
-
-    const query = `select * from appointments where user_id = ?`;
-
-    return new Promise((resolve, reject) => {
-      this.db.get(query, [ user ], (err, row) => {
-        if (err) {
-          reject(err);
-
-        } else if (!row) {
-          resolve(undefined);
-
-        } else {
-          resolve({
-            user: user,
-            date: row.date,
-          });
-        }
-      });
-    });
+    const query = this.db.prepare( `select * from appointments where user_id = ?`);
+    const row = query.get([ user ]);
+    return row ? {"user": row.user_id, "date": row.date} : undefined;
   }
 
   /**
@@ -155,28 +92,16 @@ export default class DatabaseWrapper {
    *                 or the date provided is not in the correct format.
    */
   async createAppointment(user, date) {
-    // ensure that the user id exists
-    await this.getUser(user);
-
     const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
 
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
     fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
 
-    return new Promise((resolve, reject) => {
-      this.db.run(query, [date, user], (err, res) => {
-        const params = { user, date };
-        if (err) {
-          err.query = query;
-          err.params = params;
-          reject(new Error("Failed to create appointment", { cause: err }));
 
-        } else {
-          resolve(params);
-        }
-      });
-    });
+    const insert = this.db.prepare(query);
+    const info = insert.run([date, user]);
+    return {date: date, user: user};
   }
 
 
