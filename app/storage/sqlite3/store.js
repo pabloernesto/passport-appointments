@@ -13,23 +13,23 @@ export default class DatabaseWrapper {
   static fromNewTestDB() {
     this.db = Database(':memory:');
     const createUsers = this.db.prepare(`CREATE TABLE users (
-      user INT NOT NULL, 
-      email varchar(255) UNIQUE, 
-      salt varchar(255), 
+      user INT NOT NULL,
+      email varchar(255) UNIQUE,
+      salt varchar(255),
       hash varchar(255),
       role varchar(255) NOT NULL,
       PRIMARY KEY (user));`);
     const createAppts = this.db.prepare(`CREATE TABLE appointments (
-      pass_id INTEGER PRIMARY KEY NOT NULL, 
-      date varchar(255), 
+      pass_id INTEGER PRIMARY KEY NOT NULL,
+      date varchar(255),
       user INT NOT NULL,
       FOREIGN KEY (user) REFERENCES users (user));`);
     const createSlots = this.db.prepare(`CREATE TABLE slots (
-      slot_id INTEGER PRIMARY KEY NOT NULL, 
+      slot_id INTEGER PRIMARY KEY NOT NULL,
       date varchar(255));`);
     const createQueue = this.db.prepare(`CREATE TABLE appt_queue (
       queue_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT 0,
-      user INTEGER, 
+      user INTEGER,
       FOREIGN KEY (user) REFERENCES users (user));`);
 
     const insertTables = this.db.transaction(() => {
