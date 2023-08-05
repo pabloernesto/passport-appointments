@@ -145,11 +145,12 @@ test('given a queue with a user, when getting first user remove them from the qu
   .resolves.toBe(undefined);
 })
 
-test('given a queue, add 3 users and view 2 sequentially then one is left', async () => {
+test('given a queue with 3 users, when getting from the queue return them in insertion order', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
+
   await expect(database.getFirstUserInQueue())
   .resolves.toBe("Superman");
   await expect(database.getFirstUserInQueue())
