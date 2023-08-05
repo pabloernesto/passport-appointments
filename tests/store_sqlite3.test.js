@@ -161,24 +161,32 @@ test('given a queue with 3 users, when getting from the queue return them in ins
   .resolves.toBe(undefined);
 })
 
-test('given a queue, add 3 users and view 2 non sequentially then one is left', async () => {
+/* TODO: this test is for a race condition. modify to run several times. */
+test('given an empty queue, when adding 3 users at the same time 3 users are inserted', async () => {
   await fillWithSuperheroes(database);
 
   // guarantee 2 users in queue
-  await database.addUserToQueue("Superman");
-  await database.addUserToQueue("Batman");
-  
+  const insertions_done = await Promise.all([
+    database.addUserToQueue("Superman"),
+    database.addUserToQueue("Batman"),
+    database.addUserToQueue("Wonder Woman2")
+  ]);
+
   // get 2 users and add user in non-guaranteed order
-  let results = await Promise.all([
-    await database.addUserToQueue("Wonder Woman2"),
+  const results = await Promise.all([
+    database.getFirstUserInQueue(),
+    database.getFirstUserInQueue(),
     database.getFirstUserInQueue(),
     database.getFirstUserInQueue()
-  ])
-  // getFirstUserInQueue should never return the same result twice
-  expect(results[1] != results[2]).toEqual(true);
-  let leftover = await database.getFirstUserInQueue();
-  await expect(["Superman", "Batman", "Wonder Woman2"].includes(leftover)).toEqual(true);
-  await expect(database.getFirstUserInQueue()).resolves.toBe(undefined);
+  ]);
+
+  const expected = expect.arrayContaining([
+    "Superman",
+    "Batman",
+    "Wonder Woman2",
+    undefined
+  ]);
+  expect(results).toEqual(expected);
 })
 
 test('given a queue, adding same user twice results in error', async () => {
