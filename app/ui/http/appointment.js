@@ -14,21 +14,29 @@ export default class AppointmentsMW {
       const body = await formBody(req);
       // TODO: make auth middleware hide token -> user mapping.
       const user = body.userid;
-      let appointment = await this._getAppointment(user)
-        .catch(async (error) => {
-          if(error.message == "No appointment available"){
-            await queueUserForAppointment(user);
-            return QUEUED;
-          } else {
+      let appointment;
+      try {
+        appointment = await this._getAppointment(user);
+      } catch(error) {
+        if(error.message == "No appointment available"){
+          try {
+            await this._model.queueUserForAppointment(user);
+          } catch(error) {
             console.log(error);
+          } finally {
+            appointment = QUEUED;
           }
-        }).catch(async (error) => {
+        } else {
           console.log(error);
-        });
+        }
+      }
       if(appointment == QUEUED) {
         res.end(renderQueued(body));
+      } else if(appointment) {
+        res.end(render(body, appointment));
+      } else {
+        res.end(renderAlreadyQueue(body));
       }
-      res.end(render(body, appointment));
       return true;
     }
 
@@ -50,6 +58,12 @@ function renderQueued(body) {
   let text = `<p>${ body.userid }, there are no appointments currently available. You have been added to the queue.</p>`;
   return HTMLWrap(text);
 }
+
+function renderAlreadyQueue(body) {
+  let text = `<p>${ body.userid }, you are already in the queue.</p>`;
+  return HTMLWrap(text);
+}
+
 
 function HTMLWrap(text) {
   return `\

@@ -34,7 +34,7 @@ export default class Appointments {
 
   async queueUserForAppointment(user) {
     try {
-      this._database.addUserToQueue(user);
+      await this._database.addUserToQueue(user);
     } catch(e) {
       throw Error("Could not queue user for appointment");
     }
