@@ -160,7 +160,6 @@ test('given a queue, add 3 users and view 2 sequentially then one is left', asyn
   .resolves.toBe(undefined);
 }) 
 
-/* 
 test('given a queue, add 3 users and view 2 non sequentially then one is left', async () => {
   await fillWithSuperheroes(database);
   
@@ -177,4 +176,3 @@ test('given a queue, add 3 users and view 2 non sequentially then one is left', 
   await expect(["Superman", "Batman", "Wonder Woman2"].includes(leftover)).toEqual(true);
   await expect(database.getFirstUserInQueue()).resolves.toBe(undefined);
 })
-*/
