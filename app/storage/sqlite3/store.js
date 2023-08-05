@@ -13,24 +13,24 @@ export default class DatabaseWrapper {
   static fromNewTestDB() {
     this.db = Database(':memory:');
     const createUsers = this.db.prepare(`CREATE TABLE users (
-      user_id INT NOT NULL, 
+      user INT NOT NULL, 
       email varchar(255) UNIQUE, 
       salt varchar(255), 
       hash varchar(255),
       role varchar(255) NOT NULL,
-      PRIMARY KEY (user_id));`);
+      PRIMARY KEY (user));`);
     const createAppts = this.db.prepare(`CREATE TABLE appointments (
       pass_id INTEGER PRIMARY KEY NOT NULL, 
       date varchar(255), 
-      user_id INT NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES users (user_id));`);
+      user INT NOT NULL,
+      FOREIGN KEY (user) REFERENCES users (user));`);
     const createSlots = this.db.prepare(`CREATE TABLE slots (
       slot_id INTEGER PRIMARY KEY NOT NULL, 
       date varchar(255));`);
     const createQueue = this.db.prepare(`CREATE TABLE appt_queue (
       queue_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT 0,
-      user_id INTEGER, 
-      FOREIGN KEY (user_id) REFERENCES users (user_id));`);
+      user INTEGER, 
+      FOREIGN KEY (user) REFERENCES users (user));`);
 
     const insertTables = this.db.transaction(() => {
       createUsers.run();
@@ -43,7 +43,7 @@ export default class DatabaseWrapper {
   }
 
   addUserWithRole(user, email, hash, salt, role) {
-    const query = "insert into users (user_id, email, salt, hash, role)"
+    const query = "insert into users (user, email, salt, hash, role)"
       + " values (?, ?, ?, ?, ?)";
     const insert = this.db.prepare(query);
     const info = insert.run([ user, email, salt, hash, role]);
@@ -54,33 +54,32 @@ export default class DatabaseWrapper {
   }
 
   getUser(user) {
-    const query = this.db.prepare(`select * from users where user_id = ?`);
+    const query = this.db.prepare(`select * from users where user = ?`);
     const row = query.get([ user ]);
     return row;
   }
 
   // if first digit is 1, has appointment
   hasUser(userobj) {
-    const query = this.db.prepare("select count(*) as count from users where user_id = ?;");
-    const { user_id } = userobj;
-    const result = query.get([ user_id ]);
+    const query = this.db.prepare("select count(*) as count from users where user = ?;");
+    const result = query.get([ userobj.user_id ]);
     return result.count > 0;
   }
 
   // takes a user that is known to exist
   // returns whether there is an appointment
-  async hasAppointment(user_id) {
-    const query =this.db.prepare( "SELECT count(*) as count FROM appointments WHERE user_id = ?;");
-    const result = query.get([ user_id ]);
+  async hasAppointment(user) {
+    const query =this.db.prepare( "SELECT count(*) as count FROM appointments WHERE user = ?;");
+    const result = query.get([ user ]);
     return result.count > 0;
   }
 
-  // structure: {pass_id, date, user_id}
+  // structure: {pass_id, date, user}
   async fetchAppointment(user) {
     if(!this.getUser(user)) throw Error(`${user} is not a user.`);
-    const query = this.db.prepare( `select * from appointments where user_id = ?`);
+    const query = this.db.prepare( `select * from appointments where user = ?`);
     const row = query.get([ user ]);
-    return row ? {"user": row.user_id, "date": row.date} : undefined;
+    return row ? { "user": row.user, "date": row.date } : undefined;
   }
 
   /**
@@ -96,7 +95,7 @@ export default class DatabaseWrapper {
     if(!this.getUser(user)) throw Error(`${user} is not a user.`);
     if(!date) throw Error(`Invalid date`);
 
-    const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
+    const query = "INSERT INTO appointments (date, user) VALUES (?, ?)";
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
     fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
@@ -145,7 +144,7 @@ export default class DatabaseWrapper {
   async addUserToQueue(user) {
     if(!this.getUser(user)) throw Error(`${user} is not a user.`);
     const insert = this.db.prepare(
-      "INSERT INTO appt_queue (user_id) values (?)");
+      "INSERT INTO appt_queue (user) values (?)");
     const info = insert.run([user]);
     return info;
   }
@@ -161,7 +160,7 @@ export default class DatabaseWrapper {
     if(row) {
       query_delete.run(row.queue_id);
     }
-    return row ? row.user_id : undefined;
+    return row ? row.user : undefined;
 
   }
 }
