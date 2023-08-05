@@ -20,7 +20,9 @@ export default class Appointments {
     if(appt) throw Error("Already has appointment");
 
     let date = await this.findOpenAppointmentFor(user);
-    if(!date) throw Error("No appointment available");
+    if(!date) {
+      await this.queueUserForAppointment(user);
+    }
     await this._database.createAppointment(user, date);
 
     let db_object = await this._database.fetchAppointment(user);
@@ -28,6 +30,10 @@ export default class Appointments {
       return new String(db_object.date);
     else  
       throw Error("Could not create appointment");
+  }
+
+  async queueUserForAppointment(user) {
+    throw Error("No appointment available");
   }
 
   // read

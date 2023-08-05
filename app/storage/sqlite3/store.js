@@ -143,7 +143,12 @@ export default class DatabaseWrapper {
   // adds user id to the queue
   // TODO: make atomic
   async addUserToQueue(user) {
-    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
+    let _in = await this._userIsInQueue(user);
+    if(_in) throw Error("User already in queue");
+
+    if(!await this.getUser(user)) 
+      throw Error(`${user} is not a user.`);
+    
     const insert = this.db.prepare(
       "INSERT INTO appt_queue (user_id) values (?)");
     const info = insert.run([user]);
@@ -163,5 +168,12 @@ export default class DatabaseWrapper {
     }
     return row ? row.user_id : undefined;
 
+  }
+    // TODO make atomic
+  // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
+  async _userIsInQueue(user) {
+    const query_get = this.db.prepare(`select * FROM appt_queue WHERE user_id = ?;`);
+    const row = query_get.get([user]);
+    return (!!row);
   }
 }
