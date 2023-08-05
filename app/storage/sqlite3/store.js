@@ -94,6 +94,7 @@ export default class DatabaseWrapper {
    */
   async createAppointment(user, date) {
     if(!this.getUser(user)) throw Error(`${user} is not a user.`);
+    if(!date) throw Error(`Invalid date`);
 
     const query = "INSERT INTO appointments (date, user_id) VALUES (?, ?)";
     // check the date is valid
@@ -108,25 +109,13 @@ export default class DatabaseWrapper {
 
 
   async createAppointmentSlot(date) {
-    const query = "INSERT INTO slots (date) VALUES (?)";
+    const query = this.db.prepare("INSERT INTO slots (date) VALUES (?)");
 
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
     fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
-
-    return new Promise((resolve, reject) => {
-      this.db.run(query, [date], (err, res) => {
-        const params = { date };
-        if (err) {
-          err.query = query;
-          err.params = params;
-          reject(new Error("Failed to create appointment", { cause: err }));
-
-        } else {
-          resolve(params);
-        }
-      });
-    });
+    query.run([date]);
+    return {"date": date};
   }
 
   // TODO: implement sensibly
@@ -143,98 +132,35 @@ export default class DatabaseWrapper {
       query = `SELECT * FROM slots`; // TODO:check that its after a certain date
       params = [ ];
     }
-
-    return new Promise((resolve, reject) => {
-      this.db.all(query, params, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else if (!rows) {
-          throw Error("Bad database outcome");
-        } else {
-          if(rows.length) resolve(rows[0]);
-          resolve(undefined);
-        }
-      });
-    });
+    const select = this.db.prepare(query);
+    const rows = select.all(params);
+    if(!rows) throw Error("Bad database outcome");
+    else if(rows.length) return(rows[0]);
+    else return(undefined);
   }
 
   // appointment queue
   // adds user id to the queue
+  // TODO: make atomic
   async addUserToQueue(user) {
-    const query = "INSERT INTO appt_queue (user_id)"
-      + " values (?)";
-
-    // wrap in promise
-    return new Promise((resolve, reject) => {
-      // serialize every user insert
-      this.db.run(query, [ user ], (err, res) => {
-        if (err) {
-          err.query = query;
-          err.params = { user_id: user};
-          reject(new Error("Failed to add to queue", { cause: err }));
-        } else {
-          resolve(res);
-        }
-      });
-    });
+    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
+    const insert = this.db.prepare(
+      "INSERT INTO appt_queue (user_id) values (?)");
+    const info = insert.run([user]);
+    return info;
   }
+
+  // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
   async getFirstUserInQueue() {
-    const query_lock = `BEGIN TRANSACTION;`;
-    const query_get = `select * from appt_queue ORDER BY queue_id LIMIT 1;`;
-    const query_delete = `DELETE FROM appt_queue WHERE queue_id = ?;`;
-    const query_unlock = `END TRANSACTION;`;
+    const query_get = this.db.prepare(`select * from appt_queue ORDER BY queue_id LIMIT 1;`);
+    const query_delete = this.db.prepare(`DELETE FROM appt_queue WHERE queue_id = ?;`);
 
-    await new Promise((resolve, reject) => {
-      this.db.run(query_lock, [], (err, ret) => {
-        if(err) {
-          err.query = query_lock;
-          err.params = { };
-          reject(new Error("Failed to start transaction", { cause: err }));
-        } else {
-          resolve(undefined);
-        }
-      });
-    });
-    const row = await new Promise((resolve, reject) => {
-      this.db.get(query_get, [], (err, row) => {
-        if(err) {
-          err.query = query_get;
-          err.params = { };
-          reject(new Error("Failed to get", { cause: err }));
-        } else if(!row) {
-          resolve(undefined);
-        } else {
-          resolve(row);
-        }
-      });
-    });
 
+    const row = query_get.get();
     if(row) {
-      await new Promise((resolve, reject) => {
-        this.db.run(query_delete, [ row.queue_id ], (err, ret) => {
-          if(err) {
-            err.query = query_delete;
-            err.params = { id: row.queue_id };
-            reject(new Error("Failed to delete", { cause: err }));
-          } else {
-            resolve(undefined);
-          }
-        });
-      });
+      query_delete.run(row.queue_id);
     }
-
-    await new Promise((resolve, reject) => {
-      this.db.run(query_unlock, [], (err, ret) => {
-        if(err) {
-          err.query = query_unlock;
-          err.params = { };
-          reject(new Error("Failed to end transaction", { cause: err }));
-        } else {
-          resolve(undefined);
-        }
-      });
-    });
     return row ? row.user_id : undefined;
 
   }
