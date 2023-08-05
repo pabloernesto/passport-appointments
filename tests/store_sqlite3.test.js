@@ -41,16 +41,16 @@ test('creating a user', async () => {
 // TODO: change this to require an embassy site parameter
 test('create 3 users and 1 appointment', async () => {
   await fillWithSuperheroes(database);
-  
+
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
-  
+
   expect(appt.date).toBe(when);
 });
 
 test('create 3 appointments', async () => {
   await fillWithSuperheroes(database);
-  
+
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
   expect(appt.date).toBe(when);
@@ -158,12 +158,12 @@ test('given a queue, add 3 users and view 2 sequentially then one is left', asyn
   .resolves.toBe("Wonder Woman2");
   await expect(database.getFirstUserInQueue())
   .resolves.toBe(undefined);
-}) 
+})
 
-/* 
+/*
 test('given a queue, add 3 users and view 2 non sequentially then one is left', async () => {
   await fillWithSuperheroes(database);
-  
+
   let results = await Promise.all([
     database.addUserToQueue("Superman"),
     database.addUserToQueue("Batman"),
