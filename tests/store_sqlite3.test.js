@@ -27,7 +27,7 @@ test('creating a user', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
 
-  expect(user.user_id).toBe("Superman");
+  expect(user.user).toBe("Superman");
   expect(user.email).toBe("superman@un.org");
   expect(user.hash).toBe("ABCD");
   expect(user.salt).toBe("EFGH");
@@ -41,16 +41,16 @@ test('creating a user', async () => {
 // TODO: change this to require an embassy site parameter
 test('create 3 users and 1 appointment', async () => {
   await fillWithSuperheroes(database);
-  
+
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
-  
+
   expect(appt.date).toBe(when);
 });
 
 test('create 3 appointments', async () => {
   await fillWithSuperheroes(database);
-  
+
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
   expect(appt.date).toBe(when);
@@ -145,11 +145,12 @@ test('given a queue with a user, when getting first user remove them from the qu
   .resolves.toBe(undefined);
 })
 
-test('given a queue, add 3 users and view 2 sequentially then one is left', async () => {
+test('given a queue with 3 users, when getting from the queue return them in insertion order', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
+
   await expect(database.getFirstUserInQueue())
   .resolves.toBe("Superman");
   await expect(database.getFirstUserInQueue())
@@ -158,7 +159,7 @@ test('given a queue, add 3 users and view 2 sequentially then one is left', asyn
   .resolves.toBe("Wonder Woman2");
   await expect(database.getFirstUserInQueue())
   .resolves.toBe(undefined);
-}) 
+})
 
 test('given a queue, add 3 users and view 2 non sequentially then one is left', async () => {
   await fillWithSuperheroes(database);

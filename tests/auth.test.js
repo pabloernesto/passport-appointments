@@ -40,7 +40,7 @@ test('given a single user, authentication succeeds', async () => {
 test('given a single user, when getting user return user data', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984", "u");
   const userdata = await auth.getUser("Wonder Woman2");
-  expect(userdata).toHaveProperty("user_id", "Wonder Woman2");
+  expect(userdata).toHaveProperty("user", "Wonder Woman2");
   expect(userdata).toHaveProperty("email", "wonderwoman@un.org");
   expect(userdata).toHaveProperty("hash");
   expect(userdata).toHaveProperty("salt");
