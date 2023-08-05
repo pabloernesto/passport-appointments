@@ -14,14 +14,14 @@ export default class Appointments {
   // create
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
-    if(!has) throw Error("No such user :/");
+    if(!has) throw Error("No such user");
 
     const appt = await this._database.hasAppointment(user);
     if(appt) throw Error("Already has appointment");
 
     let date = await this.findOpenAppointmentFor(user);
     if(!date) {
-      await this.queueUserForAppointment(user);
+      throw Error("No appointment available");
     }
     await this._database.createAppointment(user, date);
 
@@ -33,7 +33,11 @@ export default class Appointments {
   }
 
   async queueUserForAppointment(user) {
-    throw Error("No appointment available");
+    try {
+      this._database.addUserToQueue(user);
+    } catch(e) {
+      throw Error("Could not queue user for appointment");
+    }
   }
 
   // read

@@ -171,7 +171,7 @@ export default class DatabaseWrapper {
     // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
   async _userIsInQueue(user) {
-    const query_get = this.db.prepare(`select * FROM appt_queue WHERE user_id = ?;`);
+    const query_get = this.db.prepare(`select * FROM appt_queue WHERE user = ?;`);
     const row = query_get.get([user]);
     return (!!row);
   }
