@@ -8,6 +8,7 @@ const Errors = {
 export default class AppointmentsMW {
   constructor(model) {
     this._model = model;
+    this._formBody = formBody;
   }
   /*
     requests an appointment for the user in the form.
@@ -28,7 +29,7 @@ export default class AppointmentsMW {
     res.setHeader('Content-Type', 'text/html');
 
     // TODO: make auth middleware hide token -> user mapping.
-    const body = await formBody(req);
+    const body = await this._formBody(req);
     const user = body.userid;
 
     let appointment;
