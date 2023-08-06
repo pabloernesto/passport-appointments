@@ -68,7 +68,7 @@ export default class AdminMW {
     const { local_date } = await formBody(req);
     console.log("single slot:");
     console.log(local_date);
-    await this._model.createAppointments([Date.now()]);
+    await this._model.createSlots([Date.now()]);
   }
     
 }

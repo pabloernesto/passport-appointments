@@ -55,7 +55,7 @@ export default class Appointments {
   /* administration */
 
   // create
-  async createAppointments(dates) {
+  async createSlots(dates) {
     /*
       dates: list of js DateTime object, UTC
       TODO: take multiple dates or maybe a custom appt object
