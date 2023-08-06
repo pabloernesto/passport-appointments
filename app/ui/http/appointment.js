@@ -19,21 +19,27 @@ export default class AppointmentsMW {
   */
   async respond(req, res) {
     const { method, url } = req;
-    if(!(method === "POST" && url === "/appointment")) return false;
+
+    // only handle POSTs to /appointment
+    if(!(method === "POST" && url === "/appointment"))
+      return false;
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
-    const body = await formBody(req);
+
     // TODO: make auth middleware hide token -> user mapping.
+    const body = await formBody(req);
     const user = body.userid;
+
     let appointment;
     try {
       appointment = await this._model.requestAppointment(user);
-    } catch(error) {
-      if(error.message == "No appointment available"){
+    } catch (error) {
+      if (error.message == "No appointment available") {
         try {
           await this._model.queueUserForAppointment(user);
           appointment = Errors.QUEUED;
-        } catch(error) {
+        } catch (error) {
           appointment = Errors.QUEUE_FAIL;
         } 
       } else {
