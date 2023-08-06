@@ -67,8 +67,8 @@ export default class AdminMW {
     return false;
   }
   async handleSingleSlot(req, res) {
-    const {single_slot} = await formBody(req);
-    const date_obj = fecha.parse(single_slot, "YYYY-MM-DDTHH:mm");
+    const { single_slot: slot_date } = await formBody(req);
+    const date_obj = fecha.parse(slot_date, "YYYY-MM-DDTHH:mm");
     await this._model.createSlots([date_obj]);
   }
 }
