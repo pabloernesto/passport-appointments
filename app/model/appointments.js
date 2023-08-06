@@ -11,7 +11,8 @@ export default class Appointments {
     return nearest ? nearest.date : undefined;
   }
 
-  // create
+  /*
+  */
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
     if(!has) throw Error("No such user");

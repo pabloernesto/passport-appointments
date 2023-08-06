@@ -1,50 +1,56 @@
 import { formBody } from '../../lib/http/util-request.js';
-const QUEUED = 68;
+const Errors = {
+  QUEUED: 68,
+  QUEUE_FAIL: 69,
+  REQUEST_FAIL: 70
+};
+
 export default class AppointmentsMW {
   constructor(model) {
     this._model = model;
   }
-
+  /*
+    requests an appointment for the user in the form.
+    If there are no appointment slots avilable, it will add the user to a queue.
+    The user will be shown an error message if:
+      - the user is successfully queued.
+      - the queueing fails, assuming it's because the user is already in the queue.
+      - An error occured while requesting the appointment - for example, a nonexistent user.
+  */
   async respond(req, res) {
     const { method, url } = req;
-
-    if (method === "POST" && url === "/appointment") {
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/html');
-      const body = await formBody(req);
-      // TODO: make auth middleware hide token -> user mapping.
-      const user = body.userid;
-      let appointment;
-      try {
-        appointment = await this._getAppointment(user);
-      } catch(error) {
-        if(error.message == "No appointment available"){
-          try {
-            await this._model.queueUserForAppointment(user);
-          } catch(error) {
-            console.log(error);
-          } finally {
-            appointment = QUEUED;
-          }
-        } else {
-          console.log(error);
-        }
-      }
-      if(appointment == QUEUED) {
-        res.end(renderQueued(body));
-      } else if(appointment) {
-        res.end(render(body, appointment));
+    if(!(method === "POST" && url === "/appointment")) return false;
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html');
+    const body = await formBody(req);
+    // TODO: make auth middleware hide token -> user mapping.
+    const user = body.userid;
+    let appointment;
+    try {
+      appointment = await this._model.requestAppointment(user);
+    } catch(error) {
+      if(error.message == "No appointment available"){
+        try {
+          await this._model.queueUserForAppointment(user);
+          appointment = Errors.QUEUED;
+        } catch(error) {
+          appointment = Errors.QUEUE_FAIL;
+        } 
       } else {
-        res.end(renderAlreadyQueue(body));
+        console.log(error);
+        appointment = Errors.REQUEST_FAIL;
       }
-      return true;
     }
-
-    return false; // ignore request
-  }
-
-  async _getAppointment(user) {
-    return await this._model.requestAppointment(user);
+    if(appointment == Errors.QUEUED) {
+      res.end(renderQueued(body));
+    } else if(appointment == Errors.QUEUE_FAIL){
+      res.end(renderAlreadyQueue(body));
+    } else if(appointment == Errors.REQUEST_FAIL) {
+      res.end(renderFatalError(body));
+    } else if(appointment) {
+      res.end(render(body, appointment));
+    } 
+    return true;
   }
 }
 
@@ -64,6 +70,10 @@ function renderAlreadyQueue(body) {
   return HTMLWrap(text);
 }
 
+function renderFatalError(body) {
+  let text = `<p>${ body.userid }, an server error occured while adding your appointment.</p>`;
+  return HTMLWrap(text);
+}
 
 function HTMLWrap(text) {
   return `\
