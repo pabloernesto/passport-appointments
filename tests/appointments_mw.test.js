@@ -46,3 +46,26 @@ test('given a model with no slots, when appt is requested add them to the queue'
   expect(res.statusCode).toBe(200);
   expect(res.body).toMatch("Mr. Banana, there are no appointments currently available.");
 })
+
+test('given a model with one slot, when appt is requested assign it to the user', async () => {
+  store.addUser("Mr. Banana", "mr.banana@bigbanana.com", "hash", "salt");
+  const when = "2023-01-01 11:00";
+  store.createAppointmentSlot(when);
+  req = {
+    method: "POST",
+    url: "/appointment",
+  };
+  mw._formBody = req => ({
+    userid: "Mr. Banana"
+  });
+  res = {
+    body: undefined,        // output
+    statusCode: undefined,  // output
+    setHeader() {},
+    end(data) { this.body = data; },
+  };
+
+  await expect(mw.respond(req, res)).resolves.toBe(true);
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toMatch(`Mr. Banana, you have your appointment at ${ when }`);
+})
