@@ -1,9 +1,4 @@
 import { formBody } from '../../lib/http/util-request.js';
-const Errors = {
-  QUEUED: 68,
-  QUEUE_FAIL: 69,
-  REQUEST_FAIL: 70
-};
 
 export default class AppointmentsMW {
   constructor(model) {
