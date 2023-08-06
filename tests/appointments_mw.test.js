@@ -33,7 +33,7 @@ test('given a GET request, ignore it', async () => {
 
 test('given a model with no slots, when appt is requested add them to the queue', async () => {
   store.addUser("Mr. Banana", "mr.banana@bigbanana.com", "hash", "salt");
-  req = {
+  req = { 
     method: "POST",
     url: "/appointment",
   };

@@ -35,28 +35,20 @@ export default class AppointmentsMW {
     let appointment;
     try {
       appointment = await this._model.requestAppointment(user);
+      res.end(render(body, appointment));
     } catch (error) {
       if (error.message == "No appointment available") {
         try {
           await this._model.queueUserForAppointment(user);
-          appointment = Errors.QUEUED;
+          res.end(renderQueued(body));
         } catch (error) {
-          appointment = Errors.QUEUE_FAIL;
+          res.end(renderAlreadyQueue(body));
         } 
       } else {
         console.log(error);
-        appointment = Errors.REQUEST_FAIL;
+        res.end(renderFatalError(body));
       }
     }
-    if(appointment == Errors.QUEUED) {
-      res.end(renderQueued(body));
-    } else if(appointment == Errors.QUEUE_FAIL){
-      res.end(renderAlreadyQueue(body));
-    } else if(appointment == Errors.REQUEST_FAIL) {
-      res.end(renderFatalError(body));
-    } else if(appointment) {
-      res.end(render(body, appointment));
-    } 
     return true;
   }
 }
