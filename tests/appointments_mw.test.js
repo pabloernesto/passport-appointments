@@ -15,6 +15,11 @@ beforeEach(async () => {
   mw = new AppointmentsMW(model);
 })
 
+/* WARN: this API is allowed to fail when the request is from an unknown user.
+    getting the user from the request is auth's responsibility, and should be
+    handled through token matching.
+*/
+
 test('given a GET request, ignore it', async () => {
   req = {
     method: "GET",
