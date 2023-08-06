@@ -1,4 +1,6 @@
 import { formBody, RequestBodyParsingError } from './util-request.js';
+import fecha from 'fecha'
+
 export default class AdminMW {
   constructor(database, model) {
     this._database = database; // TODO: replace with implementation object
@@ -65,12 +67,10 @@ export default class AdminMW {
     return false;
   }
   async handleSingleSlot(req, res) {
-    const { local_date } = await formBody(req);
-    console.log("single slot:");
-    console.log(local_date);
-    await this._model.createSlots([Date.now()]);
+    const {single_slot} = await formBody(req);
+    const date_obj = fecha.parse(single_slot, "YYYY-MM-DDTHH:mm");
+    await this._model.createSlots([date_obj]);
   }
-    
 }
 
 
