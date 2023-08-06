@@ -55,8 +55,12 @@ export default class Appointments {
 
   /* administration */
 
-  // create
-  async createSlots(dates) {
+  /*
+    TODO: untested
+    Creates appointment slots based on the provided date list.
+    If auto_assign = true, assigns min(#slots, #users)
+  */
+  async createSlots(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
       TODO: take multiple dates or maybe a custom appt object
@@ -64,7 +68,33 @@ export default class Appointments {
     // check 1 week from current time
     let date = fecha.format(dates[0], 'YYYY-MM-DD HH:mm:ss')
     await this._database.createAppointmentSlot(date);
+    if(auto_assign) {
+      await this.autoAssignUsers();
+    }
   } // takes [ [date, number_of_slots]... ]
+
+  // TODO untested
+  async autoAssignUsers() {
+    let _break = false;
+    let appointment;
+    while (_break) {
+      let user = await this._database.getFirstUserInQueue()
+      .catch((reason) => {
+        _break = true;
+      }).then(async () => 
+       appointment = await this.requestAppointment(user)
+      ).catch(() => {
+        // TODO: we should get a better explanation for why 
+        // the appointment request failed.
+        // are there no more appts left? 
+        // or are there simply no appointments that fit this particular user?
+        // This will become relevant once users have preferences or
+        // restrictions.
+        console.log("Could not find an appointment for the user.")
+        _break = true;
+      })
+    }
+  }
 
   // read
   async getAppointments() {}
