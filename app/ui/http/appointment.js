@@ -32,7 +32,7 @@ export default class AppointmentsMW {
       res.end(render(body, appointment));
       return true;
 
-    } else if (err.msg !== "No open appointments.") {
+    } else if (err.message !== "No open appointments.") {
       res.end(renderFatalError(body));
       return true;
     }
@@ -42,7 +42,7 @@ export default class AppointmentsMW {
       res.end(renderQueued(body));
       return true;
 
-    } else if (err.msg === "Already in queue.") {
+    } else if (err.message === "Already in queue.") {
       res.end(renderAlreadyQueue(body));
       return true;
 

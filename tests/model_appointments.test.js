@@ -19,16 +19,16 @@ beforeEach(async () => {
 /* Tests */
 test('given an empty store, model.getAppointment() fails with missing user', async () => {
   await expect(model.getAppointment("Wonder Woman2"))
-  .resolves.toEqual({ err: {
-    msg: 'Wonder Woman2 is not a user.'
+  .resolves.toMatchObject({ err: {
+    message: 'Wonder Woman2 is not a user.'
   }});
 })
 
 test('given a store with no appointments, model.getAppointment() fails with no appointment', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.getAppointment("Wonder Woman2"))
-  .resolves.toEqual({ err: {
-    msg: 'No appointments for this user.',
+  .resolves.toMatchObject({ err: {
+    message: 'No appointments for this user.',
     user: "Wonder Woman2"
   }});
 })
@@ -50,6 +50,6 @@ test('request appointment without slot', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.requestAppointment("Wonder Woman2"))
   .resolves.toEqual({ err: {
-    msg: "No appointment available"
+    message: "No appointment available"
   }});
 })

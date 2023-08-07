@@ -10,20 +10,20 @@ export default class Appointments {
     let nearest = await this._database.getNearestAppointmentSlot();
     return (
       nearest ? { val: nearest.date }
-      : { err: { msg: "No open appointments." } }
+      : { err: { message: "No open appointments." } }
     );
   }
 
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
     if (!has) return { err: {
-      msg: "No such user",
+      message: "No such user",
       user
     }};
 
     const appt = await this._database.hasAppointment(user);
     if (appt) return { err: {
-      msg: "Already has appointment",
+      message: "Already has appointment",
       appointment: appt
     }};
 
@@ -38,7 +38,7 @@ export default class Appointments {
       return { val: new String(db_object.date) };
     else  
       return { err: {
-        msg: "Could not create appointment"
+        message: "Could not create appointment"
       }};
   }
 
@@ -48,7 +48,7 @@ export default class Appointments {
       return {};
     } catch (err) {
       return { err: {
-        msg: "Could not queue user for appointment",
+        message: "Could not queue user for appointment",
         user
       }};
     }
