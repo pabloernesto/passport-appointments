@@ -57,7 +57,7 @@ export default class Appointments {
   // read
   async getAppointment(user) {
     try {
-      return { val: this._database.fetchAppointment(user) };
+      return { val: await this._database.fetchAppointment(user) };
     } catch (err) {
       return { err };
     }
