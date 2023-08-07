@@ -1,4 +1,6 @@
-import fecha from 'fecha'
+import fecha from 'fecha';
+import { Val, Err } from '../lib/maybe'
+
 export default class Appointments {
   constructor(database) {
     this._database = database;
@@ -9,49 +11,39 @@ export default class Appointments {
   async findOpenAppointmentFor(user) {
     let nearest = await this._database.getNearestAppointmentSlot();
     return (
-      nearest ? { val: nearest.date }
-      : { err: { message: "No open slot." } }
+      nearest ? Val(nearest.date)
+      : Err("No open slot.")
     );
   }
 
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
-    if (!has) return { err: {
-      message: "No such user",
-      user
-    }};
+    if (!has)
+      return Err("No such user", { user });
 
     const appt = await this._database.hasAppointment(user);
-    if (appt) return { err: {
-      message: "Already has appointment",
-      appointment: appt
-    }};
+    if (appt)
+      return Err("Already has appointment", { appointment: appt });
 
     let slot = await this._database.getNearestAppointmentSlot();
     if (!slot)
-      return { err: {
-        message: "No slots available."
-      }};
+      return Err("No slots available.");
 
     await this._database.createAppointment(user, slot.date);
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
-      return { val: new String(db_object.date) };
+      return Val(new String(db_object.date));
     else  
-      return { err: {
-        message: "Could not create appointment"
-      }};
+      return Err("Could not create appointment");
   }
 
   async queueUserForAppointment(user) {
     try {
       await this._database.addUserToQueue(user);
-      return {};
+      return Val();
     } catch (err) {
-      return { err: {
-        message: err.message,
-        user
-      }};
+      err.user = user;
+      return { err };
     }
   }
 
@@ -60,11 +52,8 @@ export default class Appointments {
     try {
       const appt = await this._database.fetchAppointment(user);
       if (appt === undefined)
-        return { err: {
-          message: 'No appointments for this user.',
-          user
-        }};
-      return { val: appt };
+        return Err('No appointments for this user.', { user });
+      return Val(appt);
 
     } catch (err) {
       return { err };
