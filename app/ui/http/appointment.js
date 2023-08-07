@@ -32,7 +32,7 @@ export default class AppointmentsMW {
       res.end(render(body, appointment));
       return true;
 
-    } else if (err.msg !== "No appointment available") {
+    } else if (err.msg !== "No open appointments.") {
       res.end(renderFatalError(body));
       return true;
     }
