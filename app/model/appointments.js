@@ -49,7 +49,7 @@ export default class Appointments {
       return {};
     } catch (err) {
       return { err: {
-        message: "Could not queue user for appointment",
+        message: err.message,
         user
       }};
     }

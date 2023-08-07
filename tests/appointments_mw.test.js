@@ -74,3 +74,25 @@ test('given a model with one slot, when appt is requested assign it to the user'
   expect(res.statusCode).toBe(200);
   expect(res.body).toMatch(`Mr. Banana, you have your appointment at ${ when }`);
 })
+
+test('given a user in the queue, when requesting appointment tell them they are in the queue', async () => {
+  store.addUser("Mr. Banana", "mr.banana@bigbanana.com", "hash", "salt");
+  await model.queueUserForAppointment("Mr. Banana");
+  req = {
+    method: "POST",
+    url: "/appointment",
+  };
+  mw._formBody = req => ({
+    userid: "Mr. Banana"
+  });
+  res = {
+    body: undefined,        // output
+    statusCode: undefined,  // output
+    setHeader() {},
+    end(data) { this.body = data; },
+  };
+
+  await expect(mw.respond(req, res)).resolves.toBe(true);
+  expect(res.statusCode).toBe(200);
+  expect(res.body).toMatch("Mr. Banana, you are already in the queue.");
+})

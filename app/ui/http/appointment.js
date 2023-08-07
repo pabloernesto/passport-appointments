@@ -33,7 +33,7 @@ export default class AppointmentsMW {
       return true;
 
     } else if (appt.err.message !== "No slots available.") {
-      res.end(renderFatalError(body));
+      res.end(renderFatalError(body, appt.err));
       return true;
     }
 
@@ -42,12 +42,12 @@ export default class AppointmentsMW {
       res.end(renderQueued(body));
       return true;
 
-    } else if (queued.err.message === "Already in queue.") {
+    } else if (queued.err.message === "User already in queue.") {
       res.end(renderAlreadyQueue(body));
       return true;
 
     } else {
-      res.end(renderFatalError(body));
+      res.end(renderFatalError(body, queued.err));
       return true;
     }
   }
@@ -55,7 +55,7 @@ export default class AppointmentsMW {
 
 // TODO: handle pending appointments
 function render(body, appointment) {
-  let text = appointment ? `<p>${ body.userid }, you have your appointment at ${ appointment }.</p>` : `<p>No appointment slots are available.</p>`
+  let text = `<p>${ body.userid }, you have your appointment at ${ appointment }.</p>`;
   return HTMLWrap(text);
 }
 
@@ -69,9 +69,11 @@ function renderAlreadyQueue(body) {
   return HTMLWrap(text);
 }
 
-function renderFatalError(body) {
-  let text = `<p>${ body.userid }, an server error occured while adding your appointment.</p>`;
-  return HTMLWrap(text);
+function renderFatalError(body, err) {
+  return HTMLWrap(`\
+<p>${ body.userid }, an server error occured while adding your appointment.</p>
+<pre>${ JSON.stringify(err) }</pre>
+`);
 }
 
 function HTMLWrap(text) {
