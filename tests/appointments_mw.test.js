@@ -55,7 +55,7 @@ test('given a model with no slots, when appt is requested add them to the queue'
 test('given a model with one slot, when appt is requested assign it to the user', async () => {
   store.addUser("Mr. Banana", "mr.banana@bigbanana.com", "hash", "salt");
   const when = "2023-01-01 11:00";
-  store.createAppointmentSlot(when);
+  await store.createAppointmentSlot(when);
   req = {
     method: "POST",
     url: "/appointment",
