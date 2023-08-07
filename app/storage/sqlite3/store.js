@@ -144,7 +144,7 @@ export default class DatabaseWrapper {
   // TODO: make atomic
   async addUserToQueue(user) {
     let _in = await this._userIsInQueue(user);
-    if(_in) throw Error("User already in queue");
+    if(_in) throw Error("User already in queue.");
 
     if(!await this.getUser(user)) 
       throw Error(`${user} is not a user.`);
