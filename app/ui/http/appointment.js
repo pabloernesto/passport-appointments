@@ -27,24 +27,29 @@ export default class AppointmentsMW {
     const body = await this._formBody(req);
     const user = body.userid;
 
-    let appointment;
-    try {
-      appointment = await this._model.requestAppointment(user);
-      res.end(render(body, appointment));
-    } catch (error) {
-      if (error.message == "No appointment available") {
-        try {
-          await this._model.queueUserForAppointment(user);
-          res.end(renderQueued(body));
-        } catch (error) {
-          res.end(renderAlreadyQueue(body));
-        } 
-      } else {
-        console.log(error);
-        res.end(renderFatalError(body));
-      }
+    const appt = await this._model.requestAppointment(user);
+    if (!appt.err) {
+      res.end(render(body, appt.val));
+      return true;
+
+    } else if (appt.err.message !== "No slots available.") {
+      res.end(renderFatalError(body));
+      return true;
     }
-    return true;
+
+    const queued = await this._model.queueUserForAppointment(user);
+    if (!queued.err) {
+      res.end(renderQueued(body));
+      return true;
+
+    } else if (queued.err.message === "Already in queue.") {
+      res.end(renderAlreadyQueue(body));
+      return true;
+
+    } else {
+      res.end(renderFatalError(body));
+      return true;
+    }
   }
 }
 

@@ -8,42 +8,67 @@ export default class Appointments {
 
   async findOpenAppointmentFor(user) {
     let nearest = await this._database.getNearestAppointmentSlot();
-    return nearest ? nearest.date : undefined;
+    return (
+      nearest ? { val: nearest.date }
+      : { err: { message: "No open slot." } }
+    );
   }
 
-  /*
-  */
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
-    if(!has) throw Error("No such user");
+    if (!has) return { err: {
+      message: "No such user",
+      user
+    }};
 
     const appt = await this._database.hasAppointment(user);
-    if(appt) throw Error("Already has appointment");
+    if (appt) return { err: {
+      message: "Already has appointment",
+      appointment: appt
+    }};
 
-    let date = await this.findOpenAppointmentFor(user);
-    if(!date) {
-      throw Error("No appointment available");
-    }
-    await this._database.createAppointment(user, date);
+    let slot = await this._database.getNearestAppointmentSlot();
+    if (!slot)
+      return { err: {
+        message: "No slots available."
+      }};
 
+    await this._database.createAppointment(user, slot.date);
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
-      return new String(db_object.date);
+      return { val: new String(db_object.date) };
     else  
-      throw Error("Could not create appointment");
+      return { err: {
+        message: "Could not create appointment"
+      }};
   }
 
   async queueUserForAppointment(user) {
     try {
       await this._database.addUserToQueue(user);
-    } catch(e) {
-      throw Error("Could not queue user for appointment");
+      return {};
+    } catch (err) {
+      return { err: {
+        message: "Could not queue user for appointment",
+        user
+      }};
     }
   }
 
   // read
   async getAppointment(user) {
-    return this._database.fetchAppointment(user);
+    try {
+      const appt = await this._database.fetchAppointment(user);
+      if (appt === undefined)
+        return { err: {
+          message: 'No appointments for this user.',
+          user
+        }};
+      return { val: appt };
+
+    } catch (err) {
+      return { err };
+    }
   }
 
   // update
