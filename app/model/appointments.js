@@ -8,42 +8,59 @@ export default class Appointments {
 
   async findOpenAppointmentFor(user) {
     let nearest = await this._database.getNearestAppointmentSlot();
-    return nearest ? nearest.date : undefined;
+    return (
+      nearest ? { val: nearest.date }
+      : { err: { msg: "No open appointments." } }
+    );
   }
 
-  /*
-  */
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
-    if(!has) throw Error("No such user");
+    if (!has) return { err: {
+      msg: "No such user",
+      user
+    }};
 
     const appt = await this._database.hasAppointment(user);
-    if(appt) throw Error("Already has appointment");
+    if (appt) return { err: {
+      msg: "Already has appointment",
+      appointment: appt
+    }};
 
-    let date = await this.findOpenAppointmentFor(user);
-    if(!date) {
-      throw Error("No appointment available");
+    let { val, err } = await this.findOpenAppointmentFor(user);
+    if (err) {
+      return { err };
     }
-    await this._database.createAppointment(user, date);
 
+    await this._database.createAppointment(user, date);
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
-      return new String(db_object.date);
+      return { val: new String(db_object.date) };
     else  
-      throw Error("Could not create appointment");
+      return { err: {
+        msg: "Could not create appointment"
+      }};
   }
 
   async queueUserForAppointment(user) {
     try {
       await this._database.addUserToQueue(user);
-    } catch(e) {
-      throw Error("Could not queue user for appointment");
+      return {};
+    } catch (err) {
+      return { err: {
+        msg: "Could not queue user for appointment",
+        user
+      }};
     }
   }
 
   // read
   async getAppointment(user) {
-    return this._database.fetchAppointment(user);
+    try {
+      return { val: this._database.fetchAppointment(user) };
+    } catch (err) {
+      return { err };
+    }
   }
 
   // update
