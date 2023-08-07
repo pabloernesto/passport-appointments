@@ -29,6 +29,7 @@ export default class DatabaseWrapper {
       date varchar(255));`);
     const createQueue = this.db.prepare(`CREATE TABLE appt_queue (
       queue_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL DEFAULT 0,
+      queue_order INTEGER,
       user INTEGER,
       FOREIGN KEY (user) REFERENCES users (user));`);
 
@@ -148,22 +149,41 @@ export default class DatabaseWrapper {
     if(!await this.getUser(user)) 
       throw Error(`${user} is not a user.`);
     
+    // is empty?
+    let count = await this.totalUsersInQueue();
+    if(count == undefined) throw Error("Bad database");
+    let order = count + 1;
+
+    // insert with order
     const insert = this.db.prepare(
-      "INSERT INTO appt_queue (user) values (?)");
-    const info = insert.run([user]);
+      "INSERT INTO appt_queue (queue_order, user) values (?, ?)");
+    const info = insert.run([order, user]);
+
+    // order is maintained bc were inserting at the end
+
     return info;
   }
 
   // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
   async getFirstUserInQueue() {
-    const query_get = this.db.prepare(`select * from appt_queue ORDER BY queue_id LIMIT 1;`);
-    const query_delete = this.db.prepare(`DELETE FROM appt_queue WHERE queue_id = ?;`);
+    const query_get = this.db.prepare(
+      `select * from appt_queue 
+      ORDER BY queue_id LIMIT 1;`);
+    const query_delete = this.db.prepare(
+      `DELETE FROM appt_queue 
+      WHERE queue_id = ?;`);
 
-
+    // maintain ordering
+    const query_update_delete = this.db.prepare(
+      `UPDATE appt_queue 
+      SET queue_order = queue_order - 1 
+      WHERE queue_order >= ?;`);
+    
     const row = query_get.get();
     if(row) {
       query_delete.run(row.queue_id);
+      query_update_delete.run(row.queue_id);
     }
     return row ? row.user : undefined;
 
@@ -174,5 +194,17 @@ export default class DatabaseWrapper {
     const query_get = this.db.prepare(`select * FROM appt_queue WHERE user = ?;`);
     const row = query_get.get([user]);
     return (!!row);
+  }
+
+  async totalUsersInQueue() {
+    const query_get = this.db.prepare(`select COUNT(*) FROM appt_queue;`);
+    const row = query_get.get();
+    return (row["COUNT(*)"]);
+  }
+  
+  async totalUsersAheadOf(user) {
+    const query_ahead = this.db.prepare(`select * FROM appt_queue WHERE user = ?;`);
+    const row = query_ahead.get(user);
+    return row.queue_order - 1;
   }
 }
