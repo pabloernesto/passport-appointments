@@ -10,7 +10,7 @@ export default class Appointments {
     let nearest = await this._database.getNearestAppointmentSlot();
     return (
       nearest ? { val: nearest.date }
-      : { err: { message: "No open appointments." } }
+      : { err: { message: "No open slot." } }
     );
   }
 
@@ -27,12 +27,13 @@ export default class Appointments {
       appointment: appt
     }};
 
-    let { val: date, err } = await this.findOpenAppointmentFor(user);
-    if (err) {
-      return { err };
-    }
+    let slot = await this._database.getNearestAppointmentSlot();
+    if (!slot)
+      return { err: {
+        message: "No slots available."
+      }};
 
-    await this._database.createAppointment(user, date);
+    await this._database.createAppointment(user, slot.date);
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
       return { val: new String(db_object.date) };

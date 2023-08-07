@@ -32,7 +32,7 @@ export default class AppointmentsMW {
       res.end(render(body, appt.val));
       return true;
 
-    } else if (appt.err.message !== "No open appointments.") {
+    } else if (appt.err.message !== "No slots available.") {
       res.end(renderFatalError(body));
       return true;
     }

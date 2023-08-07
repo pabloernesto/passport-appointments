@@ -50,6 +50,6 @@ test('request appointment without slot', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.requestAppointment("Wonder Woman2"))
   .resolves.toEqual({ err: {
-    message: "No appointment available"
+    message: "No slots available."
   }});
 })
