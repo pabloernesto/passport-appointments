@@ -57,7 +57,14 @@ export default class Appointments {
   // read
   async getAppointment(user) {
     try {
-      return { val: await this._database.fetchAppointment(user) };
+      const appt = await this._database.fetchAppointment(user);
+      if (appt === undefined)
+        return { err: {
+          message: 'No appointments for this user.',
+          user
+        }};
+      return { val: appt };
+
     } catch (err) {
       return { err };
     }
