@@ -27,7 +27,7 @@ export default class Appointments {
       appointment: appt
     }};
 
-    let { val, err } = await this.findOpenAppointmentFor(user);
+    let { val: date, err } = await this.findOpenAppointmentFor(user);
     if (err) {
       return { err };
     }
