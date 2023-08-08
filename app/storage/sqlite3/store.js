@@ -183,10 +183,32 @@ export default class DatabaseWrapper {
     const row = query_get.get();
     if(row) {
       query_delete.run(row.queue_id);
-      query_update_delete.run(row.queue_id);
+      query_update_delete.run(row.queue_order);
     }
     return row ? row.user : undefined;
+  }
 
+  async removeUserFromQueue(user) {
+    const query_get = this.db.prepare(
+      `select * from appt_queue 
+      WHERE user = ?;`);
+
+    const query_delete = this.db.prepare(
+      `DELETE FROM appt_queue 
+      WHERE user = ?;`);
+
+    // maintain ordering
+    const query_update_delete = this.db.prepare(
+      `UPDATE appt_queue 
+      SET queue_order = queue_order - 1 
+      WHERE queue_order >= ?;`);
+    
+    const row = query_get.get([ user ]);
+    if(row) {
+      query_delete.run([ user ]);
+      query_update_delete.run(row.queue_order);
+    }
+    return row ? row.user : undefined;
   }
     // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query

@@ -201,7 +201,7 @@ test('given a queue, adding same user twice results in error', async () => {
   await expect(database.addUserToQueue("Superman")).rejects.toThrow();
 })
 
-test('After inserting 3 heroes, there are two heroes ahead of the last', async () => {
+test('After inserting 3 users, there are two users ahead of the last', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
@@ -209,4 +209,15 @@ test('After inserting 3 heroes, there are two heroes ahead of the last', async (
   await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
   await expect(database.totalUsersAheadOf("Batman")).resolves.toEqual(1);
   await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(2);
+})
+
+test('Given 3 users in a queue, deleting the middle user results in reordering of the rest', async () => {
+  await fillWithSuperheroes(database);
+  await database.addUserToQueue("Superman");
+  await database.addUserToQueue("Batman");
+  await database.addUserToQueue("Wonder Woman2");
+  const row = await database.removeUserFromQueue("Batman");
+  expect(row).toEqual("Batman");
+  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
+  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
 })
