@@ -221,3 +221,17 @@ test('Given 3 users in a queue, deleting the middle user results in reordering o
   await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
   await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
 })
+
+
+test('Given 3 users in a queue, deleting Batman twice results in undefined, but does not corrupt order', async () => {
+  await fillWithSuperheroes(database);
+  await database.addUserToQueue("Superman");
+  await database.addUserToQueue("Batman");
+  await database.addUserToQueue("Wonder Woman2");
+  const row = await database.removeUserFromQueue("Batman");
+
+  // 
+  expect(database.removeUserFromQueue("Batman")).resolves.toEqual(undefined);
+  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
+  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
+})
