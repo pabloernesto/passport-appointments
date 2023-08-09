@@ -54,17 +54,16 @@ test('when you request an appointment without slots available it fails', async (
   }});
 })
 
-test('given user in auth and single slot, when appointment is requested and not given the user is added to a queue and once slots are added with auto_assign=true they are assigned', async () => {
+test('given a user in the queue, when slots are added give the user an appointment', async () => {
   let when = Date.now();
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
-  await model.requestAppointment("Wonder Woman2");// you get queued
-  
-  await model.createSlots([when], true); 
-  // since i passed in auto_Assign = true
-  // then it autoassigns wonderwoman her appointment
-  await expect(model.getAppointment("Wonder Woman2"))
+  await model.requestAppointment("Wonder Woman2");
 
-  // we check she gets the appointment
+  // auto-assign=true
+  // TODO: remove auto-assign? when is auto-assign=false desirable?
+  await model.createSlots([when], true); 
+
+  await expect(model.getAppointment("Wonder Woman2"))
   .resolves.toEqual({ val: {
       user: "Wonder Woman2",
       date: fecha.format(when, 'YYYY-MM-DD HH:mm:ss')
