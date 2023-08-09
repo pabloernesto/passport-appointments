@@ -45,13 +45,11 @@ test('given user in auth and single slot, when appointment is requested it is ac
   }});
 })
 
-test('when you request an appointment without slots available it fails', async () => {
+test('given no slots, when requesting appt it enqueues', async () => {
   let when = "2023-01-01 12:00:00";
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.requestAppointment("Wonder Woman2"))
-  .resolves.toEqual({ err: {
-    message: "No slots available."
-  }});
+  .resolves.toEqual({ val: "In queue." });
 })
 
 test('given a user in the queue, when slots are added give the user an appointment', async () => {
