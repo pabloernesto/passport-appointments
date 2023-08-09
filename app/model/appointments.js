@@ -7,15 +7,6 @@ export default class Appointments {
   }
 
   /* appointments */
-
-  async findOpenAppointmentFor(user) {
-    let nearest = await this._database.getNearestAppointmentSlot();
-    return (
-      nearest ? Val(nearest.date)
-      : Err("No open slot.")
-    );
-  }
-
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
     if (!has)
