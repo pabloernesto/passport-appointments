@@ -75,23 +75,19 @@ export default class Appointments {
     }
   } // takes [ [date, number_of_slots]... ]
 
-  // TODO untested
+  /* Give out appointments to users in the queue. */
   async _autoAssignUsers() {
-    let _break = false;
-    let appointment;
-    while (!_break) {
-      let user;
-      user = await this._database.getFirstUserInQueue()
-      .catch((reason) => {
-        _break = true;
-      }).then(async () => {
-        appointment = await this.requestAppointment(user);
-        if(appointment.err) {
-          _break = true;
-        } 
-      }
-        
-      );
+    while (true) {
+      let slot = await this._database.getNearestAppointmentSlot();
+      if (!slot) // no more slots
+      break;
+
+      // TODO: rename to popQueue
+      let user = await this._database.getFirstUserInQueue();
+      if (!user) // no more users
+        break;
+
+      this._database.createAppointment(user, slot.date);
     }
   }
 
