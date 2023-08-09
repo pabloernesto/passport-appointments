@@ -33,7 +33,7 @@ test('given a store with no appointments, model.getAppointment() fails with no a
   }});
 })
 
-test('request appointment', async () => {
+test('given user in auth and single slot, when appointment is requested it is accepted with the correct date format', async () => {
   let when = Date.now();
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await model.createSlots([when], false);
@@ -45,7 +45,7 @@ test('request appointment', async () => {
   }});
 })
 
-test('request appointment without slot', async () => {
+test('when you request an appointment without slots available it fails', async () => {
   let when = "2023-01-01 12:00:00";
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.requestAppointment("Wonder Woman2"))
