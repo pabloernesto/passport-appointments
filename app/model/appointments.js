@@ -26,8 +26,15 @@ export default class Appointments {
       return Err("Already has appointment", { appointment: appt });
 
     let slot = await this._database.getNearestAppointmentSlot();
-    if (!slot)
-      return Err("No slots available.");
+    if (!slot) {
+      try {
+        await this._database.addUserToQueue(user);
+        return Val("In queue.");
+      } catch (err) {
+        err.user = user;
+        return { err };
+      }
+    }
 
     await this._database.createAppointment(user, slot.date);
     let db_object = await this._database.fetchAppointment(user);
@@ -35,16 +42,6 @@ export default class Appointments {
       return Val(new String(db_object.date));
     else  
       return Err("Could not create appointment");
-  }
-
-  async queueUserForAppointment(user) {
-    try {
-      await this._database.addUserToQueue(user);
-      return Val();
-    } catch (err) {
-      err.user = user;
-      return { err };
-    }
   }
 
   // read
