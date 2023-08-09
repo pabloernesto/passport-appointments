@@ -91,22 +91,19 @@ export default class Appointments {
   async _autoAssignUsers() {
     let _break = false;
     let appointment;
-    while (_break) {
-      let user = await this._database.getFirstUserInQueue()
+    while (!_break) {
+      let user;
+      user = await this._database.getFirstUserInQueue()
       .catch((reason) => {
         _break = true;
-      }).then(async () => 
-       appointment = await this.requestAppointment(user)
-      ).catch(() => {
-        // TODO: we should get a better explanation for why 
-        // the appointment request failed.
-        // are there no more appts left? 
-        // or are there simply no appointments that fit this particular user?
-        // This will become relevant once users have preferences or
-        // restrictions.
-        console.log("Could not find an appointment for the user.")
-        _break = true;
-      })
+      }).then(async () => {
+        appointment = await this.requestAppointment(user);
+        if(appointment.err) {
+          _break = true;
+        } 
+      }
+        
+      );
     }
   }
 
