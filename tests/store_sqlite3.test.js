@@ -18,7 +18,28 @@ async function fillWithSuperheroes(database) {
   await Promise.all(superheroes.map(hero => database.addUser(...hero)));
 }
 
-
+async function fillWithMoreSuperheroes(database) {
+  const superheroes = [
+    ["Superman", "superman@un.org", "ABCD", "EFGH", "u"],
+    ["Batman", "batman@bat_base.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman2", "wonderwoman@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman3", "wonderwoman3@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman4", "wonderwoman4@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman5", "wonderwoman5@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman6", "wonderwoman6@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman7", "wonderwoman7@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman8", "wonderwoman8@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman9", "wonderwoman9@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman10", "wonderwoman10@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman11", "wonderwoman11@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman12", "wonderwoman12@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman13", "wonderwoman13@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman14", "wonderwoman14@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman15", "wonderwoman15@un.org", "ABCD", "EFGH", "u"],
+    ["Wonder Woman16", "wonderwoman16@un.org", "ABCD", "EFGH", "u"],
+  ];
+  await Promise.all(superheroes.map(hero => database.addUser(...hero)));
+}
 
 /* Tests */
 
@@ -187,6 +208,44 @@ test('given an empty queue, when adding 3 users at the same time 3 users are ins
     undefined
   ]);
   expect(results).toEqual(expected);
+})
+
+/* TODO: this test is for a race condition. modify to run several times. */
+test('given a queue with  users,popping 3 and adding 3 users without order behaves as expected', async () => {
+  await fillWithMoreSuperheroes(database);
+
+  // guarantee 3 users in queue
+  const insertions_done = await Promise.all([
+    database.addUserToQueue("Superman"),
+    database.addUserToQueue("Batman"),
+    database.addUserToQueue("Wonder Woman2")
+  ]);
+
+  // get 2 users and add user in non-guaranteed order
+  const results = await Promise.all([
+    database.getFirstUserInQueue(),
+    database.getFirstUserInQueue(),
+    database.getFirstUserInQueue(),
+    database.addUserToQueue("Wonder Woman3"),
+    database.addUserToQueue("Wonder Woman4"),
+    database.addUserToQueue("Wonder Woman5"),
+  ]);
+
+  const got = results.slice(0, 3);
+
+
+  const expected = [
+    "Superman",
+    "Batman",
+    "Wonder Woman2",
+    "Wonder Woman3",
+    "Wonder Woman4",
+    "Wonder Woman5",
+  ];
+
+  // the output is a subset of the expected values
+  const result = got.every(val => expected.includes(val));
+  expect(result).toEqual(true);
 })
 
 test('given a queue, adding same user twice results in error', async () => {
