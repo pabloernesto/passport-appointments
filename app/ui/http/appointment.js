@@ -28,28 +28,13 @@ export default class AppointmentsMW {
     const user = body.userid;
 
     const appt = await this._model.requestAppointment(user);
-    if (!appt.err) {
-      res.end(render(body, appt.val));
-      return true;
-
-    } else if (appt.err.message !== "No slots available.") {
-      res.end(renderFatalError(body, appt.err));
-      return true;
-    }
-
-    const queued = await this._model.queueUserForAppointment(user);
-    if (!queued.err) {
-      res.end(renderQueued(body));
-      return true;
-
-    } else if (queued.err.message === "User already in queue.") {
-      res.end(renderAlreadyQueue(body));
-      return true;
-
-    } else {
-      res.end(renderFatalError(body, queued.err));
-      return true;
-    }
+    res.end(
+      (!appt.err && appt.val !== "In queue.") ? render(body, appt.val)
+      : (!appt.err && appt.val === "In queue.") ? renderQueued(body)
+      : (appt.err?.message === "User already in queue.") ? renderAlreadyQueue(body)
+      : renderFatalError(body, appt.err)
+    );
+    return true;
   }
 }
 

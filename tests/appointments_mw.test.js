@@ -77,7 +77,7 @@ test('given a model with one slot, when appt is requested assign it to the user'
 
 test('given a user in the queue, when requesting appointment tell them they are in the queue', async () => {
   store.addUser("Mr. Banana", "mr.banana@bigbanana.com", "hash", "salt");
-  await model.queueUserForAppointment("Mr. Banana");
+  await model.requestAppointment("Mr. Banana");
   req = {
     method: "POST",
     url: "/appointment",

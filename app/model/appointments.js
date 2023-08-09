@@ -7,15 +7,6 @@ export default class Appointments {
   }
 
   /* appointments */
-
-  async findOpenAppointmentFor(user) {
-    let nearest = await this._database.getNearestAppointmentSlot();
-    return (
-      nearest ? Val(nearest.date)
-      : Err("No open slot.")
-    );
-  }
-
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
     if (!has)
@@ -26,8 +17,15 @@ export default class Appointments {
       return Err("Already has appointment", { appointment: appt });
 
     let slot = await this._database.getNearestAppointmentSlot();
-    if (!slot)
-      return Err("No slots available.");
+    if (!slot) {
+      try {
+        await this._database.addUserToQueue(user);
+        return Val("In queue.");
+      } catch (err) {
+        err.user = user;
+        return { err };
+      }
+    }
 
     await this._database.createAppointment(user, slot.date);
     let db_object = await this._database.fetchAppointment(user);
@@ -35,16 +33,6 @@ export default class Appointments {
       return Val(new String(db_object.date));
     else  
       return Err("Could not create appointment");
-  }
-
-  async queueUserForAppointment(user) {
-    try {
-      await this._database.addUserToQueue(user);
-      return Val();
-    } catch (err) {
-      err.user = user;
-      return { err };
-    }
   }
 
   // read
@@ -83,30 +71,23 @@ export default class Appointments {
     let date = fecha.format(dates[0], 'YYYY-MM-DD HH:mm:ss')
     await this._database.createAppointmentSlot(date);
     if(auto_assign) {
-      await this.autoAssignUsers();
+      await this._autoAssignUsers();
     }
   } // takes [ [date, number_of_slots]... ]
 
-  // TODO untested
-  async autoAssignUsers() {
-    let _break = false;
-    let appointment;
-    while (_break) {
-      let user = await this._database.getFirstUserInQueue()
-      .catch((reason) => {
-        _break = true;
-      }).then(async () => 
-       appointment = await this.requestAppointment(user)
-      ).catch(() => {
-        // TODO: we should get a better explanation for why 
-        // the appointment request failed.
-        // are there no more appts left? 
-        // or are there simply no appointments that fit this particular user?
-        // This will become relevant once users have preferences or
-        // restrictions.
-        console.log("Could not find an appointment for the user.")
-        _break = true;
-      })
+  /* Give out appointments to users in the queue. */
+  async _autoAssignUsers() {
+    while (true) {
+      let slot = await this._database.getNearestAppointmentSlot();
+      if (!slot) // no more slots
+      break;
+
+      // TODO: rename to popQueue
+      let user = await this._database.getFirstUserInQueue();
+      if (!user) // no more users
+        break;
+
+      this._database.createAppointment(user, slot.date);
     }
   }
 
