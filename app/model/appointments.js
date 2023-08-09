@@ -83,12 +83,12 @@ export default class Appointments {
     let date = fecha.format(dates[0], 'YYYY-MM-DD HH:mm:ss')
     await this._database.createAppointmentSlot(date);
     if(auto_assign) {
-      await this.autoAssignUsers();
+      await this._autoAssignUsers();
     }
   } // takes [ [date, number_of_slots]... ]
 
   // TODO untested
-  async autoAssignUsers() {
+  async _autoAssignUsers() {
     let _break = false;
     let appointment;
     while (_break) {

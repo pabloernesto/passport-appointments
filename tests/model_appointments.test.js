@@ -1,7 +1,7 @@
 import Appointments from "../app/model/appointments";
 import Store from '../app/storage/sqlite3/store';
 import Authentication from '../app/lib/auth'
-
+import fecha from 'fecha';
 
 /* Test context */
 let model;
@@ -34,14 +34,14 @@ test('given a store with no appointments, model.getAppointment() fails with no a
 })
 
 test('request appointment', async () => {
-  let when = "2023-01-01 12:00:00";
+  let when = Date.now();
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
-  await store.createAppointmentSlot(when);
+  await model.createSlots([when], false);
   await model.requestAppointment("Wonder Woman2");
   await expect(model.getAppointment("Wonder Woman2"))
   .resolves.toEqual({ val: {
       user: "Wonder Woman2",
-      date: when
+      date: fecha.format(when, 'YYYY-MM-DD HH:mm:ss')
   }});
 })
 
