@@ -16,7 +16,7 @@ export default class Appointments {
     if (appt)
       return Err("Already has appointment", { appointment: appt });
 
-    let slot = await this._database.getNearestAppointmentSlot();
+    let slot = await this._database.popNearestAppointmentSlot();
     if (!slot) {
       try {
         await this._database.addUserToQueue(user);
@@ -65,20 +65,23 @@ export default class Appointments {
   async createSlots(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
-      TODO: take multiple dates or maybe a custom appt object
     */
     // check 1 week from current time
-    let date = fecha.format(dates[0], 'YYYY-MM-DD HH:mm:ss')
-    await this._database.createAppointmentSlot(date);
+    for (const _date in dates) {
+      let date = fecha.format(dates[_date], 'YYYY-MM-DD HH:mm:ss')
+      await this._database.createAppointmentSlot(date);
+    }
+    
     if(auto_assign) {
       await this._autoAssignUsers();
     }
-  } // takes [ [date, number_of_slots]... ]
+    
+  } // TODO: take [ [date, number_of_slots]... ]
 
   /* Give out appointments to users in the queue. */
   async _autoAssignUsers() {
     while (true) {
-      let slot = await this._database.getNearestAppointmentSlot();
+      let slot = await this._database.popNearestAppointmentSlot();
       if (!slot) // no more slots
       break;
 

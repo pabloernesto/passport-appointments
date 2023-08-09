@@ -118,8 +118,8 @@ export default class DatabaseWrapper {
     return {"date": date};
   }
 
-  // TODO: implement sensibly
-  async getNearestAppointmentSlot(date_threshold) {
+  // TODO: implement db taking date order into account
+  async popNearestAppointmentSlot(date_threshold) {
     let params;
     let query;
     if(date_threshold) {
@@ -134,11 +134,18 @@ export default class DatabaseWrapper {
     }
     const select = this.db.prepare(query);
     const rows = select.all(params);
-    if(!rows) throw Error("Bad database outcome");
-    else if(rows.length) return(rows[0]);
-    else return(undefined);
+    if(!rows) {
+      throw Error("Bad database outcome");
+    } else if(rows.length) {
+      // pop
+      const query_delete = this.db.prepare(
+        `DELETE FROM slots WHERE slot_id = ?;`);
+      query_delete.run([ rows[0].slot_id ])
+      return rows[0];
+    }else {
+      return undefined;
+    }
   }
-
   // appointment queue
   // adds user id to the queue
   // TODO: make atomic

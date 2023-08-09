@@ -67,3 +67,32 @@ test('given a user in the queue, when slots are added give the user an appointme
       date: fecha.format(when, 'YYYY-MM-DD HH:mm:ss')
   }});
 })
+
+test('not enough slots for 3 users', async () => {
+  let when = Date.now();
+  await auth.createUser("Batman", "batman@batcave.org", "1964");
+  await auth.createUser("Superman", "superman@un.org", "1950");
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
+
+  await model.requestAppointment("Batman");
+  await model.requestAppointment("Superman");
+  await model.requestAppointment("Wonder Woman2");
+
+  await model.createSlots([when, when]); 
+
+  await expect(model.getAppointment("Batman"))
+  .resolves.toEqual({ val: {
+      user: "Batman",
+      date: fecha.format(when, 'YYYY-MM-DD HH:mm:ss')
+  }});
+  
+  await expect(model.getAppointment("Superman"))
+  .resolves.toEqual({ val: {
+    user: "Superman",
+    date: fecha.format(when, 'YYYY-MM-DD HH:mm:ss')
+  }});
+  
+  const appt = await model.getAppointment("Wonder Woman2");
+  await expect(appt.val).toEqual(undefined);
+
+})
