@@ -96,3 +96,27 @@ test('not enough slots for 3 users', async () => {
   await expect(appt.val).toEqual(undefined);
 
 })
+
+test('trying to autoassign with empty queue does not consume a slot', async () => {
+  
+  let when = Date.now();
+  await auth.createUser("Batman", "batman@batcave.org", "1964");
+  await auth.createUser("Superman", "superman@un.org", "1950");
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
+
+  // create two slots
+  await model.createSlots([when, when], true);
+
+  // should only consume one slot
+  await model.requestAppointment("Batman");
+
+  // so this request is successful
+  await model.requestAppointment("Superman");
+  
+  await expect(model.getAppointment("Superman"))
+  .resolves.toEqual({ val: {
+    user: "Superman",
+    date: fecha.format(when, 'YYYY-MM-DD HH:mm:ss')
+  }});
+
+})
