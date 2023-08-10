@@ -36,7 +36,7 @@ test('given a store with no appointments, model.getAppointment() fails with no a
 test('given user in auth and single slot, when appointment is requested it is accepted with the correct date format', async () => {
   let when = Date.now();
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
-  await model.createSlots([when], false);
+  await model.createSlots([when], true);
   await model.requestAppointment("Wonder Woman2");
   await expect(model.getAppointment("Wonder Woman2"))
   .resolves.toEqual({ val: {
@@ -78,7 +78,7 @@ test('not enough slots for 3 users', async () => {
   await model.requestAppointment("Superman");
   await model.requestAppointment("Wonder Woman2");
 
-  await model.createSlots([when, when]); 
+  await model.createSlots([when, when], true);
 
   await expect(model.getAppointment("Batman"))
   .resolves.toEqual({ val: {
