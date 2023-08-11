@@ -11,10 +11,10 @@ We're building this in Node.js v18.16.0 LTS so we can share code between front a
 
 ## Dependencies
 
-- `sqlite3`: database management
-  - https://www.npmjs.com/package/sqlite3
-  - https://github.com/TryGhost/node-sqlite3/wiki/API
-  - https://www.sqlite.org
+- `better-sqlite3`: database management
+  - https://github.com/WiseLibs/better-sqlite3
+  - https://www.npmjs.com/package/better-sqlite3
+  - [*Convince me to use better-sqlite3*](https://github.com/WiseLibs/better-sqlite3/issues/262). better-sqlite3 issue 262
 - `jest`: javascript unit test harness
   - https://jestjs.io/
 - `fecha`: date parsing and formatting
