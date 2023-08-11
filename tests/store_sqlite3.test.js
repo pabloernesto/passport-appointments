@@ -134,6 +134,17 @@ test('create slot', async () => {
   await expect(database.popNearestAppointmentSlot()).resolves.toEqual({"date": when, "slot_id":1 });
 })
 
+test('given a database with a slot, when creating a slot before it assign the new slot first', async () => {
+  let near_future = "2023-08-18 12:00:00";
+  let far_future = "2023-08-20 12:00:00";
+  await database.createAppointmentSlot(far_future);
+
+  await database.createAppointmentSlot(near_future);
+
+  await expect(database.popNearestAppointmentSlot())
+  .resolves.toMatchObject({ date: near_future });
+})
+
 
 
 // Queue
