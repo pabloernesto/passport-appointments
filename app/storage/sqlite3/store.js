@@ -123,13 +123,13 @@ export default class DatabaseWrapper {
     let params;
     let query;
     if(date_threshold) {
-      query = `SELECT * FROM slots where date > ?`; // TODO:check that its after a certain date
+      query = `SELECT * FROM slots WHERE date > ? ORDER BY date ASC LIMIT 1`;
       // check the date is valid
       // fecha.parse() throws when the date string does not obey the format
       fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
       params = [ date_threshold ];
     } else {
-      query = `SELECT * FROM slots`; // TODO:check that its after a certain date
+      query = `SELECT * FROM slots ORDER BY date ASC LIMIT 1`;
       params = [ ];
     }
     const select = this.db.prepare(query);
