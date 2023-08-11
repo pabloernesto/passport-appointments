@@ -78,19 +78,22 @@ export default class Appointments {
     
   } // TODO: take [ [date, number_of_slots]... ]
 
-  /* Give out appointments to users in the queue. */
+  /* 
+    Give out appointments to users in the quJeue. 
+    TODO: cleaner guarantee thatdata does not get lost when popping fails
+  */
   async _autoAssignUsers() {
     while (true) {
-      let slot = await this._database.popNearestAppointmentSlot();
-      if (!slot) // no more slots
-      break;
-
-      // TODO: rename to popQueue
-      let user = await this._database.getFirstUserInQueue();
-      if (!user) // no more users
+      if(!(
+          await this._database.totalSlotsLeft() 
+          && await this._database.totalUsersInQueue())) 
         break;
-
+      let slot = await this._database.popNearestAppointmentSlot();
+      if (!slot) throw Error("Bad!");
+      let user = await this._database.getFirstUserInQueue();
+      if (!user) throw Error("Bad!");
       this._database.createAppointment(user, slot.date);
+      
     }
   }
 

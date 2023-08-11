@@ -146,6 +146,16 @@ export default class DatabaseWrapper {
       return undefined;
     }
   }
+
+  async totalSlotsLeft() {
+    let params;
+    let query;
+    query = `SELECT COUNT(*) FROM slots`;
+    params = [ ];
+    const row = this.db.prepare(query).get();
+    return (row["COUNT(*)"]);
+  }
+
   // appointment queue
   // adds user id to the queue
   // TODO: make atomic
