@@ -1,0 +1,61 @@
+<form method="POST" action="slots/">
+  <fieldset>
+    <legend>Affected range</legend>
+    <label>
+      Date start
+      <input type="date"></label><label>
+    </label>
+    <label>
+      Date end
+      <input type="date">
+    </label>
+  </fieldset>
+  <fieldset>
+    <legend>Weekdays</legend>
+    <label>
+      Mo
+      <input type="checkbox"></label><label>
+    </label>
+    <label>
+      Tu
+      <input type="checkbox"></label><label>
+    </label>
+    <label>
+      We
+      <input type="checkbox">
+    </label>
+    <label>
+      Thu
+      <input type="checkbox">
+    </label>
+    <label>
+      Fr
+      <input type="checkbox">
+    </label>
+    <label>
+      Sat
+      <input type="checkbox">
+    </label>
+    <label>
+      Sun
+      <input type="checkbox">
+    </label>
+  </fieldset>
+  <fieldset>
+    <legend>Affected range</legend>
+    <label>
+      Time start
+      <input type="time">
+    </label>
+    <label>
+      Time end
+      <input type="time">
+    </label>
+  </fieldset>
+  <label>
+    Duration
+    <!-- 1440 = 24 * 60. 24hs is all day long -->
+    <input type="number" min="1" max="1440">
+  </label>
+  <button>Submit</button>
+</form>
