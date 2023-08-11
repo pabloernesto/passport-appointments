@@ -5,8 +5,7 @@
   "type": "module",
   "dependencies": {
     "better-sqlite3": "^8.5.0",
-    "fecha": "^4.2.3",
-    "sqlite3": "^5.1.6"
+    "fecha": "^4.2.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
