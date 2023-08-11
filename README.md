@@ -30,7 +30,8 @@ Instead of making people wait/guess on the site, set them up for a queue.
 - Appointment queue
   - ~~When user tries to make an appointment and there are no slots, they are added to a database~~
   - ~~The user is told they were added to the queue~~
-  - When new slots are added, the queued users are given said appointments
+  - ~~When new slots are added, the queued users are given said appointments~~
+    - slots are ordered from most to least recent
     - slots at the exact same date and time are united
     - slots can only exist at certain 5 minute intervals
   - The user can GET /appointments to see their appointment status
