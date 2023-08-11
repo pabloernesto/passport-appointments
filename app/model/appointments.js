@@ -1,38 +1,51 @@
-import fecha from 'fecha'
+import fecha from 'fecha';
+import { Val, Err } from '../lib/maybe'
+
 export default class Appointments {
   constructor(database) {
     this._database = database;
   }
 
   /* appointments */
-
-  async findOpenAppointmentFor(user) {
-    let nearest = await this._database.getNearestAppointmentSlot();
-    return nearest ? nearest.date : undefined;
-  }
-
-  // create
   async requestAppointment(user) {
     const has = await this._database.hasUser( { user_id: user} );
-    if(!has) throw Error("No such user :/");
+    if (!has)
+      return Err("No such user", { user });
 
     const appt = await this._database.hasAppointment(user);
-    if(appt) throw Error("Already has appointment");
+    if (appt)
+      return Err("Already has appointment", { appointment: appt });
 
-    let date = await this.findOpenAppointmentFor(user);
-    if(!date) throw Error("No appointment available");
-    await this._database.createAppointment(user, date);
+    let slot = await this._database.popNearestAppointmentSlot();
+    if (!slot) {
+      try {
+        await this._database.addUserToQueue(user);
+        return Val("In queue.");
+      } catch (err) {
+        err.user = user;
+        return { err };
+      }
+    }
 
+    await this._database.createAppointment(user, slot.date);
     let db_object = await this._database.fetchAppointment(user);
     if (db_object && db_object.date) 
-      return new String(db_object.date);
+      return Val(new String(db_object.date));
     else  
-      throw Error("Could not create appointment");
+      return Err("Could not create appointment");
   }
 
   // read
   async getAppointment(user) {
-    return this._database.fetchAppointment(user);
+    try {
+      const appt = await this._database.fetchAppointment(user);
+      if (appt === undefined)
+        return Err('No appointments for this user.', { user });
+      return Val(appt);
+
+    } catch (err) {
+      return { err };
+    }
   }
 
   // update
@@ -44,16 +57,45 @@ export default class Appointments {
 
   /* administration */
 
-  // create
-  async createAppointments(dates) {
+  /*
+    TODO: untested
+    Creates appointment slots based on the provided date list.
+    If auto_assign = true, assigns min(#slots, #users)
+  */
+  async createSlots(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
-      TODO: take multiple dates or maybe a custom appt object
     */
     // check 1 week from current time
-    let date = fecha.format(dates[0], 'YYYY-MM-DD HH:mm:ss')
-    await this._database.createAppointmentSlot(date);
-  } // takes [ [date, number_of_slots]... ]
+    for (const _date in dates) {
+      let date = fecha.format(dates[_date], 'YYYY-MM-DD HH:mm:ss')
+      await this._database.createAppointmentSlot(date);
+    }
+    
+    if(auto_assign) {
+      await this._autoAssignUsers();
+    }
+    
+  } // TODO: take [ [date, number_of_slots]... ]
+
+  /* 
+    Give out appointments to users in the quJeue. 
+    TODO: cleaner guarantee thatdata does not get lost when popping fails
+  */
+  async _autoAssignUsers() {
+    while (true) {
+      if(!(
+          await this._database.totalSlotsLeft() 
+          && await this._database.totalUsersInQueue())) 
+        break;
+      let slot = await this._database.popNearestAppointmentSlot();
+      if (!slot) throw Error("Bad!");
+      let user = await this._database.getFirstUserInQueue();
+      if (!user) throw Error("Bad!");
+      this._database.createAppointment(user, slot.date);
+      
+    }
+  }
 
   // read
   async getAppointments() {}

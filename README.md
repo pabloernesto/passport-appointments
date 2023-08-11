@@ -28,8 +28,12 @@ Instead of making people wait/guess on the site, set them up for a queue.
   - ~~Admin can create appointment slots web interface~~
   - Admin can create appointment slots in bulk web interface
 - Appointment queue
-  - When user tries to make an appointment and there are no slots, they are added to a database
-  - The user is told they were added to the queue
+  - ~~When user tries to make an appointment and there are no slots, they are added to a database~~
+  - ~~The user is told they were added to the queue~~
+  - ~~When new slots are added, the queued users are given said appointments~~
+    - ~~slots are ordered from most to least recent~~
+    - slots at the exact same date and time are united
+    - slots can only exist at certain 5 minute intervals
   - The user can GET /appointments to see their appointment status
   - The user receives an email when they have an appointment (stretch)
   - Test multiple users at a time

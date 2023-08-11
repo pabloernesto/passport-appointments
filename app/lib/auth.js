@@ -43,11 +43,11 @@ class Authentication {
   }
 
   async getUser(username) {
-    return await this.database.getUser(username).catch(err => undefined);
+    return await this.database.getUser(username);
   }
 
   async authenticateUser(username, password) {
-    const user = await this.database.getUser(username).catch(err => undefined);
+    const user = await this.database.getUser(username);
     return !!user && user.hash === hash(password + user.salt);
   }
 
