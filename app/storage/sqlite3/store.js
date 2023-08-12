@@ -77,10 +77,13 @@ export default class DatabaseWrapper {
   }
 
   // structure: {pass_id, date, user}
-  async fetchAppointment(user) {
-    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
-    const query = this.db.prepare( `select * from appointments where user = ?`);
-    const row = query.get([ user ]);
+  async fetchAppointment(username) {
+    const user = await this.getUser(username);
+    if (!user.val)
+      return Err(`${username} is not a user.`);
+
+    const query = this.db.prepare(`select * from appointments where user = ?`);
+    const row = query.get([ username ]);
     return row ? { "user": row.user, "date": row.date } : undefined;
   }
 
