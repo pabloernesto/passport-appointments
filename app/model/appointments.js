@@ -1,5 +1,5 @@
 import fecha from 'fecha';
-import { Val, Err } from '../lib/maybe'
+import { Val, Err } from '../lib/maybe.js'
 
 export default class Appointments {
   constructor(database) {

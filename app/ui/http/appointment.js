@@ -1,4 +1,4 @@
-import { formBody } from '../../lib/http/util-request.js';
+import { formBody, HTMLWrap} from '../../lib/http/util-request.js';
 
 export default class AppointmentsMW {
   constructor(model) {
@@ -59,27 +59,4 @@ function renderFatalError(body, err) {
 <p>${ body.userid }, an server error occured while adding your appointment.</p>
 <pre>${ JSON.stringify(err) }</pre>
 `);
-}
-
-function HTMLWrap(text) {
-  return `\
-  <!DOCTYPE html>
-  <html lang="en" class="booting">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Your appointment is ready</title>
-  
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
-    <!-- <meta name="description" content="blurb for google search" />  -->
-    <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
-  
-    <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
-    <!-- <script src="main.js" module></script> -->
-  </head>
-  <body>
-    ${ text }
-  </body>
-  </html>`;
 }
