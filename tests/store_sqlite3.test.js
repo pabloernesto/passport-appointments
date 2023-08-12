@@ -48,11 +48,13 @@ test('creating a user', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
 
-  expect(user.user).toBe("Superman");
-  expect(user.email).toBe("superman@un.org");
-  expect(user.hash).toBe("ABCD");
-  expect(user.salt).toBe("EFGH");
-  expect(user.role).toBe("u");
+  expect(user.val).toEqual({
+    user: "Superman",
+    email: "superman@un.org",
+    hash: "ABCD",
+    salt: "EFGH",
+    role: "u"
+  });
 })
 
 
