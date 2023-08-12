@@ -1,8 +1,9 @@
 import Database from 'better-sqlite3';
-//https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
+import { Val, Err } from '../../lib/maybe';
+// https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
 // TODO: 'userobj' is the same as the form in index.html
-
 import fecha from 'fecha'
+
 export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
@@ -57,7 +58,7 @@ export default class DatabaseWrapper {
   getUser(user) {
     const query = this.db.prepare(`select * from users where user = ?`);
     const row = query.get([ user ]);
-    return row;
+    return Val(row);
   }
 
   // if first digit is 1, has appointment
