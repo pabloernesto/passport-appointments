@@ -103,9 +103,11 @@ test('given no appointment, store.fetchAppointment() returns undefined', async (
   .resolves.toBe(undefined);
 })
 
-test('given an empty store, store.fetchAppointment() throws', async () => {
+test('given an empty store, store.fetchAppointment() fails', async () => {
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .rejects.toThrow('Wonder Woman2 is not a user.');
+  .resolves.toEqual({ err: {
+    message: 'Wonder Woman2 is not a user.'
+  }});
 })
 
 test('fail to create appointment for unknown user', async () => {
