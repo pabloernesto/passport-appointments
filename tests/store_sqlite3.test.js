@@ -113,7 +113,9 @@ test('given an empty store, store.fetchAppointment() fails', async () => {
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment("Wonder Woman2", when))
-  .rejects.toThrow('Wonder Woman2 is not a user.');
+  .resolves.toEqual({ err: {
+    message: 'Wonder Woman2 is not a user.'
+  }});
 })
 
 test('fail to create appointment for null user', async () => {
