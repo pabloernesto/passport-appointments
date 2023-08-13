@@ -287,12 +287,6 @@ test('given a queue, adding same user twice results in error', async () => {
   await expect(database.addUserToQueue("Superman")).rejects.toThrow();
 })
 
-test('given a queue, adding same user twice results in error', async () => {
-  await fillWithSuperheroes(database);
-  await database.addUserToQueue("Superman");
-  await expect(database.addUserToQueue("Superman")).rejects.toThrow();
-})
-
 test('After inserting 3 users, there are two users ahead of the last', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
