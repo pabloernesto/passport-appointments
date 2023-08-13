@@ -121,13 +121,17 @@ test('fail to create appointment for unknown user', async () => {
 test('fail to create appointment for null user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment(null, when))
-  .rejects.toThrow();
+  .resolves.toEqual({ err: {
+    message: 'null is not a user.'
+  }});
 })
 
 test('fail to create appointment for undefined user', async () => {
   let when = "2023-01-01 12:00:00";
-  await expect(database.createAppointment(null, when))
-  .rejects.toThrow();
+  await expect(database.createAppointment(undefined, when))
+  .resolves.toEqual({ err: {
+    message: 'undefined is not a user.'
+  }});
 })
 
 
