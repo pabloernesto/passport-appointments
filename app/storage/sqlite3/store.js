@@ -101,7 +101,7 @@ export default class DatabaseWrapper {
 
     const insert = this.db.prepare(query);
     const info = insert.run([date, user]);
-    return {date: date, user: user};
+    return Val({ date: date, user: user });
   }
 
 
