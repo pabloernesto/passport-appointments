@@ -93,14 +93,17 @@ test('given an existing appointment, store.fetchAppointment() returns it', async
   await database.createAppointment("Wonder Woman2", when);
 
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toEqual({ user: "Wonder Woman2", date: when });
+  .resolves.toEqual({ val: {
+    user: "Wonder Woman2",
+    date: when
+  }});
 })
 
 test('given no appointment, store.fetchAppointment() returns undefined', async () => {
   await fillWithSuperheroes(database);
 
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toBe(undefined);
+  .resolves.toEqual({ val: undefined });
 })
 
 test('given an empty store, store.fetchAppointment() fails', async () => {
