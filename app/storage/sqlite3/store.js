@@ -79,7 +79,10 @@ export default class DatabaseWrapper {
 
     const query = this.db.prepare(`select * from appointments where user = ?`);
     const row = query.get([ username ]);
-    return row ? { "user": row.user, "date": row.date } : undefined;
+    return (
+      row ? Val({ "user": row.user, "date": row.date })
+      : Val(undefined)
+    );
   }
 
   async createAppointment(user, date) {
