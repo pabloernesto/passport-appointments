@@ -159,24 +159,25 @@ export default class DatabaseWrapper {
   // TODO: make atomic
   async addUserToQueue(user) {
     let _in = await this._userIsInQueue(user);
-    if(_in) throw Error("User already in queue.");
+    if (_in)
+      return Err("User already in queue.");
 
-    if(!await this.getUser(user)) 
-      throw Error(`${user} is not a user.`);
+    if (!await this.getUser(user).val)
+      return Err(`${user} is not a user.`);
     
     // is empty?
     let count = await this.totalUsersInQueue();
-    if(count == undefined) throw Error("Bad database");
+    if (count == undefined)
+      return Err("Bad database"); // TODO: explain this
     let order = count + 1;
 
     // insert with order
+    // order is maintained bc were inserting at the end
     const insert = this.db.prepare(
       "INSERT INTO appt_queue (queue_order, user) values (?, ?)");
     const info = insert.run([order, user]);
 
-    // order is maintained bc were inserting at the end
-
-    return info;
+    return Val(info);
   }
 
   // TODO make atomic
