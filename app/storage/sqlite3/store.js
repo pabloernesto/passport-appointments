@@ -87,24 +87,17 @@ export default class DatabaseWrapper {
     return row ? { "user": row.user, "date": row.date } : undefined;
   }
 
-  /**
-   * Creates a new appointment for a given user with the provided date.
-   *
-   * @param {number} user - The user ID for whom the appointment will be created.
-   * @param {string} date - The date of the appointment in 'YYYY-MM-DD HH:mm:ss' format.
-   * @returns {Promise} A promise that resolves with the appointment parameters if successful.
-   * @throws {Error} If there is an error during the database operation, the user ID is missing,
-   *                 or the date provided is not in the correct format.
-   */
   async createAppointment(user, date) {
-    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
-    if(!date) throw Error(`Invalid date`);
+    if (!this.getUser(user).val)
+      return Err(`${user} is not a user.`);
+
+    if (!date)
+      return Err(`Invalid date`);
 
     const query = "INSERT INTO appointments (date, user) VALUES (?, ?)";
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
     fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
-
 
     const insert = this.db.prepare(query);
     const info = insert.run([date, user]);
