@@ -8,14 +8,23 @@ export default class Appointments {
 
   /* appointments */
   async requestAppointment(username) {
-    const user = await this._database.getUser(username);
-    if (!user.val)
+    const appt = await this._database.fetchAppointment(username);
+    if (appt.err?.message?.includes("is not a user")) {
       return Err("No such user", { user: username });
 
-    const appt = await this._database.hasAppointment(username);
-    if (appt)
-      return Err("Already has appointment", { appointment: appt });
+    } else if (appt.err) {
+      return appt;  // unknown error
 
+    } else if (!appt.err && appt.val !== undefined) {
+      return Err(
+        "Already has appointment",
+        {
+          appointment: appt.val,
+          user: username
+        });
+    }
+
+    // user does not have an appt, attempt to create one
     let slot = await this._database.popNearestAppointmentSlot();
     if (!slot) {
       try {
