@@ -7,28 +7,28 @@ export default class Appointments {
   }
 
   /* appointments */
-  async requestAppointment(user) {
-    const has = await this._database.hasUser( { user_id: user} );
-    if (!has)
-      return Err("No such user", { user });
+  async requestAppointment(username) {
+    const user = await this._database.getUser(username);
+    if (!user.val)
+      return Err("No such user", { user: username });
 
-    const appt = await this._database.hasAppointment(user);
+    const appt = await this._database.hasAppointment(username);
     if (appt)
       return Err("Already has appointment", { appointment: appt });
 
     let slot = await this._database.popNearestAppointmentSlot();
     if (!slot) {
       try {
-        await this._database.addUserToQueue(user);
+        await this._database.addUserToQueue(username);
         return Val("In queue.");
       } catch (err) {
-        err.user = user;
+        err.user = username;
         return { err };
       }
     }
 
-    await this._database.createAppointment(user, slot.date);
-    let db_object = await this._database.fetchAppointment(user);
+    await this._database.createAppointment(username, slot.date);
+    let db_object = await this._database.fetchAppointment(username);
     if (db_object && db_object.date) 
       return Val(new String(db_object.date));
     else  

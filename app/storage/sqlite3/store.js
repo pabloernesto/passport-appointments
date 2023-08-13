@@ -63,12 +63,6 @@ export default class DatabaseWrapper {
     return Val(row);
   }
 
-  hasUser(userobj) {
-    const query = this.db.prepare("select count(*) as count from users where user = ?;");
-    const result = query.get([ userobj.user_id ]);
-    return result.count > 0;
-  }
-
   // takes a user that is known to exist
   // returns whether there is an appointment
   async hasAppointment(user) {
