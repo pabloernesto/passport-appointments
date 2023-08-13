@@ -112,28 +112,36 @@ export default class DatabaseWrapper {
   async popNearestAppointmentSlot(date_threshold) {
     let params;
     let query;
-    if(date_threshold) {
-      query = `SELECT * FROM slots WHERE date > ? ORDER BY date ASC LIMIT 1`;
-      // check the date is valid
-      // fecha.parse() throws when the date string does not obey the format
-      fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+
+    if (date_threshold) {
+      try {
+        fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+      } catch {
+        return Err('Bad date string.', { str: date_threshold });
+      }
+      query = 'SELECT * FROM slots WHERE date > ? ORDER BY date ASC LIMIT 1';
       params = [ date_threshold ];
+
     } else {
       query = `SELECT * FROM slots ORDER BY date ASC LIMIT 1`;
       params = [ ];
     }
+
     const select = this.db.prepare(query);
     const rows = select.all(params);
-    if(!rows) {
-      throw Error("Bad database outcome");
-    } else if(rows.length) {
+
+    if (!rows) {
+      return Err("Bad database outcome");
+
+    } else if (!rows.length) {
+      return Val(undefined);
+
+    } else {
       // pop
-      const query_delete = this.db.prepare(
-        `DELETE FROM slots WHERE slot_id = ?;`);
+      const query_delete = this.db.prepare('DELETE FROM slots WHERE slot_id = ?');
       query_delete.run([ rows[0].slot_id ])
-      return rows[0];
-    }else {
-      return undefined;
+
+      return Val(rows[0]);
     }
   }
 
