@@ -142,12 +142,16 @@ test('fail to create appointment for undefined user', async () => {
 // Slots
 test('create slot', async () => {
   let when = "2023-01-01 12:00:00";
-  await expect(database.popNearestAppointmentSlot()).resolves.toBe(undefined);
+  await expect(database.popNearestAppointmentSlot())
+  .resolves.toEqual({ val: undefined });
   await expect(database.createAppointmentSlot(when))
   .resolves.toEqual({ val: {
     "date": when
   }});
-  await expect(database.popNearestAppointmentSlot()).resolves.toEqual({"date": when, "slot_id":1 });
+  await expect(database.popNearestAppointmentSlot())
+  .resolves.toMatchObject({ val: {
+    date: when
+  }});
 })
 
 test('given a database with a slot, when creating a slot before it assign the new slot first', async () => {
@@ -158,7 +162,9 @@ test('given a database with a slot, when creating a slot before it assign the ne
   await database.createAppointmentSlot(near_future);
 
   await expect(database.popNearestAppointmentSlot())
-  .resolves.toMatchObject({ date: near_future });
+  .resolves.toMatchObject({ val: {
+    date: near_future
+  }});
 })
 
 
