@@ -63,15 +63,6 @@ export default class DatabaseWrapper {
     return Val(row);
   }
 
-  // takes a user that is known to exist
-  // returns whether there is an appointment
-  async hasAppointment(user) {
-    const query =this.db.prepare( "SELECT count(*) as count FROM appointments WHERE user = ?;");
-    const result = query.get([ user ]);
-    return result.count > 0;
-  }
-
-  // structure: {pass_id, date, user}
   async fetchAppointment(username) {
     const user = await this.getUser(username);
     if (!user.val)
