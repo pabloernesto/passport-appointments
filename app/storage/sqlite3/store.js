@@ -151,7 +151,7 @@ export default class DatabaseWrapper {
     query = `SELECT COUNT(*) FROM slots`;
     params = [ ];
     const row = this.db.prepare(query).get();
-    return (row["COUNT(*)"]);
+    return Val(row["COUNT(*)"]);
   }
 
   // appointment queue
