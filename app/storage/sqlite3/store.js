@@ -49,6 +49,8 @@ export default class DatabaseWrapper {
       + " values (?, ?, ?, ?, ?)";
     const insert = this.db.prepare(query);
     const info = insert.run([ user, email, salt, hash, role]);
+    // TODO: no return, addUser() is buggy. better-sqlite3 is synchronous,
+    //  so maybe this is fine?
   }
 
   addUser(user, email, hash, salt) {
