@@ -63,7 +63,6 @@ export default class DatabaseWrapper {
     return Val(row);
   }
 
-  // if first digit is 1, has appointment
   hasUser(userobj) {
     const query = this.db.prepare("select count(*) as count from users where user = ?;");
     const result = query.get([ userobj.user_id ]);
