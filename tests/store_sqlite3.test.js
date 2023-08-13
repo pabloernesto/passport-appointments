@@ -284,7 +284,10 @@ test('given a queue with  users,popping 3 and adding 3 users without order behav
 test('given a queue, adding same user twice results in error', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
-  await expect(database.addUserToQueue("Superman")).rejects.toThrow();
+  await expect(database.addUserToQueue("Superman"))
+  .resolves.toEqual({ err: {
+    message: "User already in queue."
+  }});
 })
 
 test('After inserting 3 users, there are two users ahead of the last', async () => {
