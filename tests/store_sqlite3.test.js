@@ -68,7 +68,7 @@ test('create 3 users and 1 appointment', async () => {
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
 
-  expect(appt.date).toBe(when);
+  expect(appt.val.date).toBe(when);
 });
 
 test('create 3 appointments', async () => {
@@ -76,15 +76,15 @@ test('create 3 appointments', async () => {
 
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
-  expect(appt.date).toBe(when);
+  expect(appt.val.date).toBe(when);
 
   when = "2023-01-02 12:00:00";
   appt = await database.createAppointment("Superman", when);
-  expect(appt.date).toBe(when);
+  expect(appt.val.date).toBe(when);
 
   when = "2023-01-03 12:00:00";
   appt = await database.createAppointment("Batman", when);
-  expect(appt.date).toBe(when);
+  expect(appt.val.date).toBe(when);
 });
 
 test('given an existing appointment, store.fetchAppointment() returns it', async () => {
