@@ -95,13 +95,17 @@ export default class DatabaseWrapper {
 
 
   async createAppointmentSlot(date) {
-    const query = this.db.prepare("INSERT INTO slots (date) VALUES (?)");
-
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
-    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
-    query.run([date]);
-    return {"date": date};
+    try {
+      fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
+    } catch (err) {
+      return Err('Bad date string.', { str: date });
+    }
+
+    const query = this.db.prepare("INSERT INTO slots (date) VALUES (?)");
+    query.run([ date ]);
+    return Val({ "date": date });
   }
 
   // TODO: implement db taking date order into account
