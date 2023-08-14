@@ -34,7 +34,7 @@ test('given a store with no appointments, model.getAppointment() fails with no a
 })
 
 test('given user in auth and single slot, when appointment is requested it is accepted with the correct date format', async () => {
-  let when = Date.now();
+  let when = Date.now();  // test value changes every run. potential problem.
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await model.createSlots([when], true);
   await model.requestAppointment("Wonder Woman2");
