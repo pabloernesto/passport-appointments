@@ -290,12 +290,17 @@ test('given a queue, adding same user twice results in error', async () => {
 
 test('After inserting 3 users, there are two users ahead of the last', async () => {
   await fillWithSuperheroes(database);
+
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
-  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
-  await expect(database.totalUsersAheadOf("Batman")).resolves.toEqual(1);
-  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(2);
+
+  await expect(database.totalUsersAheadOf("Superman"))
+  .resolves.toEqual(Val(0));
+  await expect(database.totalUsersAheadOf("Batman"))
+  .resolves.toEqual(Val(1));
+  await expect(database.totalUsersAheadOf("Wonder Woman2"))
+  .resolves.toEqual(Val(2));
 })
 
 test('Given 3 users in a queue, deleting the middle user results in reordering of the rest', async () => {
@@ -307,8 +312,10 @@ test('Given 3 users in a queue, deleting the middle user results in reordering o
   const row = await database.removeUserFromQueue("Batman");
 
   expect(row).toEqual(Val("Batman"));
-  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
-  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
+  await expect(database.totalUsersAheadOf("Superman"))
+  .resolves.toEqual(Val(0));
+  await expect(database.totalUsersAheadOf("Wonder Woman2"))
+  .resolves.toEqual(Val(1));
 })
 
 
@@ -322,6 +329,8 @@ test('Given 3 users in a queue, deleting Batman twice results in undefined, but 
   const remove2 = database.removeUserFromQueue("Batman");
 
   expect(remove2).resolves.toEqual(Val(undefined));
-  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
-  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
+  await expect(database.totalUsersAheadOf("Superman"))
+  .resolves.toEqual(Val(0));
+  await expect(database.totalUsersAheadOf("Wonder Woman2"))
+  .resolves.toEqual(Val(1));
 })
