@@ -90,10 +90,11 @@ export default class Appointments {
   */
   async _autoAssignUsers() {
     while (true) {
-      if(!(
-          await this._database.totalSlotsLeft() 
-          && await this._database.totalUsersInQueue())) 
+      const nslots = await this._database.totalSlotsLeft();
+      const nusers = await this._database.totalUsersInQueue();
+      if (nslots.val === 0 || nusers.val === 0)
         break;
+
       let slot = await this._database.popNearestAppointmentSlot();
       if (!slot) throw Error("Bad!");
       let user = await this._database.getFirstUserInQueue();
