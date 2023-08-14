@@ -244,40 +244,34 @@ test('given an empty queue, when adding 3 users at the same time 3 users are ins
 })
 
 /* TODO: this test is for a race condition. modify to run several times. */
-test('given a queue with  users,popping 3 and adding 3 users without order behaves as expected', async () => {
+test('given a queue with three users, interleaved pops and pushes take from the front of the queue', async () => {
   await fillWithMoreSuperheroes(database);
-
-  // guarantee 3 users in queue
-  const insertions_done = await Promise.all([
+  await Promise.all([
     database.addUserToQueue("Superman"),
     database.addUserToQueue("Batman"),
     database.addUserToQueue("Wonder Woman2")
   ]);
 
-  // get 2 users and add user in non-guaranteed order
-  const results = await Promise.all([
+  const pop_promises = [
     database.getFirstUserInQueue(),
     database.getFirstUserInQueue(),
-    database.getFirstUserInQueue(),
+    database.getFirstUserInQueue()
+  ];
+  const push_promises = [
     database.addUserToQueue("Wonder Woman3"),
     database.addUserToQueue("Wonder Woman4"),
-    database.addUserToQueue("Wonder Woman5"),
-  ]);
+    database.addUserToQueue("Wonder Woman5")
+  ];
+  await Promise.all([...pop_promises, ...push_promises]);
+  const pops = await Promise.all(pop_promises);
 
-  const got = results.slice(0, 3);
-
-
+  // users already in the queue should be served first
   const expected = [
     "Superman",
     "Batman",
-    "Wonder Woman2",
-    "Wonder Woman3",
-    "Wonder Woman4",
-    "Wonder Woman5",
+    "Wonder Woman2"
   ];
-
-  // the output is a subset of the expected values
-  const result = got.every(val => expected.includes(val));
+  const result = pops.every(val => expected.includes(val));
   expect(result).toEqual(true);
 })
 
