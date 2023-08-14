@@ -237,12 +237,12 @@ export default class DatabaseWrapper {
   async totalUsersInQueue() {
     const query_get = this.db.prepare(`select COUNT(*) FROM appt_queue;`);
     const row = query_get.get();
-    return (row["COUNT(*)"]);
+    return Val(row["COUNT(*)"]);
   }
   
   async totalUsersAheadOf(user) {
     const query_ahead = this.db.prepare(`select * FROM appt_queue WHERE user = ?;`);
     const row = query_ahead.get(user);
-    return row.queue_order - 1;
+    return Val(row.queue_order - 1);
   }
 }
