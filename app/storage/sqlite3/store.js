@@ -81,12 +81,14 @@ export default class DatabaseWrapper {
       return Err(`${user} is not a user.`);
 
     if (!date)
-      return Err(`Invalid date`);
+      return Err('Bad date string.', { str: date });
+    try {
+      fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
+    } catch (err) {
+      return Err('Bad date string.', { str: date });
+    }
 
     const query = "INSERT INTO appointments (date, user) VALUES (?, ?)";
-    // check the date is valid
-    // fecha.parse() throws when the date string does not obey the format
-    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
 
     const insert = this.db.prepare(query);
     const info = insert.run([date, user]);
