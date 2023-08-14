@@ -48,7 +48,7 @@ class Authentication {
 
   async authenticateUser(username, password) {
     const { val: user } = await this.database.getUser(username);
-    return !!user && user.hash === hash(password + user.salt);
+    return user?.hash === hash(password + user?.salt);
   }
 
   generateLoginSessionToken(user_id) {
