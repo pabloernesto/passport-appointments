@@ -27,13 +27,9 @@ export default class Appointments {
     // user does not have an appt, attempt to create one
     let slot = await this._database.popNearestAppointmentSlot();
     if (!slot.err && !slot.val) {
-      try {
-        await this._database.addUserToQueue(username);
-        return Val("In queue.");
-      } catch (err) {
-        err.user = username;
-        return { err };
-      }
+      const queued = await this._database.addUserToQueue(username);
+      return !queued.err ? Val("In queue.")
+        : queued;
     }
 
     await this._database.createAppointment(username, slot.date);
