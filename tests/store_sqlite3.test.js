@@ -177,13 +177,14 @@ test('given a database with a slot, when creating a slot before it assign the ne
 // Queue
 test('given an empty queue, when getting first user return undefined', async () => {
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
 test('add user to queue', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
-  await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
+  await expect(database.getFirstUserInQueue())
+  .resolves.toEqual(Val("Superman"));
 })
 
 test('add users to queue', async () => {
@@ -191,7 +192,8 @@ test('add users to queue', async () => {
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
-  await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
+  await expect(database.getFirstUserInQueue())
+  .resolves.toEqual(Val("Superman"));
 })
 
 
@@ -199,9 +201,9 @@ test('given a queue with a user, when getting first user remove them from the qu
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Superman");
+  .resolves.toEqual(Val("Superman"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
 test('given a queue with 3 users, when getting from the queue return them in insertion order', async () => {
@@ -211,13 +213,13 @@ test('given a queue with 3 users, when getting from the queue return them in ins
   await database.addUserToQueue("Wonder Woman2");
 
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Superman");
+  .resolves.toEqual(Val("Superman"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Batman");
+  .resolves.toEqual(Val("Batman"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Wonder Woman2");
+  .resolves.toEqual(Val("Wonder Woman2"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
 /* TODO: this test is for a race condition. modify to run several times. */
@@ -240,10 +242,10 @@ test('given an empty queue, when adding 3 users at the same time 3 users are ins
   ]);
 
   const expected = expect.arrayContaining([
-    "Superman",
-    "Batman",
-    "Wonder Woman2",
-    undefined
+    Val("Superman"),
+    Val("Batman"),
+    Val("Wonder Woman2"),
+    Val(undefined)
   ]);
   expect(results).toEqual(expected);
 })
@@ -271,13 +273,12 @@ test('given a queue with three users, interleaved pops and pushes take from the 
   const pops = await Promise.all(pop_promises);
 
   // users already in the queue should be served first
-  const expected = [
-    "Superman",
-    "Batman",
-    "Wonder Woman2"
-  ];
-  const result = pops.every(val => expected.includes(val));
-  expect(result).toEqual(true);
+  const expected = expect.arrayContaining([
+    Val("Superman"),
+    Val("Batman"),
+    Val("Wonder Woman2")
+  ]);
+  expect(pops).toEqual(expected);
 })
 
 test('given a queue, adding same user twice results in error', async () => {
