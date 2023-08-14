@@ -37,7 +37,7 @@ export default class Appointments {
     if (new_appt.val)
       return Val(new String(new_appt.val.date));
     else  
-      return Err("Could not create appointment");
+      return Err("Could not create appointment", { cause: new_appt.err });
   }
 
   // read
