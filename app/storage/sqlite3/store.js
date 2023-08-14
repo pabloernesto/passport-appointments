@@ -167,9 +167,9 @@ export default class DatabaseWrapper {
     
     // is empty?
     let count = await this.totalUsersInQueue();
-    if (count == undefined)
+    if (count.err)
       return Err("Bad database"); // TODO: explain this
-    let order = count + 1;
+    let order = count.val + 1;
 
     // insert with order
     // order is maintained bc were inserting at the end
