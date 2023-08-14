@@ -43,7 +43,8 @@ class Authentication {
   }
 
   async getUser(username) {
-    return await this.database.getUser(username);
+    const { val: user } = await this.database.getUser(username);
+    return user;
   }
 
   async authenticateUser(username, password) {
