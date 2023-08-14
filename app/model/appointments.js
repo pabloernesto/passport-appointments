@@ -95,12 +95,16 @@ export default class Appointments {
       if (nslots.val === 0 || nusers.val === 0)
         break;
 
+      // these statements should never fail. if they do, either:
+      // 1. the db is dead
+      // 2. we hit a race condition
+      // 3. the underlying store is buggy
       let slot = await this._database.popNearestAppointmentSlot();
-      if (!slot) throw Error("Bad!");
+      if (slot.err || !slot.val) throw Error("Bad!");
       let user = await this._database.getFirstUserInQueue();
-      if (!user) throw Error("Bad!");
-      this._database.createAppointment(user, slot.date);
-      
+      if (user.err || !user.val) throw Error("Bad!");
+
+      this._database.createAppointment(user.val, slot.val.date);
     }
   }
 
