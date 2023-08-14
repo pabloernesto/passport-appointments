@@ -220,11 +220,11 @@ export default class DatabaseWrapper {
       WHERE queue_order >= ?;`);
     
     const row = query_get.get([ user ]);
-    if(row) {
+    if (row) {
       query_delete.run([ user ]);
       query_update_delete.run(row.queue_order);
     }
-    return row ? row.user : undefined;
+    return Val(row?.user);
   }
     // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
