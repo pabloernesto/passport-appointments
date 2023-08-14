@@ -32,7 +32,7 @@ export default class Appointments {
         : queued;
     }
 
-    await this._database.createAppointment(username, slot.date);
+    await this._database.createAppointment(username, slot.val.date);
     let db_object = await this._database.fetchAppointment(username);
     if (db_object && db_object.date) 
       return Val(new String(db_object.date));
