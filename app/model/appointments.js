@@ -8,18 +8,18 @@ export default class Appointments {
 
   /* appointments */
   async requestAppointment(username) {
-    const appt = await this._database.fetchAppointment(username);
-    if (appt.err?.message?.includes("is not a user")) {
+    const old_appt = await this._database.fetchAppointment(username);
+    if (old_appt.err?.message?.includes("is not a user")) {
       return Err("No such user", { user: username });
 
-    } else if (appt.err) {
-      return appt;  // unknown error
+    } else if (old_appt.err) {
+      return old_appt;  // unknown error
 
-    } else if (!appt.err && appt.val !== undefined) {
+    } else if (!old_appt.err && old_appt.val !== undefined) {
       return Err(
         "Already has appointment",
         {
-          appointment: appt.val,
+          appointment: old_appt.val,
           user: username
         });
     }
@@ -33,9 +33,9 @@ export default class Appointments {
     }
 
     await this._database.createAppointment(username, slot.val.date);
-    let db_object = await this._database.fetchAppointment(username);
-    if (db_object && db_object.date) 
-      return Val(new String(db_object.date));
+    let new_appt = await this._database.fetchAppointment(username);
+    if (new_appt.val)
+      return Val(new String(new_appt.val.date));
     else  
       return Err("Could not create appointment");
   }
