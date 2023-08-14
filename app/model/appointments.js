@@ -46,15 +46,12 @@ export default class Appointments {
 
   // read
   async getAppointment(user) {
-    try {
-      const appt = await this._database.fetchAppointment(user);
-      if (appt === undefined)
-        return Err('No appointments for this user.', { user });
-      return Val(appt);
-
-    } catch (err) {
-      return { err };
-    }
+    const appt = await this._database.fetchAppointment(user);
+    if (appt.err)
+      return appt;
+    if (!appt.err && appt.val === undefined)
+      return Err('No appointments for this user.', { user });
+    return appt;
   }
 
   // update
