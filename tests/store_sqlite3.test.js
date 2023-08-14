@@ -1,4 +1,5 @@
 import Store from '../app/storage/sqlite3/store';
+import { Val, Err } from '../app/lib/maybe';
 
 
 
@@ -48,13 +49,13 @@ test('creating a user', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
 
-  expect(user.val).toEqual({
+  expect(user).toEqual(Val({
     user: "Superman",
     email: "superman@un.org",
     hash: "ABCD",
     salt: "EFGH",
     role: "u"
-  });
+  }));
 })
 
 
@@ -68,7 +69,10 @@ test('create 3 users and 1 appointment', async () => {
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
 
-  expect(appt.val.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Wonder Woman2",
+    date: when
+  }));
 });
 
 test('create 3 appointments', async () => {
@@ -76,15 +80,24 @@ test('create 3 appointments', async () => {
 
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
-  expect(appt.val.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Wonder Woman2",
+    date: when
+  }));
 
   when = "2023-01-02 12:00:00";
   appt = await database.createAppointment("Superman", when);
-  expect(appt.val.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Superman",
+    date: when
+  }));
 
   when = "2023-01-03 12:00:00";
   appt = await database.createAppointment("Batman", when);
-  expect(appt.val.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Batman",
+    date: when
+  }));
 });
 
 test('given an existing appointment, store.fetchAppointment() returns it', async () => {
@@ -93,48 +106,40 @@ test('given an existing appointment, store.fetchAppointment() returns it', async
   await database.createAppointment("Wonder Woman2", when);
 
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toEqual({ val: {
+  .resolves.toEqual(Val({
     user: "Wonder Woman2",
     date: when
-  }});
+  }));
 })
 
 test('given no appointment, store.fetchAppointment() returns undefined', async () => {
   await fillWithSuperheroes(database);
 
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toEqual({ val: undefined });
+  .resolves.toEqual(Val(undefined));
 })
 
 test('given an empty store, store.fetchAppointment() fails', async () => {
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toEqual({ err: {
-    message: 'Wonder Woman2 is not a user.'
-  }});
+  .resolves.toEqual(Err('Wonder Woman2 is not a user.'));
 })
 
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment("Wonder Woman2", when))
-  .resolves.toEqual({ err: {
-    message: 'Wonder Woman2 is not a user.'
-  }});
+  .resolves.toEqual(Err('Wonder Woman2 is not a user.'));
 })
 
 test('fail to create appointment for null user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment(null, when))
-  .resolves.toEqual({ err: {
-    message: 'null is not a user.'
-  }});
+  .resolves.toEqual(Err('null is not a user.'));
 })
 
 test('fail to create appointment for undefined user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment(undefined, when))
-  .resolves.toEqual({ err: {
-    message: 'undefined is not a user.'
-  }});
+  .resolves.toEqual(Err('undefined is not a user.'));
 })
 
 
@@ -143,15 +148,15 @@ test('fail to create appointment for undefined user', async () => {
 test('create slot', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.popNearestAppointmentSlot())
-  .resolves.toEqual({ val: undefined });
+  .resolves.toEqual(Val(undefined));
   await expect(database.createAppointmentSlot(when))
-  .resolves.toEqual({ val: {
+  .resolves.toEqual(Val({
     "date": when
-  }});
+  }));
   await expect(database.popNearestAppointmentSlot())
-  .resolves.toMatchObject({ val: {
+  .resolves.toMatchObject(Val({
     date: when
-  }});
+  }));
 })
 
 test('given a database with a slot, when creating a slot before it assign the new slot first', async () => {
@@ -162,9 +167,9 @@ test('given a database with a slot, when creating a slot before it assign the ne
   await database.createAppointmentSlot(near_future);
 
   await expect(database.popNearestAppointmentSlot())
-  .resolves.toMatchObject({ val: {
+  .resolves.toMatchObject(Val({
     date: near_future
-  }});
+  }));
 })
 
 
@@ -279,9 +284,7 @@ test('given a queue, adding same user twice results in error', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
   await expect(database.addUserToQueue("Superman"))
-  .resolves.toEqual({ err: {
-    message: "User already in queue."
-  }});
+  .resolves.toEqual(Err("User already in queue."));
 })
 
 test('After inserting 3 users, there are two users ahead of the last', async () => {
