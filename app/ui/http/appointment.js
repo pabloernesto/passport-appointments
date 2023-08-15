@@ -26,47 +26,23 @@ export default class AppointmentsMW {
       const user = body.userid;
       const appt = await this._model.requestAppointment(user);
 
-      res.statusCode = 303;
-      let handler;
-      let meta;
-      let error = "";
+      res.statusCode = 200;
       if(!appt.err && appt.val !== "In queue.") {
-        handler ='appt-render';
+        res.end(render(user, appt.val));
       }else if (!appt.err && appt.val === "In queue.") {
-        handler ='appt-queued';
+        res.end(renderQueued(body));
       } else if (appt.err?.message === "User already in queue.") {
-        handler = 'appt-already-queued';
-      } else {
-        handler ='appt-fatal';
-        error = "Server error";
-      }
-      
-      meta = querystring.stringify({"handler": handler, userid: user, appt: appt.val, error: error});
-      res.setHeader('Location', '/appointment-check?'+ meta);
-
-      res.end();
-      return true;
-
-      // handle redirects
-    } else if ((method === 'GET') && (clean_url === "/appointment-check")) {
-      if(!late_url) return false;
-      let qs = querystring.parse(late_url);
-      if(qs == {}) return false;
-      if(qs.handler == 'appt-render') {
-        res.statusCode = 200;
-        res.end(render({userid: qs.userid}, qs.appt));
-      } else if('appt-queued') {
-        res.statusCode = 200;
-        res.end(renderQueued({userid: qs.userid}));
-      } else if('appt-already-queued') {
-        res.statusCode = 200;
-        res.end(renderAlreadyQueue({userid: qs.userid}));
+        res.end(renderAlreadyQueue(body));
       } else {
         res.statusCode = 500;
-        res.end(renderFatalError({userid: qs.userid}));
+        res.end(renderFatalError(body, err));
       }
       return true;
-    } 
+    } else if (clean_url === "/appointment-result") {
+      res.statusCode = 200;
+      res.end();
+      return true;
+    }
     return false;
   }
 }

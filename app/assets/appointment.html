@@ -14,7 +14,7 @@
   <!-- <script src="main.js" module></script> -->
 </head>
 <body>
-  <form method="POST">
+  <form method="POST" target="result_frame">
     <label for="userid">Your id</label>
     <input type="text" id="userid" name="userid" required>
 
@@ -23,5 +23,13 @@
 
     <button>Request appointment</button>
   </form>
+  <iframe
+    name="result_frame"
+    title="Inline Frame Example"
+    width="300"
+    height="200"
+    src="/appointment-result"
+  >
+  </iframe>
 </body>
 </html>
