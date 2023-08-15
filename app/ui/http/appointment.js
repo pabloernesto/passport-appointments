@@ -1,4 +1,5 @@
 import { formBody, HTMLWrap} from '../../lib/http/util-request.js';
+import querystring from 'node:querystring';
 
 export default class AppointmentsMW {
   constructor(model) {
@@ -14,27 +15,59 @@ export default class AppointmentsMW {
       - An error occured while requesting the appointment - for example, a nonexistent user.
   */
   async respond(req, res) {
+    // Using POST-REDIRECT-GET pattern
     const { method, url } = req;
+    let clean_url = url.split('?')[0];
+    let late_url = url.split('?')[1];
+    // handle passport check status
+    if (method === "POST" && clean_url === "/appointment") {
+      // TODO: make auth middleware hide token -> user mapping.
+      const body = await this._formBody(req);
+      const user = body.userid;
+      const appt = await this._model.requestAppointment(user);
 
-    // only handle POSTs to /appointment
-    if(!(method === "POST" && url === "/appointment"))
-      return false;
+      res.statusCode = 303;
+      let handler;
+      let meta;
+      let error = "";
+      if(!appt.err && appt.val !== "In queue.") {
+        handler ='appt-render';
+      }else if (!appt.err && appt.val === "In queue.") {
+        handler ='appt-queued';
+      } else if (appt.err?.message === "User already in queue.") {
+        handler = 'appt-already-queued';
+      } else {
+        handler ='appt-fatal';
+        error = "Server error";
+      }
+      
+      meta = querystring.stringify({"handler": handler, userid: user, appt: appt.val, error: error});
+      res.setHeader('Location', '/appointment?'+ meta);
 
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
+      res.end();
+      return true;
 
-    // TODO: make auth middleware hide token -> user mapping.
-    const body = await this._formBody(req);
-    const user = body.userid;
-
-    const appt = await this._model.requestAppointment(user);
-    res.end(
-      (!appt.err && appt.val !== "In queue.") ? render(body, appt.val)
-      : (!appt.err && appt.val === "In queue.") ? renderQueued(body)
-      : (appt.err?.message === "User already in queue.") ? renderAlreadyQueue(body)
-      : renderFatalError(body, appt.err)
-    );
-    return true;
+      // handle redirects
+    } else if ((method === 'GET') && (clean_url === "/appointment")) {
+      if(!late_url) return false;
+      let qs = querystring.parse(late_url);
+      if(qs == {}) return false;
+      if(qs.handler == 'appt-render') {
+        res.statusCode = 200;
+        res.end(render({userid: qs.userid}, qs.appt));
+      } else if('appt-queued') {
+        res.statusCode = 200;
+        res.end(renderQueued({userid: qs.userid}));
+      } else if('appt-already-queued') {
+        res.statusCode = 200;
+        res.end(renderAlreadyQueue({userid: qs.userid}));
+      } else {
+        res.statusCode = 500;
+        res.end(renderFatalError({userid: qs.userid}));
+      }
+      return true;
+    } 
+    return false;
   }
 }
 
