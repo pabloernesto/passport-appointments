@@ -42,13 +42,13 @@ export default class AppointmentsMW {
       }
       
       meta = querystring.stringify({"handler": handler, userid: user, appt: appt.val, error: error});
-      res.setHeader('Location', '/appointment?'+ meta);
+      res.setHeader('Location', '/appointment-check?'+ meta);
 
       res.end();
       return true;
 
       // handle redirects
-    } else if ((method === 'GET') && (clean_url === "/appointment")) {
+    } else if ((method === 'GET') && (clean_url === "/appointment-check")) {
       if(!late_url) return false;
       let qs = querystring.parse(late_url);
       if(qs == {}) return false;
