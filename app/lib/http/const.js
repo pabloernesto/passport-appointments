@@ -1,8 +1,8 @@
 const adminEndpoints = [ 
-  '/admin' , '/single_slot' 
+  '/admin' , '/slots' 
 ];
 const loggedInEndpoints = [
-  '/appointment', '/admin', '/single_slot'
+  '/appointment', '/admin', '/slots'
 ];
 
 export {adminEndpoints, loggedInEndpoints}
