@@ -51,3 +51,9 @@ test('given a single user, when getting user return user data', async () => {
     role: "u"
   }));
 })
+
+test('given a single user, it has user permissions', async () => {
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984", "u");
+  await expect(auth.userHasPermission("Wonder Woman2", "u"))
+  .resolves.toEqual(Val(true));
+})
