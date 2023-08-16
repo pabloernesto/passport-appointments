@@ -23,19 +23,19 @@ test('given an empty store, auth.createUser() resolves', async () => {
 
 test('given an empty store, authentication fails', async () => {
   await expect(auth.authenticateUser("Wonder Woman2", "1984"))
-  .resolves.toBe(false);
+  .resolves.toEqual(Err('Wonder Woman2 is not a user.'));
 })
 
 test('given a single user, when given wrong password, authentication fails', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984", "u");
   await expect(auth.authenticateUser("Wonder Woman2", "69"))
-  .resolves.toBe(false);
+  .resolves.toEqual(Val(false));
 })
 
 test('given a single user, authentication succeeds', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984", "u");
   await expect(auth.authenticateUser("Wonder Woman2", "1984"))
-  .resolves.toBe(true);
+  .resolves.toEqual(Val(true));
 })
 
 test('given a single user, when getting user return user data', async () => {
