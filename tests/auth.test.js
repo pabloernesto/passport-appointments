@@ -1,5 +1,6 @@
 import Store from '../app/storage/sqlite3/store';
-import Authentication from '../app/lib/auth'
+import Authentication from '../app/lib/auth';
+import { Val, Err } from '../app/lib/maybe';
 
 
 
@@ -39,10 +40,14 @@ test('given a single user, authentication succeeds', async () => {
 
 test('given a single user, when getting user return user data', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984", "u");
+
   const userdata = await auth.getUser("Wonder Woman2");
-  expect(userdata).toHaveProperty("user", "Wonder Woman2");
-  expect(userdata).toHaveProperty("email", "wonderwoman@un.org");
-  expect(userdata).toHaveProperty("hash");
-  expect(userdata).toHaveProperty("salt");
-  expect(userdata).toHaveProperty("role", "u");
+
+  expect(userdata).toEqual(Val({
+    user: "Wonder Woman2",
+    email: "wonderwoman@un.org",
+    hash: expect.any(String),
+    salt: expect.any(String),
+    role: "u"
+  }));
 })
