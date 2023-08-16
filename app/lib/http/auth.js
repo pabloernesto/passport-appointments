@@ -146,7 +146,7 @@ function sendErrorResponse(res, err) {
 // TODO: BUG: null under certain circumstances
 function isLoggedIn(req, auth) {
   const sessionToken = getTokenFromRequest(req);
-  return sessionToken && auth && auth.isValidSessionToken(sessionToken);
+  return auth.isValidSessionToken(sessionToken).val;
 }
 
 function getTokenFromRequest(req) {
