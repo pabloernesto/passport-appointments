@@ -1,8 +1,9 @@
 import Database from 'better-sqlite3';
-//https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
+import { Val, Err } from '../../lib/maybe';
+// https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
 // TODO: 'userobj' is the same as the form in index.html
-
 import fecha from 'fecha'
+
 export default class DatabaseWrapper {
   constructor(db) {
     this.db = db;
@@ -48,6 +49,8 @@ export default class DatabaseWrapper {
       + " values (?, ?, ?, ?, ?)";
     const insert = this.db.prepare(query);
     const info = insert.run([ user, email, salt, hash, role]);
+    // TODO: no return, addUser() is buggy. better-sqlite3 is synchronous,
+    //  so maybe this is fine?
   }
 
   addUser(user, email, hash, salt) {
@@ -57,93 +60,90 @@ export default class DatabaseWrapper {
   getUser(user) {
     const query = this.db.prepare(`select * from users where user = ?`);
     const row = query.get([ user ]);
-    return row;
+    return Val(row);
   }
 
-  // if first digit is 1, has appointment
-  hasUser(userobj) {
-    const query = this.db.prepare("select count(*) as count from users where user = ?;");
-    const result = query.get([ userobj.user_id ]);
-    return result.count > 0;
+  async fetchAppointment(username) {
+    const user = await this.getUser(username);
+    if (!user.val)
+      return Err(`${username} is not a user.`);
+
+    const query = this.db.prepare(`select * from appointments where user = ?`);
+    const row = query.get([ username ]);
+    return (
+      row ? Val({ "user": row.user, "date": row.date })
+      : Val(undefined)
+    );
   }
 
-  // takes a user that is known to exist
-  // returns whether there is an appointment
-  async hasAppointment(user) {
-    const query =this.db.prepare( "SELECT count(*) as count FROM appointments WHERE user = ?;");
-    const result = query.get([ user ]);
-    return result.count > 0;
-  }
-
-  // structure: {pass_id, date, user}
-  async fetchAppointment(user) {
-    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
-    const query = this.db.prepare( `select * from appointments where user = ?`);
-    const row = query.get([ user ]);
-    return row ? { "user": row.user, "date": row.date } : undefined;
-  }
-
-  /**
-   * Creates a new appointment for a given user with the provided date.
-   *
-   * @param {number} user - The user ID for whom the appointment will be created.
-   * @param {string} date - The date of the appointment in 'YYYY-MM-DD HH:mm:ss' format.
-   * @returns {Promise} A promise that resolves with the appointment parameters if successful.
-   * @throws {Error} If there is an error during the database operation, the user ID is missing,
-   *                 or the date provided is not in the correct format.
-   */
   async createAppointment(user, date) {
-    if(!this.getUser(user)) throw Error(`${user} is not a user.`);
-    if(!date) throw Error(`Invalid date`);
+    if (!this.getUser(user).val)
+      return Err(`${user} is not a user.`);
+
+    if (!date)
+      return Err('Bad date string.', { str: date });
+    try {
+      fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
+    } catch (err) {
+      return Err('Bad date string.', { str: date });
+    }
 
     const query = "INSERT INTO appointments (date, user) VALUES (?, ?)";
-    // check the date is valid
-    // fecha.parse() throws when the date string does not obey the format
-    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
-
 
     const insert = this.db.prepare(query);
     const info = insert.run([date, user]);
-    return {date: date, user: user};
+    return Val({ date: date, user: user });
   }
 
 
   async createAppointmentSlot(date) {
-    const query = this.db.prepare("INSERT INTO slots (date) VALUES (?)");
-
     // check the date is valid
     // fecha.parse() throws when the date string does not obey the format
-    fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
-    query.run([date]);
-    return {"date": date};
+    try {
+      fecha.parse(date, 'YYYY-MM-DD HH:mm:ss');
+    } catch (err) {
+      return Err('Bad date string.', { str: date });
+    }
+
+    const query = this.db.prepare("INSERT INTO slots (date) VALUES (?)");
+    query.run([ date ]);
+    return Val({ "date": date });
   }
 
   // TODO: implement db taking date order into account
   async popNearestAppointmentSlot(date_threshold) {
     let params;
     let query;
-    if(date_threshold) {
-      query = `SELECT * FROM slots WHERE date > ? ORDER BY date ASC LIMIT 1`;
-      // check the date is valid
-      // fecha.parse() throws when the date string does not obey the format
-      fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+
+    if (date_threshold) {
+      try {
+        fecha.parse(date_threshold, 'YYYY-MM-DD HH:mm:ss');
+      } catch {
+        return Err('Bad date string.', { str: date_threshold });
+      }
+      query = 'SELECT * FROM slots WHERE date > ? ORDER BY date ASC LIMIT 1';
       params = [ date_threshold ];
+
     } else {
       query = `SELECT * FROM slots ORDER BY date ASC LIMIT 1`;
       params = [ ];
     }
+
     const select = this.db.prepare(query);
     const rows = select.all(params);
-    if(!rows) {
-      throw Error("Bad database outcome");
-    } else if(rows.length) {
+
+    if (!rows) {
+      return Err("Bad database outcome");
+
+    } else if (!rows.length) {
+      return Val(undefined);
+
+    } else {
       // pop
-      const query_delete = this.db.prepare(
-        `DELETE FROM slots WHERE slot_id = ?;`);
+      const query_delete = this.db.prepare('DELETE FROM slots WHERE slot_id = ?');
       query_delete.run([ rows[0].slot_id ])
-      return rows[0];
-    }else {
-      return undefined;
+
+      return Val(rows[0]);
     }
   }
 
@@ -153,7 +153,7 @@ export default class DatabaseWrapper {
     query = `SELECT COUNT(*) FROM slots`;
     params = [ ];
     const row = this.db.prepare(query).get();
-    return (row["COUNT(*)"]);
+    return Val(row["COUNT(*)"]);
   }
 
   // appointment queue
@@ -161,24 +161,25 @@ export default class DatabaseWrapper {
   // TODO: make atomic
   async addUserToQueue(user) {
     let _in = await this._userIsInQueue(user);
-    if(_in) throw Error("User already in queue.");
+    if (_in)
+      return Err("User already in queue.");
 
-    if(!await this.getUser(user)) 
-      throw Error(`${user} is not a user.`);
+    if (!await this.getUser(user).val)
+      return Err(`${user} is not a user.`);
     
     // is empty?
     let count = await this.totalUsersInQueue();
-    if(count == undefined) throw Error("Bad database");
-    let order = count + 1;
+    if (count.err)
+      return Err("Bad database"); // TODO: explain this
+    let order = count.val + 1;
 
     // insert with order
+    // order is maintained bc were inserting at the end
     const insert = this.db.prepare(
       "INSERT INTO appt_queue (queue_order, user) values (?, ?)");
     const info = insert.run([order, user]);
 
-    // order is maintained bc were inserting at the end
-
-    return info;
+    return Val(info);
   }
 
   // TODO make atomic
@@ -198,11 +199,11 @@ export default class DatabaseWrapper {
       WHERE queue_order >= ?;`);
     
     const row = query_get.get();
-    if(row) {
+    if (row) {
       query_delete.run(row.queue_id);
       query_update_delete.run(row.queue_order);
     }
-    return row ? row.user : undefined;
+    return Val(row?.user);
   }
 
   async removeUserFromQueue(user) {
@@ -221,11 +222,11 @@ export default class DatabaseWrapper {
       WHERE queue_order >= ?;`);
     
     const row = query_get.get([ user ]);
-    if(row) {
+    if (row) {
       query_delete.run([ user ]);
       query_update_delete.run(row.queue_order);
     }
-    return row ? row.user : undefined;
+    return Val(row?.user);
   }
     // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
@@ -238,12 +239,12 @@ export default class DatabaseWrapper {
   async totalUsersInQueue() {
     const query_get = this.db.prepare(`select COUNT(*) FROM appt_queue;`);
     const row = query_get.get();
-    return (row["COUNT(*)"]);
+    return Val(row["COUNT(*)"]);
   }
   
   async totalUsersAheadOf(user) {
     const query_ahead = this.db.prepare(`select * FROM appt_queue WHERE user = ?;`);
     const row = query_ahead.get(user);
-    return row.queue_order - 1;
+    return Val(row.queue_order - 1);
   }
 }

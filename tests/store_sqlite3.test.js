@@ -1,4 +1,5 @@
 import Store from '../app/storage/sqlite3/store';
+import { Val, Err } from '../app/lib/maybe';
 
 
 
@@ -48,11 +49,13 @@ test('creating a user', async () => {
   await fillWithSuperheroes(database);
   let user = await database.getUser("Superman");
 
-  expect(user.user).toBe("Superman");
-  expect(user.email).toBe("superman@un.org");
-  expect(user.hash).toBe("ABCD");
-  expect(user.salt).toBe("EFGH");
-  expect(user.role).toBe("u");
+  expect(user).toEqual(Val({
+    user: "Superman",
+    email: "superman@un.org",
+    hash: "ABCD",
+    salt: "EFGH",
+    role: "u"
+  }));
 })
 
 
@@ -66,7 +69,10 @@ test('create 3 users and 1 appointment', async () => {
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
 
-  expect(appt.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Wonder Woman2",
+    date: when
+  }));
 });
 
 test('create 3 appointments', async () => {
@@ -74,15 +80,24 @@ test('create 3 appointments', async () => {
 
   let when = "2023-01-01 12:00:00";
   let appt = await database.createAppointment("Wonder Woman2", when);
-  expect(appt.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Wonder Woman2",
+    date: when
+  }));
 
   when = "2023-01-02 12:00:00";
   appt = await database.createAppointment("Superman", when);
-  expect(appt.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Superman",
+    date: when
+  }));
 
   when = "2023-01-03 12:00:00";
   appt = await database.createAppointment("Batman", when);
-  expect(appt.date).toBe(when);
+  expect(appt).toEqual(Val({
+    user: "Batman",
+    date: when
+  }));
 });
 
 test('given an existing appointment, store.fetchAppointment() returns it', async () => {
@@ -91,37 +106,40 @@ test('given an existing appointment, store.fetchAppointment() returns it', async
   await database.createAppointment("Wonder Woman2", when);
 
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toEqual({ user: "Wonder Woman2", date: when });
+  .resolves.toEqual(Val({
+    user: "Wonder Woman2",
+    date: when
+  }));
 })
 
 test('given no appointment, store.fetchAppointment() returns undefined', async () => {
   await fillWithSuperheroes(database);
 
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
-test('given an empty store, store.fetchAppointment() throws', async () => {
+test('given an empty store, store.fetchAppointment() fails', async () => {
   await expect(database.fetchAppointment("Wonder Woman2"))
-  .rejects.toThrow('Wonder Woman2 is not a user.');
+  .resolves.toEqual(Err('Wonder Woman2 is not a user.'));
 })
 
 test('fail to create appointment for unknown user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment("Wonder Woman2", when))
-  .rejects.toThrow('Wonder Woman2 is not a user.');
+  .resolves.toEqual(Err('Wonder Woman2 is not a user.'));
 })
 
 test('fail to create appointment for null user', async () => {
   let when = "2023-01-01 12:00:00";
   await expect(database.createAppointment(null, when))
-  .rejects.toThrow();
+  .resolves.toEqual(Err('null is not a user.'));
 })
 
 test('fail to create appointment for undefined user', async () => {
   let when = "2023-01-01 12:00:00";
-  await expect(database.createAppointment(null, when))
-  .rejects.toThrow();
+  await expect(database.createAppointment(undefined, when))
+  .resolves.toEqual(Err('undefined is not a user.'));
 })
 
 
@@ -129,9 +147,16 @@ test('fail to create appointment for undefined user', async () => {
 // Slots
 test('create slot', async () => {
   let when = "2023-01-01 12:00:00";
-  await expect(database.popNearestAppointmentSlot()).resolves.toBe(undefined);
-  await expect(database.createAppointmentSlot(when)).resolves.toEqual({"date": when });
-  await expect(database.popNearestAppointmentSlot()).resolves.toEqual({"date": when, "slot_id":1 });
+  await expect(database.popNearestAppointmentSlot())
+  .resolves.toEqual(Val(undefined));
+  await expect(database.createAppointmentSlot(when))
+  .resolves.toEqual(Val({
+    "date": when
+  }));
+  await expect(database.popNearestAppointmentSlot())
+  .resolves.toMatchObject(Val({
+    date: when
+  }));
 })
 
 test('given a database with a slot, when creating a slot before it assign the new slot first', async () => {
@@ -142,7 +167,9 @@ test('given a database with a slot, when creating a slot before it assign the ne
   await database.createAppointmentSlot(near_future);
 
   await expect(database.popNearestAppointmentSlot())
-  .resolves.toMatchObject({ date: near_future });
+  .resolves.toMatchObject(Val({
+    date: near_future
+  }));
 })
 
 
@@ -150,13 +177,14 @@ test('given a database with a slot, when creating a slot before it assign the ne
 // Queue
 test('given an empty queue, when getting first user return undefined', async () => {
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
 test('add user to queue', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
-  await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
+  await expect(database.getFirstUserInQueue())
+  .resolves.toEqual(Val("Superman"));
 })
 
 test('add users to queue', async () => {
@@ -164,7 +192,8 @@ test('add users to queue', async () => {
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
-  await expect(database.getFirstUserInQueue()).resolves.toEqual("Superman");
+  await expect(database.getFirstUserInQueue())
+  .resolves.toEqual(Val("Superman"));
 })
 
 
@@ -172,9 +201,9 @@ test('given a queue with a user, when getting first user remove them from the qu
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Superman");
+  .resolves.toEqual(Val("Superman"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
 test('given a queue with 3 users, when getting from the queue return them in insertion order', async () => {
@@ -184,13 +213,13 @@ test('given a queue with 3 users, when getting from the queue return them in ins
   await database.addUserToQueue("Wonder Woman2");
 
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Superman");
+  .resolves.toEqual(Val("Superman"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Batman");
+  .resolves.toEqual(Val("Batman"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe("Wonder Woman2");
+  .resolves.toEqual(Val("Wonder Woman2"));
   await expect(database.getFirstUserInQueue())
-  .resolves.toBe(undefined);
+  .resolves.toEqual(Val(undefined));
 })
 
 /* TODO: this test is for a race condition. modify to run several times. */
@@ -213,72 +242,65 @@ test('given an empty queue, when adding 3 users at the same time 3 users are ins
   ]);
 
   const expected = expect.arrayContaining([
-    "Superman",
-    "Batman",
-    "Wonder Woman2",
-    undefined
+    Val("Superman"),
+    Val("Batman"),
+    Val("Wonder Woman2"),
+    Val(undefined)
   ]);
   expect(results).toEqual(expected);
 })
 
 /* TODO: this test is for a race condition. modify to run several times. */
-test('given a queue with  users,popping 3 and adding 3 users without order behaves as expected', async () => {
+test('given a queue with three users, interleaved pops and pushes take from the front of the queue', async () => {
   await fillWithMoreSuperheroes(database);
-
-  // guarantee 3 users in queue
-  const insertions_done = await Promise.all([
+  await Promise.all([
     database.addUserToQueue("Superman"),
     database.addUserToQueue("Batman"),
     database.addUserToQueue("Wonder Woman2")
   ]);
 
-  // get 2 users and add user in non-guaranteed order
-  const results = await Promise.all([
+  const pop_promises = [
     database.getFirstUserInQueue(),
     database.getFirstUserInQueue(),
-    database.getFirstUserInQueue(),
+    database.getFirstUserInQueue()
+  ];
+  const push_promises = [
     database.addUserToQueue("Wonder Woman3"),
     database.addUserToQueue("Wonder Woman4"),
-    database.addUserToQueue("Wonder Woman5"),
-  ]);
-
-  const got = results.slice(0, 3);
-
-
-  const expected = [
-    "Superman",
-    "Batman",
-    "Wonder Woman2",
-    "Wonder Woman3",
-    "Wonder Woman4",
-    "Wonder Woman5",
+    database.addUserToQueue("Wonder Woman5")
   ];
+  await Promise.all([...pop_promises, ...push_promises]);
+  const pops = await Promise.all(pop_promises);
 
-  // the output is a subset of the expected values
-  const result = got.every(val => expected.includes(val));
-  expect(result).toEqual(true);
+  // users already in the queue should be served first
+  const expected = expect.arrayContaining([
+    Val("Superman"),
+    Val("Batman"),
+    Val("Wonder Woman2")
+  ]);
+  expect(pops).toEqual(expected);
 })
 
 test('given a queue, adding same user twice results in error', async () => {
   await fillWithSuperheroes(database);
   await database.addUserToQueue("Superman");
-  await expect(database.addUserToQueue("Superman")).rejects.toThrow();
-})
-
-test('given a queue, adding same user twice results in error', async () => {
-  await fillWithSuperheroes(database);
-  await database.addUserToQueue("Superman");
-  await expect(database.addUserToQueue("Superman")).rejects.toThrow();
+  await expect(database.addUserToQueue("Superman"))
+  .resolves.toEqual(Err("User already in queue."));
 })
 
 test('After inserting 3 users, there are two users ahead of the last', async () => {
   await fillWithSuperheroes(database);
+
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
-  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
-  await expect(database.totalUsersAheadOf("Batman")).resolves.toEqual(1);
-  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(2);
+
+  await expect(database.totalUsersAheadOf("Superman"))
+  .resolves.toEqual(Val(0));
+  await expect(database.totalUsersAheadOf("Batman"))
+  .resolves.toEqual(Val(1));
+  await expect(database.totalUsersAheadOf("Wonder Woman2"))
+  .resolves.toEqual(Val(2));
 })
 
 test('Given 3 users in a queue, deleting the middle user results in reordering of the rest', async () => {
@@ -286,10 +308,14 @@ test('Given 3 users in a queue, deleting the middle user results in reordering o
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
+
   const row = await database.removeUserFromQueue("Batman");
-  expect(row).toEqual("Batman");
-  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
-  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
+
+  expect(row).toEqual(Val("Batman"));
+  await expect(database.totalUsersAheadOf("Superman"))
+  .resolves.toEqual(Val(0));
+  await expect(database.totalUsersAheadOf("Wonder Woman2"))
+  .resolves.toEqual(Val(1));
 })
 
 
@@ -298,10 +324,13 @@ test('Given 3 users in a queue, deleting Batman twice results in undefined, but 
   await database.addUserToQueue("Superman");
   await database.addUserToQueue("Batman");
   await database.addUserToQueue("Wonder Woman2");
-  const row = await database.removeUserFromQueue("Batman");
+  
+  await database.removeUserFromQueue("Batman");
+  const remove2 = database.removeUserFromQueue("Batman");
 
-  // 
-  expect(database.removeUserFromQueue("Batman")).resolves.toEqual(undefined);
-  await expect(database.totalUsersAheadOf("Superman")).resolves.toEqual(0);
-  await expect(database.totalUsersAheadOf("Wonder Woman2")).resolves.toEqual(1);
+  expect(remove2).resolves.toEqual(Val(undefined));
+  await expect(database.totalUsersAheadOf("Superman"))
+  .resolves.toEqual(Val(0));
+  await expect(database.totalUsersAheadOf("Wonder Woman2"))
+  .resolves.toEqual(Val(1));
 })

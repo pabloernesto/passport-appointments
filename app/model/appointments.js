@@ -7,45 +7,47 @@ export default class Appointments {
   }
 
   /* appointments */
-  async requestAppointment(user) {
-    const has = await this._database.hasUser( { user_id: user} );
-    if (!has)
-      return Err("No such user", { user });
+  async requestAppointment(username) {
+    const old_appt = await this._database.fetchAppointment(username);
+    if (old_appt.err?.message?.includes("is not a user")) {
+      return Err("No such user", { user: username });
 
-    const appt = await this._database.hasAppointment(user);
-    if (appt)
-      return Err("Already has appointment", { appointment: appt });
+    } else if (old_appt.err) {
+      return old_appt;  // unknown error
 
-    let slot = await this._database.popNearestAppointmentSlot();
-    if (!slot) {
-      try {
-        await this._database.addUserToQueue(user);
-        return Val("In queue.");
-      } catch (err) {
-        err.user = user;
-        return { err };
-      }
+    } else if (!old_appt.err && old_appt.val !== undefined) {
+      return Err(
+        "Already has appointment",
+        {
+          appointment: old_appt.val,
+          user: username
+        });
     }
 
-    await this._database.createAppointment(user, slot.date);
-    let db_object = await this._database.fetchAppointment(user);
-    if (db_object && db_object.date) 
-      return Val(new String(db_object.date));
+    // user does not have an appt, attempt to create one
+    let slot = await this._database.popNearestAppointmentSlot();
+    if (!slot.err && !slot.val) {
+      const queued = await this._database.addUserToQueue(username);
+      return !queued.err ? Val("In queue.")
+        : queued;
+    }
+
+    await this._database.createAppointment(username, slot.val.date);
+    let new_appt = await this._database.fetchAppointment(username);
+    if (new_appt.val)
+      return Val(new String(new_appt.val.date));
     else  
-      return Err("Could not create appointment");
+      return Err("Could not create appointment", { cause: new_appt.err });
   }
 
   // read
   async getAppointment(user) {
-    try {
-      const appt = await this._database.fetchAppointment(user);
-      if (appt === undefined)
-        return Err('No appointments for this user.', { user });
-      return Val(appt);
-
-    } catch (err) {
-      return { err };
-    }
+    const appt = await this._database.fetchAppointment(user);
+    if (appt.err)
+      return appt;
+    if (!appt.err && appt.val === undefined)
+      return Err('No appointments for this user.', { user });
+    return appt;
   }
 
   // update
@@ -84,16 +86,21 @@ export default class Appointments {
   */
   async _autoAssignUsers() {
     while (true) {
-      if(!(
-          await this._database.totalSlotsLeft() 
-          && await this._database.totalUsersInQueue())) 
+      const nslots = await this._database.totalSlotsLeft();
+      const nusers = await this._database.totalUsersInQueue();
+      if (nslots.val === 0 || nusers.val === 0)
         break;
+
+      // these statements should never fail. if they do, either:
+      // 1. the db is dead
+      // 2. we hit a race condition
+      // 3. the underlying store is buggy
       let slot = await this._database.popNearestAppointmentSlot();
-      if (!slot) throw Error("Bad!");
+      if (slot.err || !slot.val) throw Error("Bad!");
       let user = await this._database.getFirstUserInQueue();
-      if (!user) throw Error("Bad!");
-      this._database.createAppointment(user, slot.date);
-      
+      if (user.err || !user.val) throw Error("Bad!");
+
+      this._database.createAppointment(user.val, slot.val.date);
     }
   }
 
