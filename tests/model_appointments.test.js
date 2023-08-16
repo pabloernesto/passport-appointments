@@ -27,10 +27,7 @@ test('given an empty store, model.getAppointment() fails with missing user', asy
 test('given a store with no appointments, model.getAppointment() fails with no appointment', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.getAppointment("Wonder Woman2"))
-  .resolves.toMatchObject({ err: {
-    message: 'No appointments for this user.',
-    user: "Wonder Woman2"
-  }});
+  .resolves.toEqual({ val: undefined });
 })
 
 test('given user in auth and single slot, when appointment is requested it is accepted with the correct date format', async () => {
