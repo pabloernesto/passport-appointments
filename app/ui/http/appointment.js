@@ -30,12 +30,12 @@ export default class AppointmentsMW {
       if(!appt.err && appt.val !== "In queue.") {
         res.end(render(user, appt.val));
       }else if (!appt.err && appt.val === "In queue.") {
-        res.end(renderQueued(body));
+        res.end(renderQueued(user));
       } else if (appt.err?.message === "User already in queue.") {
-        res.end(renderAlreadyQueue(body));
+        res.end(renderAlreadyQueue(user));
       } else {
         res.statusCode = 500;
-        res.end(renderFatalError(body, err));
+        res.end(renderFatalError(user, err));
       }
       return true;
     } else if (clean_url === "/appointment-result") {
@@ -48,24 +48,24 @@ export default class AppointmentsMW {
 }
 
 // TODO: handle pending appointments
-function render(body, appointment) {
-  let text = `<p>${ body.userid }, you have your appointment at ${ appointment }.</p>`;
+function render(user, appointment) {
+  let text = `<p>${ user }, you have your appointment at ${ appointment }.</p>`;
   return HTMLWrap(text);
 }
 
-function renderQueued(body) {
-  let text = `<p>${ body.userid }, there are no appointments currently available. You have been added to the queue.</p>`;
+function renderQueued(user) {
+  let text = `<p>${ user }, there are no appointments currently available. You have been added to the queue.</p>`;
   return HTMLWrap(text);
 }
 
-function renderAlreadyQueue(body) {
-  let text = `<p>${ body.userid }, you are already in the queue.</p>`;
+function renderAlreadyQueue(user) {
+  let text = `<p>${ user }, you are already in the queue.</p>`;
   return HTMLWrap(text);
 }
 
-function renderFatalError(body, err) {
+function renderFatalError(user, err) {
   return HTMLWrap(`\
-<p>${ body.userid }, an server error occured while adding your appointment.</p>
+<p>${ user }, an server error occured while adding your appointment.</p>
 <pre>${ JSON.stringify(err) }</pre>
 `);
 }
