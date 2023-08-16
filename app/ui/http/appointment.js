@@ -35,7 +35,7 @@ export default class AppointmentsMW {
         res.end(renderAlreadyQueue(user));
       } else {
         res.statusCode = 500;
-        res.end(renderFatalError(user, err));
+        res.end(renderFatalError(user, appt.err));
       }
       return true;
     } else if (clean_url === "/appointment-result") {
