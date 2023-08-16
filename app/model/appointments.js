@@ -59,6 +59,7 @@ export default class Appointments {
     Creates appointment slots based on the provided date list.
     If auto_assign = true, assigns min(#slots, #users)
   */
+  // TODO: take [ [date, number_of_slots]... ]
   async createSlots(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
@@ -72,8 +73,9 @@ export default class Appointments {
     if(auto_assign) {
       await this._autoAssignUsers();
     }
-    
-  } // TODO: take [ [date, number_of_slots]... ]
+
+    return Val(undefined);
+  }
 
   /* 
     Give out appointments to users in the quJeue. 
