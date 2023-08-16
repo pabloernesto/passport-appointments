@@ -95,6 +95,9 @@ class Authentication {
   // NOTE: perm is a single-letter permission
   async userHasPermission(username, perm) {
     const user = await this.getUser(username);
+    if (!user.val)
+      return Err(`${username} is not a user.`);
+
     return Val(user.val.role.includes(perm));
   }
 }
