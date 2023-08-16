@@ -57,3 +57,8 @@ test('given a single user, it has user permissions', async () => {
   await expect(auth.userHasPermission("Wonder Woman2", "u"))
   .resolves.toEqual(Val(true));
 })
+
+test('given an unknown user, when asking for permissions it fails', async () => {
+  await expect(auth.userHasPermission("Mysterio", "u"))
+  .resolves.toEqual(Err('Mysterio is not a user.'));
+})
