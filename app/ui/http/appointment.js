@@ -14,7 +14,7 @@ export default class AppointmentsMW {
       - the queueing fails, assuming it's because the user is already in the queue.
       - An error occured while requesting the appointment - for example, a nonexistent user.
   */
-  async respond(req, res) {
+  async respond(req, res, ctx) {
     // Using POST-REDIRECT-GET pattern
     const { method, url } = req;
     let clean_url = url.split('?')[0];

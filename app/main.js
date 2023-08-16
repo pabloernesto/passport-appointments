@@ -1,4 +1,5 @@
 import Server from './lib/http/server.js';
+import FormBodyMW from './lib/http/formbody.js'
 import http404MW from './lib/http/404.js';
 import AuthenticationMW from './lib/http/auth.js';
 import StaticFilesMW from './lib/http/static.js';
@@ -12,6 +13,7 @@ let store = DatabaseWrapper.fromNewTestDB();
 let model = new Appointments(store);
 
 let server = new Server();
+server.add_middleware(new FormBodyMW());
 server.add_middleware(await AuthenticationMW.fromDatabase(store));
 server.add_middleware(new AppointmentsMW(model));
 server.add_middleware(await StaticFilesMW.fromPath("./app/assets"));
