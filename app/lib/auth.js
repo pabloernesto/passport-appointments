@@ -56,18 +56,21 @@ class Authentication {
   }
 
   generateLoginSessionToken(user_id) {
+    if (!user_id)
+      return Err("Must have valid user id to create session", { user_id });
+
     let sessionToken;
-    if(!user_id) throw Error("Must have valid user id to create session");
     do {
       const bytes = randomBytes(16);
       sessionToken = bytes.toString('base64url');
     } while (this.userTokens.has(sessionToken));
+
     this.userTokens.set(sessionToken, {
       token: sessionToken,
       user_id: user_id,
       emitted: new Date(),
     });
-    return sessionToken;
+    return Val(sessionToken);
   }
 
   isValidSessionToken(s) {
