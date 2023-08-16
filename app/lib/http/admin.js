@@ -68,7 +68,7 @@ function validate(form_data) {
     ? _default(p) 
     : form_data[p];
   })
-
+  return form_data;
 }
 
 /*
