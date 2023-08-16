@@ -91,7 +91,9 @@ async function attemptLogin(req, res, auth) {
     }
 
     const sessionToken = auth.generateLoginSessionToken(username);
-    addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
+    if (sessionToken.err)
+      throw Error("Could not get token");
+    addCookie(res, `sessionToken=${sessionToken.val}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
@@ -205,7 +207,10 @@ async function attemptRegistration(req, res, auth) {
     await auth.createUser(username, email, password);
 
     const sessionToken = auth.generateLoginSessionToken(username);
-    addCookie(res, `sessionToken=${sessionToken}; HttpOnly; SameSite=Strict; Path=/`);
+    if (sessionToken.err)
+      throw Error("Could not get token");
+    
+    addCookie(res, `sessionToken=${sessionToken.val}; HttpOnly; SameSite=Strict; Path=/`);
     redirectToRedirectPage(req, res);
 
   } catch (error) {
