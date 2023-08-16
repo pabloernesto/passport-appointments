@@ -91,10 +91,11 @@ class Authentication {
     this.userTokens.delete(token);
   }
 
-    // TODO: better information flow
+  // TODO: better information flow
+  // NOTE: perm is a single-letter permission
   async userHasPermission(username, perm) {
     const user = await this.getUser(username);
-    return user.role.includes(perm);
+    return Val(user.val.role.includes(perm));
   }
 }
 
