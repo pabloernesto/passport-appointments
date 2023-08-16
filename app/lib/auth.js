@@ -1,4 +1,5 @@
 import { randomBytes, createHash } from 'crypto';
+import { Val, Err } from './maybe';
 
 const TOKEN_VALIDITY = 60 * 60 * 1000; // 1 hour
 const TOKEN_INVALIDATION_PERIOD = 5 * 60 * 1000; // 5 minutes
@@ -43,8 +44,7 @@ class Authentication {
   }
 
   async getUser(username) {
-    const { val: user } = await this.database.getUser(username);
-    return user;
+    return await this.database.getUser(username);
   }
 
   async authenticateUser(username, password) {
