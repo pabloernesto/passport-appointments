@@ -223,23 +223,7 @@ async function attemptRegistration(req, res, auth) {
 function sendUserOrPasswordExistsResponse(req, res, username, email) {
   res.statusCode = 409;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  const body = `\
-<!DOCTYPE html>
-<html lang="en" class="booting">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>bookmarkname</title>
-
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-  <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
-  <!-- <meta name="description" content="blurb for google search" />  -->
-  <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
-
-  <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
-  <!-- <script src="main.js" module></script> -->
-</head>
-<body>
+  const body = HTMLWrap(`
   <p>
   The <span class="username">${ username }</span> username
   and/or <span class="email">${ email }</span> email
@@ -248,9 +232,7 @@ function sendUserOrPasswordExistsResponse(req, res, username, email) {
   <p>
   Please
   <a href="/register">try again</a>.
-  </p>
-</body>
-</html>`;
+  </p>`);
   res.end(body);
 }
 

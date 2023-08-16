@@ -1,6 +1,11 @@
-import { formBody, RequestBodyParsingError } from './util-request.js';
+import { formBody, HTMLWrap } from './util-request.js';
 import fecha from 'fecha'
+import fs from 'fs'
 
+const slots_form = 'app/assets/create-slots-form.html'
+const slots_form_s = 'app/assets/create-slots-form-success.html'
+
+const ONE_DAY = 1000*60*60*24*1
 export default class AdminMW {
   constructor(database, model) {
     this._database = database; // TODO: replace with implementation object
@@ -8,69 +13,81 @@ export default class AdminMW {
   }
 
   async respond(req, res) {
-    if(req.url == "/admin") {
-      res.end(`\
-<!DOCTYPE html>
-<html lang="en" class="booting">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin tab</title>
-
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-  <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
-  <!-- <meta name="description" content="blurb for google search" />  -->
-  <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
-
-  <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
-  <!-- <script src="main.js" module></script> -->
-</head>
-<body>
-  <form method="POST" action="/single_slot">
-    <label for="single_slot">Add single appointment slot (date and time):</label>
-    <input type="datetime-local" id="single_slot" name="single_slot"> 
-    <button>Add new slot</button>
-  </form>
-</body>
-</html>`);
+    try {
+      if(req.url == "/admin") {
+        const fileContents = fs.readFileSync(slots_form).toString()
+        res.end(HTMLWrap(fileContents));
+        return true;
+      } else if (req.url == "/slots") {
+        const fileContents_s = fs.readFileSync(slots_form_s).toString()
+        await this.handleSlots(req, res);
+        res.end(HTMLWrap(fileContents_s));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log(error);
+      res.end(HTMLWrap(`<p>There was an error: ${error}</p>`));
       return true;
-    } else if (req.url == "/single_slot") {
-      await this.handleSingleSlot(req, res);
-      res.end(`\
-<!DOCTYPE html>
-<html lang="en" class="booting">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin tab</title>
-
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-  <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
-  <!-- <meta name="description" content="blurb for google search" />  -->
-  <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
-
-  <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
-  <!-- <script src="main.js" module></script> -->
-</head>
-<body>
-  <form method="POST" action="/single_slot">
-    <label for="single_slot">Add single appointment slot (date and time):</label>
-    <input type="datetime-local" id="single_slot" name="single_slot"> 
-    <button>Add new slot</button>
-    <label>Success!</label>
-  </form>
-</body>
-</html>`);
-      return true;
-      
     }
-    return false;
   }
-  async handleSingleSlot(req, res) {
-    const { single_slot: slot_date } = await formBody(req);
-    const date_obj = fecha.parse(slot_date, "YYYY-MM-DDTHH:mm");
-    await this._model.createSlots([date_obj]);
+  async handleSlots(req, res) {
+    // TODO: formBody not reading properly
+    const form = await formBody(req);
+    const form_obj = slots_parse(form);
+    await this._model.createSlots([form_obj.range_start]);
   }
 }
 
+/*
+  validate form or fill with defualt values where needed
+*/
+export function slots_parse(_form_data) {
+  let form_data = validate(_form_data);
+
+  // parse dates
+  const range_start = fecha.parse(form_data["range-start"], "YYYY-MM-DD");
+  const range_end = fecha.parse(form_data["range-end"], "YYYY-MM-DD");
+  const time_start = fecha.parse(form_data["time-start"], "HH:mm");
+  const time_end = fecha.parse(form_data["time-end"], "HH:mm");
+  const interval = parseInt(form_data["duration"]);
+
+  return {range_start, range_end, time_start, time_end, interval};  
+}
+
+function validate(form_data) {
+  //let object = {"weekday-mo": "on", "range-start":  "2001-01-01", "range-end": "2001-01-01"};
+  let properties = Object.getOwnPropertyNames(form_data);
+
+  // take out checkbox data
+  properties = properties.filter(p => !p.match('weekday')); 
+
+  // replace invalid values with default values
+  properties.map(p => {
+    form_data[p] = ((!form_data[p]) || form_data[p] == '') 
+    ? _default(p) 
+    : form_data[p];
+  })
+  return form_data;
+}
+
+/*
+  Throws if property is not expected, including weekdays
+*/
+function _default(property) {
+  throw Error("Unexpected property!");
+
+  // more nuanced default value handling:
+  if(["range-start","range-end"].includes(property)) {
+    let now = new Date();
+    now.setTime(now.getTime() + ONE_DAY);
+    return fecha.format(now, "YYYY-MM-DD");
+  } else if(["time-start", "time-end"].includes(property)) {
+    return "13:00";
+  } else if(property == "duration") {
+    return "60";
+  } else {
+    throw Error("Unexpected property!");
+  }
+}
 

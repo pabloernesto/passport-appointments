@@ -1,4 +1,5 @@
-import { formBody } from '../../lib/http/util-request.js';
+import { formBody, HTMLWrap} from '../../lib/http/util-request.js';
+import querystring from 'node:querystring';
 
 export default class AppointmentsMW {
   constructor(model) {
@@ -14,72 +15,57 @@ export default class AppointmentsMW {
       - An error occured while requesting the appointment - for example, a nonexistent user.
   */
   async respond(req, res) {
+    // Using POST-REDIRECT-GET pattern
     const { method, url } = req;
+    let clean_url = url.split('?')[0];
+    let late_url = url.split('?')[1];
+    // handle passport check status
+    if (method === "POST" && clean_url === "/appointment") {
+      // TODO: make auth middleware hide token -> user mapping.
+      const body = await this._formBody(req);
+      const user = body.userid;
+      const appt = await this._model.requestAppointment(user);
 
-    // only handle POSTs to /appointment
-    if(!(method === "POST" && url === "/appointment"))
-      return false;
-
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-
-    // TODO: make auth middleware hide token -> user mapping.
-    const body = await this._formBody(req);
-    const user = body.userid;
-
-    const appt = await this._model.requestAppointment(user);
-    res.end(
-      (!appt.err && appt.val !== "In queue.") ? render(body, appt.val)
-      : (!appt.err && appt.val === "In queue.") ? renderQueued(body)
-      : (appt.err?.message === "User already in queue.") ? renderAlreadyQueue(body)
-      : renderFatalError(body, appt.err)
-    );
-    return true;
+      res.statusCode = 200;
+      if(!appt.err && appt.val !== "In queue.") {
+        res.end(render(user, appt.val));
+      }else if (!appt.err && appt.val === "In queue.") {
+        res.end(renderQueued(user));
+      } else if (appt.err?.message === "User already in queue.") {
+        res.end(renderAlreadyQueue(user));
+      } else {
+        res.statusCode = 500;
+        res.end(renderFatalError(user, appt.err));
+      }
+      return true;
+    } else if (clean_url === "/appointment-result") {
+      res.statusCode = 200;
+      res.end();
+      return true;
+    }
+    return false;
   }
 }
 
 // TODO: handle pending appointments
-function render(body, appointment) {
-  let text = `<p>${ body.userid }, you have your appointment at ${ appointment }.</p>`;
+function render(user, appointment) {
+  let text = `<p>${ user }, you have your appointment at ${ appointment }.</p>`;
   return HTMLWrap(text);
 }
 
-function renderQueued(body) {
-  let text = `<p>${ body.userid }, there are no appointments currently available. You have been added to the queue.</p>`;
+function renderQueued(user) {
+  let text = `<p>${ user }, there are no appointments currently available. You have been added to the queue.</p>`;
   return HTMLWrap(text);
 }
 
-function renderAlreadyQueue(body) {
-  let text = `<p>${ body.userid }, you are already in the queue.</p>`;
+function renderAlreadyQueue(user) {
+  let text = `<p>${ user }, you are already in the queue.</p>`;
   return HTMLWrap(text);
 }
 
-function renderFatalError(body, err) {
+function renderFatalError(user, err) {
   return HTMLWrap(`\
-<p>${ body.userid }, an server error occured while adding your appointment.</p>
+<p>${ user }, an server error occured while adding your appointment.</p>
 <pre>${ JSON.stringify(err) }</pre>
 `);
-}
-
-function HTMLWrap(text) {
-  return `\
-  <!DOCTYPE html>
-  <html lang="en" class="booting">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Your appointment is ready</title>
-  
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <!-- <link rel="icon" href="favicon.ico" type="image/x-icon" /> -->
-    <!-- <meta name="description" content="blurb for google search" />  -->
-    <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
-  
-    <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
-    <!-- <script src="main.js" module></script> -->
-  </head>
-  <body>
-    ${ text }
-  </body>
-  </html>`;
 }
