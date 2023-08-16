@@ -74,7 +74,7 @@ class Authentication {
   }
 
   isValidSessionToken(s) {
-    return this.userTokens.has(s);
+    return Val(this.userTokens.has(s));
   }
 
   invalidateExpiredTokens() {
