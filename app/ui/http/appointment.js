@@ -65,7 +65,7 @@ function renderAlreadyQueue(user) {
 
 function renderFatalError(user, err) {
   return HTMLWrap(`\
-<p>${ user }, an server error occured while adding your appointment.</p>
+<p>${ user }, a server error occured while adding your appointment.</p>
 <pre>${ JSON.stringify(err) }</pre>
 `);
 }
