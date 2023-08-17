@@ -65,7 +65,7 @@ export default class AuthenticationMW {
       const token_obj = this.auth.userTokens.get(token)
 
       const authorization = await this.auth.userHasPermission(token_obj.user_id, "a");
-      if(authorization) {
+      if(authorization.val) {
         return false;
       } else {
         // TODO: URGENT: replace with permission error page or 404
