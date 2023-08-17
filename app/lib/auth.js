@@ -1,5 +1,5 @@
 import { randomBytes, createHash } from 'crypto';
-import { Val, Err } from './maybe';
+import { Val, Err } from './maybe.js';
 
 const TOKEN_VALIDITY = 60 * 60 * 1000; // 1 hour
 const TOKEN_INVALIDATION_PERIOD = 5 * 60 * 1000; // 5 minutes
