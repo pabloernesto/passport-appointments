@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { Val, Err } from '../../lib/maybe';
+import { Val, Err } from '../../lib/maybe.js';
 // https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
 // TODO: 'userobj' is the same as the form in index.html
 import fecha from 'fecha'
