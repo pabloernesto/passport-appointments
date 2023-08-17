@@ -1,4 +1,5 @@
 import { randomBytes, createHash } from 'crypto';
+import { Val, Err } from './maybe';
 
 const TOKEN_VALIDITY = 60 * 60 * 1000; // 1 hour
 const TOKEN_INVALIDATION_PERIOD = 5 * 60 * 1000; // 5 minutes
@@ -43,32 +44,37 @@ class Authentication {
   }
 
   async getUser(username) {
-    const { val: user } = await this.database.getUser(username);
-    return user;
+    return await this.database.getUser(username);
   }
 
   async authenticateUser(username, password) {
-    const { val: user } = await this.database.getUser(username);
-    return user?.hash === hash(password + user?.salt);
+    const user = await this.database.getUser(username);
+    return (
+      !user.val ? Err(`${username} is not a user.`)
+      : Val(user.val.hash === hash(password + user.val.salt))
+    );
   }
 
   generateLoginSessionToken(user_id) {
+    if (!user_id)
+      return Err("Must have valid user id to create session", { user_id });
+
     let sessionToken;
-    if(!user_id) throw Error("Must have valid user id to create session");
     do {
       const bytes = randomBytes(16);
       sessionToken = bytes.toString('base64url');
     } while (this.userTokens.has(sessionToken));
+
     this.userTokens.set(sessionToken, {
       token: sessionToken,
       user_id: user_id,
       emitted: new Date(),
     });
-    return sessionToken;
+    return Val(sessionToken);
   }
 
   isValidSessionToken(s) {
-    return this.userTokens.has(s);
+    return Val(this.userTokens.has(s));
   }
 
   invalidateExpiredTokens() {
@@ -85,10 +91,14 @@ class Authentication {
     this.userTokens.delete(token);
   }
 
-    // TODO: better information flow
+  // TODO: better information flow
+  // NOTE: perm is a single-letter permission
   async userHasPermission(username, perm) {
     const user = await this.getUser(username);
-    return user.role.includes(perm);
+    if (!user.val)
+      return Err(`${username} is not a user.`);
+
+    return Val(user.val.role.includes(perm));
   }
 }
 
