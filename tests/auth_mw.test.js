@@ -59,4 +59,5 @@ test('given a req with no token to a logged in area, block it', async () => {
 
   expect(out).toBe(true);
   expect(ctx).toEqual( {} );
+  expect(res.statusCode).toBe(302);
 })
