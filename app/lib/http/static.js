@@ -11,14 +11,13 @@ export default class StaticFilesMW {
   }
 
   async respond(req, res) {
-    const { method, url } = req;
-    if (method !== "GET") return false;
+    if (req.method !== "GET") return false;
 
     const request_url = new URL(req.url, "file:").pathname; // URL-encode the path
     const asset_path = getAssetByURL(request_url, this._known_assets)?.["path"];
     if (asset_path === undefined) return false; // no such resource
 
-    req.statusCode = 200;
+    res.statusCode = 200;
     res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
     let f = await fs.open(asset_path);
     f.createReadStream(asset_path).pipe(res);
