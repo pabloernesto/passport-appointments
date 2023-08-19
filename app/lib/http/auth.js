@@ -19,9 +19,9 @@ export default class AuthenticationMW {
   async respond(req, res, ctx) {
     const token = getTokenFromRequest(req);
     const trec = await this.auth.getTokenRecord(token);
-    if (!trec.err)
+    if (trec.val)
       ctx.user = trec.val.user_id;
-    const logged = !trec.err;
+    const logged = trec.val;
 
     // redirect unauthenticated requests
     if (loggedInEndpoints.includes(req.url) && !logged) {
