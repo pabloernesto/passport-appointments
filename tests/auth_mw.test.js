@@ -14,7 +14,7 @@ let req;
 let res;
 
 beforeEach(async () => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
   authmw = new AuthenticationMW(mockauth);
 
   req = {};
