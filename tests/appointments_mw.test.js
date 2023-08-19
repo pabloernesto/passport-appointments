@@ -37,9 +37,9 @@ test('given a model with no slots, when appt is requested add them to the queue'
     method: "POST",
     url: "/appointment",
   };
-  mw._formBody = req => ({
-    userid: "Mr. Banana"
-  });
+  const ctx = {
+    user: "Mr. Banana"
+  }
   res = {
     body: undefined,        // output
     statusCode: undefined,  // output
@@ -47,7 +47,7 @@ test('given a model with no slots, when appt is requested add them to the queue'
     end(data) { this.body = data; },
   };
 
-  await expect(mw.respond(req, res)).resolves.toBe(true);
+  await expect(mw.respond(req, res, ctx)).resolves.toBe(true);
   expect(res.statusCode).toBe(200);
   expect(res.body).toMatch("Mr. Banana, there are no appointments currently available.");
 })
@@ -60,9 +60,9 @@ test('given a model with one slot, when appt is requested assign it to the user'
     method: "POST",
     url: "/appointment",
   };
-  mw._formBody = req => ({
-    userid: "Mr. Banana"
-  });
+  const ctx = {
+    user: "Mr. Banana"
+  }
   res = {
     body: undefined,        // output
     statusCode: undefined,  // output
@@ -70,7 +70,7 @@ test('given a model with one slot, when appt is requested assign it to the user'
     end(data) { this.body = data; },
   };
 
-  await expect(mw.respond(req, res)).resolves.toBe(true);
+  await expect(mw.respond(req, res, ctx)).resolves.toBe(true);
   expect(res.statusCode).toBe(200);
   expect(res.body).toMatch(`Mr. Banana, you have your appointment at ${ when }`);
 })
@@ -82,9 +82,9 @@ test('given a user in the queue, when requesting appointment tell them they are 
     method: "POST",
     url: "/appointment",
   };
-  mw._formBody = req => ({
-    userid: "Mr. Banana"
-  });
+  const ctx = {
+    user: "Mr. Banana"
+  }
   res = {
     body: undefined,        // output
     statusCode: undefined,  // output
@@ -92,7 +92,7 @@ test('given a user in the queue, when requesting appointment tell them they are 
     end(data) { this.body = data; },
   };
 
-  await expect(mw.respond(req, res)).resolves.toBe(true);
+  await expect(mw.respond(req, res, ctx)).resolves.toBe(true);
   expect(res.statusCode).toBe(200);
   expect(res.body).toMatch("Mr. Banana, you are already in the queue.");
 })
