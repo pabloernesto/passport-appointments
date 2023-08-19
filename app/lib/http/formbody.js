@@ -1,4 +1,4 @@
-import { formBody } from 'util-request';
+import { formBody } from './util-request.js';
 
 export default class FormBodyMW {
   async respond(req, res, ctx) {
