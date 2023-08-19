@@ -1,4 +1,4 @@
-import { formBody, HTMLWrap } from './util-request.js';
+import { HTMLWrap } from './util-request.js';
 import fecha from 'fecha'
 import fs from 'fs'
 
@@ -12,7 +12,7 @@ export default class AdminMW {
     this._model = model;
   }
 
-  async respond(req, res) {
+  async respond(req, res, ctx) {
     try {
       if(req.url == "/admin") {
         const fileContents = fs.readFileSync(slots_form).toString()
@@ -20,7 +20,7 @@ export default class AdminMW {
         return true;
       } else if (req.url == "/slots") {
         const fileContents_s = fs.readFileSync(slots_form_s).toString()
-        await this.handleSlots(req, res);
+        await this.handleSlots(req, res, ctx);
         res.end(HTMLWrap(fileContents_s));
         return true;
       }
@@ -31,10 +31,8 @@ export default class AdminMW {
       return true;
     }
   }
-  async handleSlots(req, res) {
-    // TODO: formBody not reading properly
-    const form = await formBody(req);
-    const form_obj = slots_parse(form);
+  async handleSlots(req, res, ctx) {
+    const form_obj = slots_parse(ctx.body);
     await this._model.createSlots([form_obj.range_start]);
   }
 }
