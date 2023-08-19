@@ -2,6 +2,7 @@ import { formBody, RequestBodyParsingError } from './util-request.js';
 import Authentication from '../auth.js';
 import querystring from 'node:querystring';
 import {adminEndpoints, loggedInEndpoints} from './const.js';
+import { Err } from '../maybe.js';
 
 export default class AuthenticationMW {
   // @private
@@ -15,9 +16,12 @@ export default class AuthenticationMW {
     return new AuthenticationMW(auth);
   }
 
-  async respond(req, res) {
-    // TODO: only synchronous bc we store tokens in memory, EW!!!
-    const logged = isLoggedIn(req, this.auth);
+  async respond(req, res, ctx) {
+    const token = getTokenFromRequest(req);
+    const trec = await this.auth.getTokenRecord(token);
+    if (!trec.err)
+      ctx.user = trec.val.user_id;
+    const logged = !trec.err;
 
     // redirect unauthenticated requests
     if (loggedInEndpoints.includes(req.url) && !logged) {
@@ -61,10 +65,9 @@ export default class AuthenticationMW {
     // authorization
     if(adminEndpoints.includes(req.url) && logged) {
       const token = getTokenFromRequest(req);
+      const { val: record } = this.auth.getTokenRecord(token);
 
-      const token_obj = this.auth.userTokens.get(token)
-
-      const authorization = await this.auth.userHasPermission(token_obj.user_id, "a");
+      const authorization = await this.auth.userHasPermission(record.user_id, "a");
       if(authorization) {
         return false;
       } else {

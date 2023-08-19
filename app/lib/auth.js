@@ -14,10 +14,12 @@ class Authentication {
   //@private
   constructor(database) {
     this.database = database;
+
     // key: token
     // value: { token: token, user_id: id, emitted: date }
-    this.userTokens = new Map();
+    // TODO: we store tokens in memory, EW!!!
     // NOTE: potentially add anon tokens
+    this.userTokens = new Map();
 
     // Set up repeating timer to invalidate expired tokens
     // TODO: move this out of constructor so it can be controlled explicitly;
@@ -75,6 +77,10 @@ class Authentication {
 
   isValidSessionToken(s) {
     return Val(this.userTokens.has(s));
+  }
+
+  async getTokenRecord(token) {
+    return Val(this.userTokens.get(token));
   }
 
   invalidateExpiredTokens() {
