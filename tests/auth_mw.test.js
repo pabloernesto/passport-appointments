@@ -42,3 +42,21 @@ test('given a logged in req, add the username to ctx', async () => {
 
   expect(ctx).toEqual({ user: "Batman" });
 })
+
+test('given a req with no token to a logged in area, block it', async () => {
+  mockauth.getTokenRecord.mockReturnValue(Val(undefined));
+  // fake request with missing token
+  req = {
+    method: "GET",
+    url: "/admin",
+  };
+  res.getHeader = jest.fn();
+  res.setHeader = jest.fn();
+  res.end = jest.fn();
+  let ctx = {};
+
+  const out = await authmw.respond(req, res, ctx);
+
+  expect(out).toBe(true);
+  expect(ctx).toEqual( {} );
+})
