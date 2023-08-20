@@ -28,6 +28,7 @@ test('given a logged in req, add the username to ctx', async () => {
     user_id: "Batman",
     emitted: new Date(2023, 1, 1)
   }));
+  mockauth.userHasPermission.mockReturnValue(Val(true));
   // fake request with correct token
   req = {
     method: "GET",
