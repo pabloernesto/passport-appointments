@@ -1,10 +1,9 @@
-import { formBody, HTMLWrap} from '../../lib/http/util-request.js';
+import { HTMLWrap } from '../../lib/http/util-request.js';
 import querystring from 'node:querystring';
 
 export default class AppointmentsMW {
   constructor(model) {
     this._model = model;
-    this._formBody = formBody;
   }
   /*
     requests an appointment for the user in the form.
@@ -14,7 +13,7 @@ export default class AppointmentsMW {
       - the queueing fails, assuming it's because the user is already in the queue.
       - An error occured while requesting the appointment - for example, a nonexistent user.
   */
-  async respond(req, res) {
+  async respond(req, res, ctx) {
     // Using POST-REDIRECT-GET pattern
     const { method, url } = req;
     let clean_url = url.split('?')[0];
@@ -22,20 +21,18 @@ export default class AppointmentsMW {
     // handle passport check status
     if (method === "POST" && clean_url === "/appointment") {
       // TODO: make auth middleware hide token -> user mapping.
-      const body = await this._formBody(req);
-      const user = body.userid;
-      const appt = await this._model.requestAppointment(user);
+      const appt = await this._model.requestAppointment(ctx.user);
 
       res.statusCode = 200;
       if(!appt.err && appt.val !== "In queue.") {
-        res.end(render(user, appt.val));
+        res.end(render(ctx.user, appt.val));
       }else if (!appt.err && appt.val === "In queue.") {
-        res.end(renderQueued(user));
+        res.end(renderQueued(ctx.user));
       } else if (appt.err?.message === "User already in queue.") {
-        res.end(renderAlreadyQueue(user));
+        res.end(renderAlreadyQueue(ctx.user));
       } else {
         res.statusCode = 500;
-        res.end(renderFatalError(user, appt.err));
+        res.end(renderFatalError(ctx.user, appt.err));
       }
       return true;
     } else if (clean_url === "/appointment-result") {

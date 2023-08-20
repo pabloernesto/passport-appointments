@@ -19,8 +19,9 @@ export default class Server {
   }
 
   async _route(req, res) {
+    let ctx = {};
     for (const m of this._middleware) {
-      const is_captured = await m.respond(req, res);
+      const is_captured = await m.respond(req, res, ctx);
       if (is_captured)
         break;
     }
