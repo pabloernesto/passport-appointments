@@ -38,7 +38,7 @@ export default class StaticFilesMW {
 /* source: https://github.com/nginx/nginx/blob/master/conf/mime.types */
 let mimetypes;
 try {
-  const mimestr = await fs.readFile('./mimetypes.json', { encoding: 'utf8' });
+  const mimestr = await fs.readFile('./app/lib/http/mimetypes.json', { encoding: 'utf8' });
   mimetypes = JSON.parse(mimestr);
 } catch (err) {
   throw new Error('Could not read MIME type descriptions.', { cause: err });
