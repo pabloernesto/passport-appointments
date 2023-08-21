@@ -80,7 +80,7 @@ class Authentication {
   }
 
   async getTokenRecord(token) {
-    return Val(this.userTokens.get(token));
+    return Val(await this.userTokens.get(token));
   }
 
   invalidateExpiredTokens() {

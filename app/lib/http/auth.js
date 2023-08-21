@@ -65,7 +65,7 @@ export default class AuthenticationMW {
     // authorization
     if(adminEndpoints.includes(req.url) && logged) {
       const token = getTokenFromRequest(req);
-      const { val: record } = this.auth.getTokenRecord(token);
+      const { val: record } = await this.auth.getTokenRecord(token);
 
       const authorization = await this.auth.userHasPermission(record.user_id, "a");
       if (authorization.val) {
