@@ -7,6 +7,7 @@ Instead of making people wait/guess on the site, set them up for a queue.
 **Contents**
 1. [Design principles](docs/design-principles.md)
 1. [Technical notes](docs/technical-notes.md)
+1. [Integration tests](docs/integration-tests/README.md)
 1. [References](docs/refences.md)
 
 # Running the project
