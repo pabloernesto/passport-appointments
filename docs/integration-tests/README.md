@@ -4,7 +4,7 @@
 - [app starts](./app-starts.md)
 
 ## User tests
-- login as a user
+- [login as a user](./login.md)
 - as a user, get an appointment
 - as a user, get queued for an appointment
 
