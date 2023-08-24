@@ -88,7 +88,7 @@ async function attemptLogin(req, res, auth) {
     const { username, password } = await formBody(req);
     const passedAuth = await auth.authenticateUser(username, password);
 
-    if (!passedAuth) {
+    if (!passedAuth.val) {
       sendInvalidCredentialsResponse(res);
       return;
     }
