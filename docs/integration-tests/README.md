@@ -4,13 +4,13 @@
 - [app starts](./app-starts.md)
 
 ## User tests
-- login as a user
+- [login as a user](./login.md)
 - as a user, get an appointment
-- as a user, get queued for an appointment
+- [as a user, get queued for an appointment](./appointment-queue.md)
 
 ## Admin tests
-- login as an admin
-- login as an admin, then enter appointment/
+- [login as an admin](./admin-login.md)
+- [login as an admin, then get an appointment](./appointment-admin.md)
 - as an admin, create an appointment slot
 
 ## Queue tests
