@@ -23,7 +23,7 @@ describe("integration tests", () => {
     jest.resetAllMocks();
   })
 
-  test('given a logged in req, add the username to ctx', async () => {
+  test('given a user req, add the username to ctx', async () => {
     await auth.createUser("Batman", "batman@batcave.com", "catwoman69");
     const { val: token } = await auth.generateLoginSessionToken("Batman");
     expect(token).toEqual(expect.any(String));
@@ -41,6 +41,30 @@ describe("integration tests", () => {
     await authmw.respond(req, res, ctx);
 
     expect(ctx).toEqual({ user: "Batman" });
+  })
+
+  /* admins are not users, in that they aren't supposed to be able to ask for
+    a passport appointment
+   */
+  test('given an admin req for an appointment, reject it', async () => {
+    const { val: token } = await auth.generateLoginSessionToken("Wonder Woman");
+    expect(token).toEqual(expect.any(String));
+
+    // fake request with correct token
+    let req = {
+      method: "GET",
+      url: "/appointment",
+      headers: {
+        cookie: `sessionToken=${ token }`
+      }
+    };
+    let ctx = {};
+
+    const is_captured = await authmw.respond(req, res, ctx);
+
+    expect(is_captured).toBe(false); // redirects to static error
+    expect(ctx).toEqual({ user: "Wonder Woman" });
+    expect(res.statusCode).toBe(403);
   })
 })
 
