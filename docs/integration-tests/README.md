@@ -10,7 +10,7 @@
 
 ## Admin tests
 - [login as an admin](./admin-login.md)
-- login as an admin, then enter appointment/
+- [login as an admin, then get an appointment](./appointment-admin.md)
 - as an admin, create an appointment slot
 
 ## Queue tests
