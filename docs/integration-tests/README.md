@@ -7,6 +7,8 @@
 - [login as a user](./login.md)
 - as a user, get an appointment
 - [as a user, get queued for an appointment](./appointment-queue.md)
+- attempt to log in with invalid username
+- attempt to log in with invalid password
 
 ## Admin tests
 - [login as an admin](./admin-login.md)
