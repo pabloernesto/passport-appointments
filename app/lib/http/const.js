@@ -1,8 +1,7 @@
-const adminEndpoints = [ 
-  '/admin' , '/slots' 
-];
-const loggedInEndpoints = [
-  '/appointment', '/admin', '/slots'
-];
+const loggedInEndpoints = {
+  '/appointment': { roles: ["u"] },
+  '/admin': { roles: ["a"] },
+  '/slots': { roles: ["a"] },
+}
 
-export {adminEndpoints, loggedInEndpoints}
+export { loggedInEndpoints };
