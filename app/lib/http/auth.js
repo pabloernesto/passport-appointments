@@ -72,7 +72,7 @@ export default class AuthenticationMW {
       // unauthorized request, block
       // TODO: URGENT: replace with permission error page or 404
       // TODO: status code gets overwritten by StaticMW
-      req.url = "/already-logged-in.html";
+      req.url = "/unauthorized-access.html";
       req.method = "GET";
       res.statusCode = 403;
       return false;
