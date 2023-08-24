@@ -17,7 +17,8 @@ export default class StaticFilesMW {
     const asset_path = getAssetByURL(request_url, this._known_assets)?.["path"];
     if (asset_path === undefined) return false; // no such resource
 
-    res.statusCode = 200;
+    // if status code is already set, leave it be
+    res.statusCode = res.statusCode ?? 200;
     res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
     let f = await fs.open(asset_path);
     f.createReadStream(asset_path).pipe(res);
