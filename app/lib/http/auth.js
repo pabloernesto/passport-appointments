@@ -93,6 +93,7 @@ async function attemptLogin(req, res, auth) {
       return;
     }
 
+    // TODO: fugly; auth.authenticateUser() should return Val(token)
     const sessionToken = auth.generateLoginSessionToken(username);
     if (sessionToken.err)
       throw Error("Could not get token");
@@ -144,12 +145,6 @@ function sendErrorResponse(res, err) {
   res.statusCode = 400;
   res.setHeader('Content-Type', 'text/plain');
   res.end(err.toString());
-}
-
-// TODO: BUG: null under certain circumstances
-function isLoggedIn(req, auth) {
-  const sessionToken = getTokenFromRequest(req);
-  return auth.isValidSessionToken(sessionToken).val;
 }
 
 function getTokenFromRequest(req) {
