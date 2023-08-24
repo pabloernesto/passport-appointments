@@ -206,6 +206,9 @@ export default class DatabaseWrapper {
     return Val(row?.user);
   }
 
+  /*
+  Not relevant until we implement "withdrawing from the queue"
+  */
   async removeUserFromQueue(user) {
     const query_get = this.db.prepare(
       `select * from appt_queue 
