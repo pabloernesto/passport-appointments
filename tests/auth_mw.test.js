@@ -5,7 +5,43 @@ import { Val, Err } from '../app/lib/maybe.js'
 import { jest } from '@jest/globals';
 
 describe("integration tests", () => {
-  test("passes", () => {})
+  let store;
+  let auth;
+  let authmw;
+
+  let res = {
+    getHeader: jest.fn(),
+    setHeader: jest.fn(),
+    end: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    store = await Store.fromNewTestDB();
+    // TODO: add some mechanism to create new admins from auth
+    auth = await Authentication.fromDatabase(store); // adds default admin
+    authmw = new AuthenticationMW(auth);
+    jest.resetAllMocks();
+  })
+
+  test('given a logged in req, add the username to ctx', async () => {
+    await auth.createUser("Batman", "batman@batcave.com", "catwoman69");
+    const { val: token } = await auth.generateLoginSessionToken("Batman");
+    expect(token).toEqual(expect.any(String));
+
+    // fake request with correct token
+    let req = {
+      method: "GET",
+      url: "/admin",
+      headers: {
+        cookie: `sessionToken=${ token }`
+      }
+    };
+    let ctx = {};
+
+    await authmw.respond(req, res, ctx);
+
+    expect(ctx).toEqual({ user: "Batman" });
+  })
 })
 
 /* NOTE: these should get a lot less attention than the integration tests.
