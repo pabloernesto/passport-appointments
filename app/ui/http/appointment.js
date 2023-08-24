@@ -22,7 +22,6 @@ export default class AppointmentsMW {
     if (method === "POST" && clean_url === "/appointment") {
       // TODO: make auth middleware hide token -> user mapping.
       const appt = await this._model.requestAppointment(ctx.user);
-
       res.statusCode = 200;
       if(!appt.err && appt.val !== "In queue.") {
         res.end(render(ctx.user, appt.val));
@@ -38,6 +37,21 @@ export default class AppointmentsMW {
     } else if (clean_url === "/appointment-result") {
       res.statusCode = 200;
       res.end();
+      return true;
+    } else if (method === "GET" && clean_url == "/appointment-status") {
+      res.statusCode = 200;
+      const appt = await this._model.getAppointment(ctx.user);
+      if(appt.val) {
+        res.end(renderSuccessfulCheck(appt.val.user, appt.val.date));
+      } else {
+        const in_q = await this._model._database._userIsInQueue(ctx.user);
+        if(in_q) {
+          let ahead = await this._model._database.totalUsersAheadOf(ctx.user);
+          res.end(renderQueueStatus(ctx.user, ahead.val));
+        } else {
+          res.end(HTMLWrap("Sorry, you have no appointments at this time and you are not in the queue."))
+        }
+      }
       return true;
     }
     return false;
@@ -65,4 +79,19 @@ function renderFatalError(user, err) {
 <p>${ user }, a server error occured while adding your appointment.</p>
 <pre>${ JSON.stringify(err) }</pre>
 `);
+}
+
+function renderSuccessfulCheck(user, date) {
+  return HTMLWrap(`<p>Congratulations, ${user}, you have an appointment for: ${date}</p>`);
+}
+
+function renderQueueStatus(user, ahead) {
+  if(ahead == null || !user) {
+    return generalError(user);
+  }
+  return HTMLWrap(`<p>User, you are currently waiting in the queue. There are ${ahead} users waiting ahead of you.</p>`);
+}
+
+function generalError(user) {
+  return HTMLWrap(`<p>User, there was a server error.</p>`);
 }
