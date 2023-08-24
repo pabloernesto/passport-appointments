@@ -6,7 +6,7 @@
 ## User tests
 - [login as a user](./login.md)
 - as a user, get an appointment
-- as a user, get queued for an appointment
+- [as a user, get queued for an appointment](./appointment-queue.md)
 
 ## Admin tests
 - login as an admin
