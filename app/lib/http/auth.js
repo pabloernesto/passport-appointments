@@ -1,7 +1,7 @@
 import { formBody, RequestBodyParsingError } from './util-request.js';
 import Authentication from '../auth.js';
 import querystring from 'node:querystring';
-import {adminEndpoints, loggedInEndpoints} from './const.js';
+import { loggedInEndpoints } from './const.js';
 import { Err } from '../maybe.js';
 
 export default class AuthenticationMW {
@@ -23,63 +23,62 @@ export default class AuthenticationMW {
       ctx.user = trec.val.user_id;
     const logged = trec.val;
 
+    // NOTE: we don't actually care about the host or protocol.
+    //  sadly, it is a standard interface demand and it beats writing a regex.
+    const _url = new URL(req.url, 'http://localhost');
+    const endpoint = _url.pathname;
+
     // redirect unauthenticated requests
-    if (loggedInEndpoints.includes(req.url) && !logged) {
+    if (Object.keys(loggedInEndpoints).includes(endpoint) && !logged) {
       redirectToLogin(req, res);
       return true;
     }
 
-    const operation = (
-      req.url.split('?')[0] === '/login' ? 'login'
-      : req.url.split('?')[0] === '/register' ? 'register'
-      : undefined
-    );
-
-    const logout = (req.url.split('?')[0] === '/logout' ? 'logout' : undefined);
-
     // prevent double login or registration
-    if (operation && logged) {
+    if (["/login", "/register"].includes(endpoint) && logged) {
       req.url = "/already-logged-in.html";
       req.method = "GET";
       return false;
     }
 
-    if (req.method === 'POST' && operation === 'login' && !logged) {
+    // login
+    if (req.method === 'POST' && endpoint === '/login' && !logged) {
       attemptLogin(req, res, this.auth);
       return true;
     }
 
-    if (req.method === 'POST' && operation === 'register' && !logged) {
+    // registration
+    if (req.method === 'POST' && endpoint === '/register' && !logged) {
       attemptRegistration(req, res, this.auth);
       return true;
     }
 
     // logout
-    if (logout) {
-      if(logged) {
-        attemptLogout(req, res, this.auth);
-        return true;
-      }
+    if (endpoint === '/logout' && logged) {
+      attemptLogout(req, res, this.auth);
+      return true;
     }
 
-    // authorization
-    if(adminEndpoints.includes(req.url) && logged) {
-      const token = getTokenFromRequest(req);
-      const { val: record } = await this.auth.getTokenRecord(token);
+    // request to controlled endpoint
+    if (Object.keys(loggedInEndpoints).includes(endpoint) && logged) {
+      const allowed_roles = loggedInEndpoints[endpoint].roles;
+      // request comes from a logged in user, guaranteed to succeed
+      const { val: user } = await this.auth.getUser(ctx.user);
 
-      const authorization = await this.auth.userHasPermission(record.user_id, "a");
-      if (authorization.val) {
+      // authorized request, pass through
+      if (allowed_roles.includes(user.role))
         return false;
-      } else {
-        // TODO: URGENT: replace with permission error page or 404
-        req.url = "/already-logged-in.html";
-        req.method = "GET";
-        return false;
-      }
-    } else {
+
+      // unauthorized request, block
+      // TODO: URGENT: replace with permission error page or 404
+      req.url = "/unauthorized-access.html";
+      req.method = "GET";
+      res.statusCode = 403;
       return false;
     }
-    
+
+    // request to public endpoint, pass through
+    return false;
   }
 }
 

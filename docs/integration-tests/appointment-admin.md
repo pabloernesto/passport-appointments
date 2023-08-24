@@ -1,7 +1,7 @@
 Run `npm start` from project root.
 
 Launch a new Firefox private window (`./scripts/firefox-tmp-profile.sh`).
-Navigate to `/appointments`.
+Click on "Get an appointment".
 Login as "Wonder Woman", "1234".
 
 If you are not presented the message:
