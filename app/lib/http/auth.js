@@ -93,6 +93,7 @@ async function attemptLogin(req, res, auth) {
       return;
     }
 
+    // TODO: fugly; auth.authenticateUser() should return Val(token)
     const sessionToken = auth.generateLoginSessionToken(username);
     if (sessionToken.err)
       throw Error("Could not get token");
