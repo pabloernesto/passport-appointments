@@ -74,7 +74,7 @@ describe("integration tests", () => {
 describe("unit tests", () => {
   let mockauth = {
     getTokenRecord: jest.fn(),
-    userHasPermission: jest.fn(),
+    getUser: jest.fn(),
   };
   let authmw;
 
@@ -96,7 +96,10 @@ describe("unit tests", () => {
       user_id: "Batman",
       emitted: new Date(2023, 1, 1)
     }));
-    mockauth.userHasPermission.mockReturnValue(Val(true));
+    mockauth.getUser.mockReturnValue(Val({
+      user: "Batman",
+      role: "u"
+    }));
     // fake request with correct token
     req = {
       method: "GET",
