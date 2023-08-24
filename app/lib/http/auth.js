@@ -146,12 +146,6 @@ function sendErrorResponse(res, err) {
   res.end(err.toString());
 }
 
-// TODO: BUG: null under certain circumstances
-function isLoggedIn(req, auth) {
-  const sessionToken = getTokenFromRequest(req);
-  return auth.isValidSessionToken(sessionToken).val;
-}
-
 function getTokenFromRequest(req) {
   // Extract cookies from the cookie header using querystring.parse()
   // If the cookie header is undefined, provide an empty string as the default value
