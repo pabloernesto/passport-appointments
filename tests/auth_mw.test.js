@@ -42,7 +42,7 @@ describe("unit tests", () => {
       method: "GET",
       url: "/admin",
       headers: {
-        cookie: "sesionToken=xxx"
+        cookie: "sessionToken=xxx"
       }
     };
     let ctx = {};
