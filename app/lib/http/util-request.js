@@ -53,7 +53,8 @@ export function HTMLWrap(text, title="") {
     <!-- <meta name="description" content="blurb for google search" />  -->
     <!-- <link rel="canonical" href="www.mysite.com/index.html" > -->
   
-    <!-- <link rel="stylesheet" href="my-css-file.css" /> -->
+    <link rel="stylesheet" href="/reset.css" />
+    <link rel="stylesheet" href="/style.css" />
     <!-- <script src="main.js" module></script> -->
   </head>
   <body>
