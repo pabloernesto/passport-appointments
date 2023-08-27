@@ -5,10 +5,12 @@
 
 ## User tests
 - [login as a user](./login.md)
+- [log out](./logout.md)
 - as a user, get an appointment
 - [as a user, get queued for an appointment](./appointment-queue.md)
 - [attempt to log in with invalid username](./login-invalid-username.md)
 - [attempt to log in with invalid password](./login-invalid-password.md)
+- attempt to register with an existing username
 
 ## Admin tests
 - [login as an admin](./admin-login.md)
