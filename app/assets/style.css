@@ -1,3 +1,14 @@
+/* default box-sizing is almost never what you want.
+    if it is, you can change it and it will affect children.
+    https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/
+ */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 body {
   max-width: 80ch;
   margin: 1rem auto;
