@@ -39,7 +39,8 @@ export function formBody(request) {
   });
 }
 
-export function HTMLWrap(text, title="") {
+export function DrawPageWithBody(text, ctx, title="") {
+  let logout = ctx.user ? `<href a="logout" />` : ``;
   return `\
   <!DOCTYPE html>
   <html lang="en" class="booting">
@@ -58,6 +59,7 @@ export function HTMLWrap(text, title="") {
   </head>
   <body>
     ${ text }
+    ${ logout }
   </body>
   </html>`;
 }

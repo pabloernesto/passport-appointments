@@ -225,7 +225,7 @@ async function attemptRegistration(req, res, auth) {
 function sendUserOrPasswordExistsResponse(req, res, username, email) {
   res.statusCode = 409;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  const body = HTMLWrap(`
+  const body = DrawPageWithBody(`
   <p>
   The <span class="username">${ username }</span> username
   and/or <span class="email">${ email }</span> email
@@ -234,7 +234,7 @@ function sendUserOrPasswordExistsResponse(req, res, username, email) {
   <p>
   Please
   <a href="/register">try again</a>.
-  </p>`);
+  </p>`, ctx);
   res.end(body);
 }
 

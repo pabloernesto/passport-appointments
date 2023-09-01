@@ -1,4 +1,4 @@
-import { HTMLWrap } from '../../lib/http/util-request.js';
+import { DrawPageWithBody } from '../../lib/http/util-request.js';
 import querystring from 'node:querystring';
 
 export default class AppointmentsMW {
@@ -23,16 +23,20 @@ export default class AppointmentsMW {
       // TODO: make auth middleware hide token -> user mapping.
       const appt = await this._model.requestAppointment(ctx.user);
       res.statusCode = 200;
+
+      let body;
       if(!appt.err && appt.val !== "In queue.") {
-        res.end(render(ctx.user, appt.val));
+        body = render(ctx.user, appt.val);
       }else if (!appt.err && appt.val === "In queue.") {
-        res.end(renderQueued(ctx.user));
+        body = renderQueued(ctx.user);
       } else if (appt.err?.message === "User already in queue.") {
-        res.end(renderAlreadyQueue(ctx.user));
+        body = renderAlreadyQueue(ctx.user);
       } else {
         res.statusCode = 500;
-        res.end(renderFatalError(ctx.user, appt.err));
+        body = renderFatalError(ctx.user, appt.err);
       }
+
+      res.end(DrawPageWithBody(body, ctx));
       return true;
     } else if (clean_url === "/appointment-result") {
       res.statusCode = 200;
@@ -42,16 +46,17 @@ export default class AppointmentsMW {
       res.statusCode = 200;
       const appt = await this._model.getAppointment(ctx.user);
       if(appt.val) {
-        res.end(renderSuccessfulCheck(appt.val.user, appt.val.date));
+        body = renderSuccessfulCheck(appt.val.user, appt.val.date);
       } else {
         const in_q = await this._model._database._userIsInQueue(ctx.user);
         if(in_q) {
           let ahead = await this._model._database.totalUsersAheadOf(ctx.user);
-          res.end(renderQueueStatus(ctx.user, ahead.val));
+          body = renderQueueStatus(ctx.user, ahead.val);
         } else {
-          res.end(HTMLWrap("Sorry, you have no appointments at this time and you are not in the queue."))
+          body = "Sorry, you have no appointments at this time and you are not in the queue.";
         }
       }
+      res.end(DrawPageWithBody(body, ctx));
       return true;
     }
     return false;
@@ -60,38 +65,35 @@ export default class AppointmentsMW {
 
 // TODO: handle pending appointments
 function render(user, appointment) {
-  let text = `<p>${ user }, you have your appointment at ${ appointment }.</p>`;
-  return HTMLWrap(text);
+  return `<p>${ user }, you have your appointment at ${ appointment }.</p>`;
 }
 
 function renderQueued(user) {
-  let text = `<p>${ user }, there are no appointments currently available. You have been added to the queue.</p>`;
-  return HTMLWrap(text);
+  return `<p>${ user }, there are no appointments currently available. You have been added to the queue.</p>`;
 }
 
 function renderAlreadyQueue(user) {
-  let text = `<p>${ user }, you are already in the queue.</p>`;
-  return HTMLWrap(text);
+  return `<p>${ user }, you are already in the queue.</p>`;
 }
 
 function renderFatalError(user, err) {
-  return HTMLWrap(`\
+  return `\
 <p>${ user }, a server error occured while adding your appointment.</p>
 <pre>${ JSON.stringify(err) }</pre>
-`);
+`
 }
 
 function renderSuccessfulCheck(user, date) {
-  return HTMLWrap(`<p>Congratulations, ${user}, you have an appointment for: ${date}</p>`);
+  return `<p>Congratulations, ${user}, you have an appointment for: ${date}</p>`;
 }
 
 function renderQueueStatus(user, ahead) {
   if(ahead == null || !user) {
     return generalError(user);
   }
-  return HTMLWrap(`<p>User, you are currently waiting in the queue. There are ${ahead} users waiting ahead of you.</p>`);
+  return `<p>User, you are currently waiting in the queue. There are ${ahead} users waiting ahead of you.</p>`;
 }
 
 function generalError(user) {
-  return HTMLWrap(`<p>User, there was a server error.</p>`);
+  return `<p>User, there was a server error.</p>`;
 }

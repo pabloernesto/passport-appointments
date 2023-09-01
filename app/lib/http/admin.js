@@ -1,4 +1,4 @@
-import { HTMLWrap } from './util-request.js';
+import { DrawPageWithBody } from './util-request.js';
 import fecha from 'fecha'
 import fs from 'fs'
 
@@ -16,18 +16,18 @@ export default class AdminMW {
     try {
       if(req.url == "/admin") {
         const fileContents = fs.readFileSync(slots_form).toString()
-        res.end(HTMLWrap(fileContents));
+        res.end(DrawPageWithBody(fileContents, ctx));
         return true;
       } else if (req.url == "/slots") {
         const fileContents_s = fs.readFileSync(slots_form_s).toString()
         await this.handleSlots(req, res, ctx);
-        res.end(HTMLWrap(fileContents_s));
+        res.end(DrawPageWithBody(fileContents_s, ctx));
         return true;
       }
       return false;
     } catch (error) {
       console.log(error);
-      res.end(HTMLWrap(`<p>There was an error: ${error}</p>`));
+      res.end(DrawPageWithBody(`<p>There was an error: ${error}</p>`, ctx));
       return true;
     }
   }
