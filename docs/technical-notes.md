@@ -20,5 +20,7 @@ We're building this in Node.js v18.16.0 LTS so we can share code between front a
 - `fecha`: date parsing and formatting
   - https://github.com/taylorhakes/fecha
   - rationale [as stackoverflow answer][so-fecha]
+- `normalize.css`: consistent cross-browser defaults
+  - https://necolas.github.io/normalize.css/
 
 [so-fecha]: https://stackoverflow.com/questions/5129624/convert-js-date-time-to-mysql-datetime
