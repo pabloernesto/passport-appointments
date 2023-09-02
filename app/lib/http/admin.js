@@ -2,8 +2,8 @@ import { DrawPageWithBody } from './util-request.js';
 import fecha from 'fecha'
 import fs from 'fs'
 
-const slots_form = 'app/assets/create-slots-form.html'
-const slots_form_s = 'app/assets/create-slots-form-success.html'
+const slots_form = 'app/lib/http/components/create-slots-form.html'
+const slots_form_s = 'app/lib/http/components/create-slots-form-success.html'
 
 const ONE_DAY = 1000*60*60*24*1
 export default class AdminMW {

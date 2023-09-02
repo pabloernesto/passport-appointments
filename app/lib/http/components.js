@@ -22,6 +22,7 @@ export default class HTMLComponentsMW {
     res.setHeader('Content-Type', mimetypes[path.extname(asset_path).slice(1)]);
     let f = await fs.open(asset_path);
     const data = await fs.readFile(asset_path, { encoding: 'utf8' });
+    f.close();
     res.end(DrawPageWithBody(data, ctx));
     return true;
   }
