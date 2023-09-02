@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "better-sqlite3": "^8.5.0",
+    "combined-stream": "^1.0.8",
     "fecha": "^4.2.3"
   },
   "devDependencies": {
