@@ -18,13 +18,13 @@ export default class AppointmentsMW {
     const { method, url } = req;
     let clean_url = url.split('?')[0];
     let late_url = url.split('?')[1];
+    let body;
     // handle passport check status
     if (method === "POST" && clean_url === "/appointment") {
       // TODO: make auth middleware hide token -> user mapping.
       const appt = await this._model.requestAppointment(ctx.user);
       res.statusCode = 200;
 
-      let body;
       if(!appt.err && appt.val !== "In queue.") {
         body = render(ctx.user, appt.val);
       }else if (!appt.err && appt.val === "In queue.") {

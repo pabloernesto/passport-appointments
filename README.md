@@ -49,7 +49,8 @@ Instead of making people wait/guess on the site, set them up for a queue.
 - User with admin role but without user role cannot ask for appointment
 - Auth UI
   - Display username everywhere
-  - Log out from anywhere in the app
+  - ~~Log out from anywhere in the app~~
+    - avoid redundant log out prints in iframe pages
   - Unauthorized access page
 - Prettify CSS (low urgency, low importance)
 - Email everything that isn't the appointment
