@@ -9,9 +9,14 @@ html {
   box-sizing: inherit;
 }
 
+/* display: inline-block is unintuitive */
+img {
+  display: block;
+}
+
 body {
-  max-width: 80ch;
-  margin: 1rem auto;
+  margin: 0;
+  padding: 0;
 
   /* default typography */
   font-size: 1.2rem;
@@ -24,4 +29,15 @@ body {
 
 a {
   color: var(--link-color);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid lightgray;
+}
+.header--logo {
+}
+.header--title {
+  margin: 0;
 }
