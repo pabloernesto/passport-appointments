@@ -73,8 +73,6 @@ function validate(form_data) {
   Throws if property is not expected, including weekdays
 */
 function _default(property) {
-  throw Error("Unexpected property!");
-
   // more nuanced default value handling:
   if(["range-start","range-end"].includes(property)) {
     let now = new Date();
