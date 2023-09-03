@@ -104,7 +104,7 @@ export default class AuthenticationMW {
   async _attemptRegistration(req, res, ctx) {
     let username, email, password;
     try {
-      ({ username, email, password } = ctx);
+      ({ username, email, password } = ctx.body);
       await this.auth.createUser(username, email, password);
   
       const sessionToken = this.auth.generateLoginSessionToken(username);
