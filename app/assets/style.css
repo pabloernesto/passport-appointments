@@ -44,5 +44,8 @@ header {
 }
 .header--title {
   margin: 0;
+  margin-left: -70px;
   font-family: 'Courier New', Courier, monospace;
+  font-size: min(5vw, 2.7rem);
 }
+
