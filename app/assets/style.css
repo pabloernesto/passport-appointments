@@ -49,3 +49,18 @@ header {
   font-size: min(5vw, 2.7rem);
 }
 
+.main-column {
+  display: flex;
+  flex-direction: column;
+  max-width: 80ch;
+  padding: 0 1rem;
+  margin: 0 auto;
+}
+
+.callout-box {
+  align-self: center;
+  border: 2px solid var(--color-site-accent);
+  box-shadow: 2px 4px 4px var(--color-site-accent);
+  padding: .7rem 1rem;
+  border-radius: 15px;
+}
