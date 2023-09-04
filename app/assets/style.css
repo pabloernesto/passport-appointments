@@ -40,7 +40,6 @@ body {
 header {
   display: flex;
   align-items: center;
-  border-bottom: 3px solid var(--color-site-accent);
   background-color: var(--color-site-background);
 }
 .header--logo {
