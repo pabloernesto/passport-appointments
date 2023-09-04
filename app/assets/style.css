@@ -16,11 +16,13 @@ img {
 
 :root {
   /* color scheme */
+  /*   base palette */
   --color-site-primary: blue;
   --color-site-secondary: red;
-
+  /*   derived colors */
   --color-site-background: color-mix(in srgb, var(--color-site-primary), white 50%);
   --color-site-accent: color-mix(in srgb, var(--color-site-secondary), white 25%);
+  --color-text: black;
 }
 
 body {
@@ -33,6 +35,7 @@ body {
   font-family: sans-serif;
 
   background-color: var(--color-site-background);
+  color: var(--color-text);
 }
 
 header {
@@ -63,4 +66,15 @@ header {
   box-shadow: 2px 4px 4px var(--color-site-accent);
   padding: .7rem 1rem;
   border-radius: 15px;
+}
+
+.solid-button {
+  align-self: center;
+  background-color: var(--color-site-accent);
+  padding: .7rem 1rem;
+  border-radius: 15px;
+}
+.solid-button * {
+  text-decoration: none;
+  color: var(--color-text);
 }
