@@ -58,7 +58,15 @@ export function HTMLWrap(text, title="") {
     <!-- <script src="main.js" module></script> -->
   </head>
   <body>
-    ${ text }
+    <header>
+      <a href="/" class="header--logo">
+        <img src="/venezuela-banner-brush.png" width="200px" alt="Inicio">
+      </a>
+      <h1 class="header--title">passport-appointments</h1>
+    </header>
+    <main>
+      ${ text }
+    </main>
   </body>
   </html>`;
 }
