@@ -26,7 +26,7 @@ export default class AdminMW {
       }
       return false;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.end(DrawPageWithBody(`<p>There was an error: ${error}</p>`, ctx));
       return true;
     }
