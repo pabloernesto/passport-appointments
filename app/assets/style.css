@@ -78,3 +78,8 @@ header {
   color: white;
   font-weight: 700;
 }
+
+fieldset {
+  display: flex;
+  flex-wrap: wrap;
+}
