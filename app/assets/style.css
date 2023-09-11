@@ -79,7 +79,6 @@ header {
   font-weight: 700;
 }
 
-fieldset {
-  display: flex;
-  flex-wrap: wrap;
+label {
+  display: inline-block;
 }
