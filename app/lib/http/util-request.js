@@ -64,7 +64,7 @@ export function HTMLWrap(text, title="") {
       </a>
       <h1 class="header--title">passport-appointments</h1>
     </header>
-    <main>
+    <main class="main-column">
       ${ text }
     </main>
   </body>
