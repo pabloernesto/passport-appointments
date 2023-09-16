@@ -85,3 +85,7 @@ label {
 fieldset :not(legend):nth-of-type(n+2) {
   margin-top: .6rem;
 }
+
+.vertical-label * {
+  display: block;
+}
