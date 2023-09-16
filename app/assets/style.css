@@ -82,3 +82,6 @@ header {
 label {
   display: block;
 }
+fieldset :not(legend):nth-of-type(n+2) {
+  margin-top: .6rem;
+}
