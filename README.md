@@ -52,7 +52,11 @@ Instead of making people wait/guess on the site, set them up for a queue.
   - ~~Log out from anywhere in the app~~
     - avoid redundant log out prints in iframe pages
   - Unauthorized access page
-- Prettify CSS (low urgency, low importance)
+- Prettify CSS (high importance)
+  - Form
+    - put checkboxes on the left
+    - Everything is vertical unless specifically decided otherwise for good reasons
+    - DOUBLE THE LINE SPACING! DOUBLE THE MARGINS!
 - Email everything that isn't the appointment
 - App config: host and port as parameters
 
