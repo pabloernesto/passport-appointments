@@ -96,6 +96,12 @@ fieldset :not(legend):nth-of-type(n+2) {
   margin: 2rem auto;
   display: flex;
   flex-direction: column;
+  gap: .8rem;
+}
+.login-form--actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
 }
 .login-form--input {
 }
@@ -106,8 +112,6 @@ fieldset :not(legend):nth-of-type(n+2) {
   width: 100%;
 }
 .login-form--submit {
-  align-self: flex-end;
-  margin-top: 1rem;
 }
 
 .vertical-label * {
