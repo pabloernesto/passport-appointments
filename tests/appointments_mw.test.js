@@ -20,17 +20,6 @@ beforeEach(async () => {
     handled through token matching.
 */
 
-test('given a GET request, ignore it', async () => {
-  req = {
-    method: "GET",
-    url: "/appointment"
-  };
-  res = {};
-
-  await expect(mw.respond(req, res))
-  .resolves.toBe(false);
-})
-
 test('given a model with no slots, when appt is requested add them to the queue', async () => {
   store.addUser("Mr. Banana", "mr.banana@bigbanana.com", "hash", "salt");
   req = { 

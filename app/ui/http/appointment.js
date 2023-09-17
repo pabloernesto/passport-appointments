@@ -18,9 +18,37 @@ export default class AppointmentsMW {
     const { method, url } = req;
     let clean_url = url.split('?')[0];
     let late_url = url.split('?')[1];
-    let body;
-    // handle passport check status
-    if (method === "POST" && clean_url === "/appointment") {
+    let body;  // TODO: get rid of this variable! why is it even here?
+
+    if (method === "GET" && clean_url === "/appointment") {
+      const appt = await this._model.getAppointment(ctx.user);
+      // if user has an appointment, render it
+      if (appt.val?.date) {
+        body = renderAppointment(ctx.user, appt.val);
+        res.end(DrawPageWithBody(body, ctx));
+        return true;
+
+      // if user is queued, render message
+      } else if (appt.err?.message === "Enqueued.") {
+        let ahead = await this._model._database.totalUsersAheadOf(ctx.user);
+        body = renderQueueStatus(ctx.user, ahead.val);
+        res.end(DrawPageWithBody(body, ctx));
+        return true;
+
+      // if neither, show appointment form
+      } else if (appt.err?.message === "No appointment.") {
+        body = renderFormLink();
+        res.end(DrawPageWithBody(body, ctx));
+        return true;
+
+      // something went wrong
+      } else {
+        // TODO: render error
+        console.error("bad");
+      }
+
+    } else if (method === "POST" && clean_url === "/appointment") {
+      // TODO: POST-REDIRECT-GET?
       const appt = await this._model.requestAppointment(ctx.user);
       res.statusCode = 200;
 
@@ -60,6 +88,10 @@ export default class AppointmentsMW {
     }
     return false;
   }
+}
+
+function renderFormLink() {
+  return `<a href="/appointment-request">Get appointment.</a>`;
 }
 
 // TODO: handle pending appointments
