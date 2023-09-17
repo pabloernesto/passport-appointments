@@ -44,7 +44,9 @@ export default class AppointmentsMW {
       // something went wrong
       } else {
         // TODO: render error
-        console.error("bad");
+        body = renderFatalError(ctx.user, appt.err);
+        res.end(DrawPageWithBody(body, ctx));
+        return true;
       }
 
     } else if (method === "POST" && clean_url === "/appointment") {
