@@ -31,6 +31,7 @@ export default class AdminMW {
       return true;
     }
   }
+  // TODO: reject bad input
   async handleSlots(req, res, ctx) {
     const form_obj = slots_parse(ctx.body);
     await this._model.createSlots([form_obj.range_start, form_obj.range_end]);
