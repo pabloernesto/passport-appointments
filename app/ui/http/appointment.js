@@ -31,7 +31,11 @@ export default class AppointmentsMW {
         body = renderQueued(ctx.user);
       } else if (appt.err?.message === "User already in queue.") {
         body = renderAlreadyQueue(ctx.user);
+      } else if (appt.err?.message === "Already has appointment") {
+        // TODO: renderAlreadyAppointment
+        body = renderAlreadyQueue(ctx.user);
       } else {
+        console.log(appt.err?.message)
         res.statusCode = 500;
         body = renderFatalError(ctx.user, appt.err);
       }

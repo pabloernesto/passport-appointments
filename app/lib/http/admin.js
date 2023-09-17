@@ -33,7 +33,7 @@ export default class AdminMW {
   }
   async handleSlots(req, res, ctx) {
     const form_obj = slots_parse(ctx.body);
-    await this._model.createSlots([form_obj.range_start]);
+    await this._model.createSlots([form_obj.range_start, form_obj.range_end]);
   }
 }
 
@@ -44,6 +44,7 @@ export function slots_parse(_form_data) {
   let form_data = validate(_form_data);
 
   // parse dates
+  // TODO not taking weekdays into account
   const range_start = fecha.parse(form_data["range-start"], "YYYY-MM-DD");
   const range_end = fecha.parse(form_data["range-end"], "YYYY-MM-DD");
   const time_start = fecha.parse(form_data["time-start"], "HH:mm");
