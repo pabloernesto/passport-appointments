@@ -90,6 +90,30 @@ fieldset :not(legend):nth-of-type(n+2) {
   margin-top: .6rem;
 }
 
+.login-form {
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+.login-form--actions {
+  display: flex;
+  margin-top: 1rem;
+}
+.login-form--input {
+}
+.login-form--input * {
+  display: block;
+}
+.login-form--input input {
+  width: 100%;
+}
+.login-form--submit {
+  margin-left: auto;
+}
+
 .vertical-label * {
   display: block;
 }
