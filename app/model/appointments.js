@@ -41,8 +41,21 @@ export default class Appointments {
   }
 
   // read
+
+  // returns:
+  //   Val({ user, date }) if there is an appointment for that user
+  //   Err("No appointment.") if there is no appointment for that user
+  //   Err("Enqueued.") if user is in the queue
+  //   Err(`${username} is not a user.`) if the user does not exist
   async getAppointment(user) {
-    return this._database.fetchAppointment(user);
+    const appt = await this._database.fetchAppointment(user);
+    // smell? having both val and err undefined seems wrong
+    if (appt.val !== undefined || appt.err !== undefined)
+      return appt;
+    const is_queued = await this._database.userIsInQueue(user);
+    if (is_queued)
+      return Err("Enqueued.");
+    return Err("No appointment.")
   }
 
   // update
