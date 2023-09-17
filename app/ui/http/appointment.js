@@ -14,7 +14,6 @@ export default class AppointmentsMW {
       - An error occured while requesting the appointment - for example, a nonexistent user.
   */
   async respond(req, res, ctx) {
-    // Using POST-REDIRECT-GET pattern
     const { method, url } = req;
     let clean_url = url.split('?')[0];
     let late_url = url.split('?')[1];
