@@ -67,15 +67,20 @@ export default class Appointments {
     */
     // check 1 week from current time
     
-    var generated_dates = getDaysArray(dates[0], dates[1])
-    for (const _date in generated_dates) {
-      let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
-      await this._database.createAppointmentSlot(date);
+    if(dates[0] >= dates[1]) {
+      console.error("User input end greater than start");
+    } else {
+      var generated_dates = getDaysArray(dates[0], dates[1])
+      for (const _date in generated_dates) {
+        let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
+        await this._database.createAppointmentSlot(date);
+      }
+      
+      if(auto_assign) {
+        await this._autoAssignUsers();
+      }
     }
     
-    if(auto_assign) {
-      await this._autoAssignUsers();
-    }
 
     return Val(undefined);
   }
@@ -115,9 +120,6 @@ export default class Appointments {
 }
 
 export function getDaysArray(start, end) {
-  if(start >= end) {
-    console.log("Oh no!!!");
-  }
   for(var arr=[],dt=new Date(start); dt<=end; dt.setDate(dt.getDate()+1)){
     arr.push(dt);
   }
