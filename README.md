@@ -35,7 +35,7 @@ Instead of making people wait/guess on the site, set them up for a queue.
     - ~~slots are ordered from most to least recent~~
     - slots at the exact same date and time are united
     - slots can only exist at certain 5 minute intervals
-  - The user can GET /appointments to see their appointment status
+  - ~~The user can GET /appointments to see their appointment status~~
   - The user receives an email when they have an appointment (stretch)
   - Test multiple users at a time
   - Users can see where they are in the queue (two significant figures)
@@ -49,9 +49,14 @@ Instead of making people wait/guess on the site, set them up for a queue.
 - User with admin role but without user role cannot ask for appointment
 - Auth UI
   - Display username everywhere
-  - Log out from anywhere in the app
+  - ~~Log out from anywhere in the app~~
+    - avoid redundant log out prints in iframe pages
   - Unauthorized access page
-- Prettify CSS (low urgency, low importance)
+- Prettify CSS (high importance)
+  - Form
+    - put checkboxes on the left
+    - Everything is vertical unless specifically decided otherwise for good reasons
+    - DOUBLE THE LINE SPACING! DOUBLE THE MARGINS!
 - Email everything that isn't the appointment
 - App config: host and port as parameters
 

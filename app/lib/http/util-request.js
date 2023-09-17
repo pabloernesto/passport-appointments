@@ -39,7 +39,10 @@ export function formBody(request) {
   });
 }
 
-export function HTMLWrap(text, title="") {
+export function DrawPageWithBody(text, ctx, title="") {
+  let logout = ctx.user 
+    ? `<a href="http://127.0.0.1:3000/logout" target="_top">logout</a>` 
+    : ``;
   return `\
   <!DOCTYPE html>
   <html lang="en" class="booting">

@@ -1,8 +1,6 @@
-import { formBody, RequestBodyParsingError } from './util-request.js';
 import Authentication from '../auth.js';
 import querystring from 'node:querystring';
 import { loggedInEndpoints } from './const.js';
-import { Err } from '../maybe.js';
 
 export default class AuthenticationMW {
   // @private
@@ -43,19 +41,19 @@ export default class AuthenticationMW {
 
     // login
     if (req.method === 'POST' && endpoint === '/login' && !logged) {
-      attemptLogin(req, res, this.auth);
+      this._attemptLogin(req, res, ctx);
       return true;
     }
 
     // registration
     if (req.method === 'POST' && endpoint === '/register' && !logged) {
-      attemptRegistration(req, res, this.auth);
+      this._attemptRegistration(req, res, ctx);
       return true;
     }
 
     // logout
     if (endpoint === '/logout' && logged) {
-      attemptLogout(req, res, this.auth);
+      this._attemptLogout(req, res, ctx);
       return true;
     }
 
@@ -80,46 +78,65 @@ export default class AuthenticationMW {
     // request to public endpoint, pass through
     return false;
   }
-}
 
-async function attemptLogin(req, res, auth) {
-  try {
-    const { username, password } = await formBody(req);
-    const passedAuth = await auth.authenticateUser(username, password);
-
-    if (!passedAuth.val) {
-      sendInvalidCredentialsResponse(res);
-      return;
-    }
-
-    // TODO: fugly; auth.authenticateUser() should return Val(token)
-    const sessionToken = auth.generateLoginSessionToken(username);
-    if (sessionToken.err)
-      throw Error("Could not get token");
-    addCookie(res, `sessionToken=${sessionToken.val}; HttpOnly; SameSite=Strict; Path=/`);
-    redirectToRedirectPage(req, res);
-
-  } catch (error) {
-    if (error instanceof RequestBodyParsingError) {
-      logRequestBodyParsingError(error, req);
-    } else {
+  async _attemptLogin(req, res, ctx) {
+    try {
+      const { username, password } = ctx.body;
+      const passedAuth = await this.auth.authenticateUser(username, password);
+  
+      if (!passedAuth.val) {
+        sendInvalidCredentialsResponse(res);
+        return;
+      }
+  
+      // TODO: fugly; auth.authenticateUser() should return Val(token)
+      const sessionToken = this.auth.generateLoginSessionToken(username);
+      if (sessionToken.err)
+        throw Error("Could not get token");
+      addCookie(res, `sessionToken=${sessionToken.val}; HttpOnly; SameSite=Strict; Path=/`);
+      redirectToRedirectPage(req, res);
+  
+    } catch (error) {
       sendErrorResponse(res, error);
     }
   }
-}
 
-async function attemptLogout(req, res, auth) {
-  try {
-    const sessionToken = getTokenFromRequest(req);
-    await auth.invalidateToken(sessionToken);
-    redirectHome(req, res);
-  } catch (error) {
-    if (error instanceof RequestBodyParsingError) {
-      logRequestBodyParsingError(error, req);
-    } else {
-      sendErrorResponse(res, error);
+  async _attemptRegistration(req, res, ctx) {
+    let username, email, password;
+    try {
+      ({ username, email, password } = ctx.body);
+      await this.auth.createUser(username, email, password);
+  
+      const sessionToken = this.auth.generateLoginSessionToken(username);
+      if (sessionToken.err)
+        throw Error("Could not get token");
+      
+      addCookie(res, `sessionToken=${sessionToken.val}; HttpOnly; SameSite=Strict; Path=/`);
+      redirectToRedirectPage(req, res);
+  
+    } catch (error) {
+      if (error.message === "Failed to add user"
+          && error.cause.toString().includes('UNIQUE constraint failed')) {
+        sendUserOrPasswordExistsResponse(req, res, username, email);
+      } else {
+        sendErrorResponse(res, error);
+      }
     }
   }
+
+  async _attemptLogout(req, res, ctx) {
+    try {
+      const sessionToken = getTokenFromRequest(req);
+      await this.auth.invalidateToken(sessionToken);
+      redirectHome(req, res);
+    } catch (error) {
+      if (error instanceof RequestBodyParsingError) {
+        logRequestBodyParsingError(error, req);
+      } else {
+        sendErrorResponse(res, error);
+      }
+    }
+  }  
 }
 
 function logRequestBodyParsingError(error, request) {
@@ -197,35 +214,10 @@ function getRedirectURL(req) {
   return cookies.redirect;
 }
 
-async function attemptRegistration(req, res, auth) {
-  let username, email, password;
-  try {
-    ({ username, email, password } = await formBody(req));
-    await auth.createUser(username, email, password);
-
-    const sessionToken = auth.generateLoginSessionToken(username);
-    if (sessionToken.err)
-      throw Error("Could not get token");
-    
-    addCookie(res, `sessionToken=${sessionToken.val}; HttpOnly; SameSite=Strict; Path=/`);
-    redirectToRedirectPage(req, res);
-
-  } catch (error) {
-    if (error instanceof RequestBodyParsingError) {
-      logRequestBodyParsingError(error, req);
-    } else if (error.message === "Failed to add user"
-        && error.cause.toString().includes('UNIQUE constraint failed')) {
-      sendUserOrPasswordExistsResponse(req, res, username, email);
-    } else {
-      sendErrorResponse(res, error);
-    }
-  }
-}
-
 function sendUserOrPasswordExistsResponse(req, res, username, email) {
   res.statusCode = 409;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  const body = HTMLWrap(`
+  const body = DrawPageWithBody(`
   <p>
   The <span class="username">${ username }</span> username
   and/or <span class="email">${ email }</span> email
@@ -234,7 +226,7 @@ function sendUserOrPasswordExistsResponse(req, res, username, email) {
   <p>
   Please
   <a href="/register">try again</a>.
-  </p>`);
+  </p>`, ctx);
   res.end(body);
 }
 

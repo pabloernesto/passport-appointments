@@ -12,6 +12,6 @@ export default class FormBodyMW {
 function hasFormBody(req) {
   return (
     req.method === 'POST'
-    && req.headers['content-type'] !== 'application/x-www-form-urlencoded'
+    && req.headers['content-type'] === 'application/x-www-form-urlencoded'
   )
 }
