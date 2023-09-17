@@ -21,7 +21,6 @@ export default class AppointmentsMW {
     let body;
     // handle passport check status
     if (method === "POST" && clean_url === "/appointment") {
-      // TODO: make auth middleware hide token -> user mapping.
       const appt = await this._model.requestAppointment(ctx.user);
       res.statusCode = 200;
 
