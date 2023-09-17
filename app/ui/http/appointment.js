@@ -25,7 +25,7 @@ export default class AppointmentsMW {
       res.statusCode = 200;
 
       if(!appt.err && appt.val !== "In queue.") {
-        body = render(ctx.user, appt.val);
+        body = renderAppointment(ctx.user, appt.val);
       }else if (!appt.err && appt.val === "In queue.") {
         body = renderQueued(ctx.user);
       } else if (appt.err?.message === "User already in queue.") {
@@ -63,7 +63,7 @@ export default class AppointmentsMW {
 }
 
 // TODO: handle pending appointments
-function render(user, appointment) {
+function renderAppointment(user, appointment) {
   return `<p>${ user }, you have your appointment at ${ appointment }.</p>`;
 }
 
