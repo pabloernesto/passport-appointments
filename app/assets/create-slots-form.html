@@ -1,12 +1,14 @@
 <form method="POST" action="slots">
+  <div><h1>Appointment slot generator</h1></div>
+  <div><p>Generate a range of evenly spaced appointment slots in a period of time.</p><p><a href="/admin-single">No thanks, let me generate appointments one by one.</a></p></div>
   <fieldset>
-    <legend>Affected range</legend>
+    <legend>Range of dates</legend>
     <label class="vertical-label">
-      Date start
+      From:
       <input type="date" name="range-start">
     </label>
     <label class="vertical-label">
-      Date end
+      To:
       <input type="date" name="range-end">
     </label>
   </fieldset>
@@ -42,18 +44,18 @@
     </label>
   </fieldset>
   <fieldset>
-    <legend>Affected range</legend>
+    <legend>Time range per day</legend>
     <label class="vertical-label">
-      Time start
+      From:
       <input type="time" name="time-start">
     </label>
     <label class="vertical-label">
-      Time end
+      To:
       <input type="time" name="time-end">
     </label>
   </fieldset>
   <label>
-    Duration
+    Interval beween slots
     <!-- 1440 = 24 * 60. 24hs is all day long -->
     <input type="number" min="1" max="1440" name="duration">
   </label>
