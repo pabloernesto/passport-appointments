@@ -23,6 +23,12 @@ export default class AdminMW {
         await this.handleSlots(req, res, ctx);
         res.end(DrawPageWithBody(fileContents_s, ctx));
         return true;
+      } else if(req.url == "/queue-status"){
+        let val = await this._database.getPagedUsersInQueue();
+        let list = val?.val;
+        list = list?.map((x) => x.user);
+        res.end(DrawPageWithBody("<p>" + list.toString() + "</p>", ctx))
+        return true;
       }
       return false;
     } catch (error) {

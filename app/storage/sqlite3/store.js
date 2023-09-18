@@ -206,6 +206,18 @@ export default class DatabaseWrapper {
     return Val(row?.user);
   }
 
+  // TODO make atomic
+  // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
+  async getPagedUsersInQueue() {
+    const to_fetch = 50;
+    const query_get = this.db.prepare(
+      `select * from appt_queue 
+      ORDER BY queue_id LIMIT ?;`);
+
+    const entries = query_get.all(to_fetch);
+    return Val(entries);
+  }
+
   /*
   Not relevant until we implement "withdrawing from the queue"
   */

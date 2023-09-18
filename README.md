@@ -38,7 +38,8 @@ Instead of making people wait/guess on the site, set them up for a queue.
   - ~~The user can GET /appointments to see their appointment status~~
   - The user receives an email when they have an appointment (stretch)
   - Test multiple users at a time
-  - Users can see where they are in the queue (two significant figures)
+  - ~~Users can see where they are in the queue~~
+    - (two significant figures)
   - Admin can see the queue
   - Don't give out appointments less than one week away
 - Page templates for the app (Mafer wants React, Pablo thinks that's too much)
