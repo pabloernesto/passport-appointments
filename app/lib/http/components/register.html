@@ -1,13 +1,20 @@
-
-  <form method="POST">
-    <label for="username">Your user</label>
+<form method="POST" class="login-form">
+  <label for="username" class="login-form--input">
+    Your user
     <input type="text" id="username" name="username" required>
+  </label>
 
-    <label for="email">Your email</label>
+  <label for="email" class="login-form--input">
+    Your email
     <input type="email" id="email" name="email" required>
+  </label>
 
-    <label for="password">Your password</label>
+  <label for="password" class="login-form--input">
+    Your password
     <input type="password" id="password" name="password" required>
+  </label>
 
-    <button>Register</button>
-  </form>
+  <div class="login-form--actions">
+    <button class="login-form--submit">Register</button>
+  </div>
+</form>
