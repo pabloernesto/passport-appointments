@@ -2,9 +2,6 @@ import { DrawPageWithBody } from './util-request.js';
 import fecha from 'fecha'
 import fs from 'fs'
 
-const slots_form = 'app/lib/http/components/create-slots-form.html'
-const slots_form_s = 'app/lib/http/components/create-slots-form-success.html'
-
 const ONE_DAY = 1000*60*60*24*1
 export default class AdminMW {
   constructor(database, model) {
@@ -15,14 +12,12 @@ export default class AdminMW {
   async respond(req, res, ctx) {
     try {
       if(req.url == "/admin") {
-        const fileContents = fs.readFileSync(slots_form).toString()
-        res.end(DrawPageWithBody(fileContents, ctx));
-        return true;
+        req.url = "/create-slots-form.html"
+        return false;
+
       } else if (req.url == "/slots") {
-        const fileContents_s = fs.readFileSync(slots_form_s).toString()
-        await this.handleSlots(req, res, ctx);
-        res.end(DrawPageWithBody(fileContents_s, ctx));
-        return true;
+        req.url = "/crete-slots-form-success.html"
+        return false;
       }
       return false;
     } catch (error) {
