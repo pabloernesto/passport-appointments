@@ -73,19 +73,27 @@ export default class Appointments {
     If auto_assign = true, assigns min(#slots, #users)
   */
   // TODO: take [ [date, number_of_slots]... ]
+
   async createSlots(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
     */
     // check 1 week from current time
-    for (const _date in dates) {
-      let date = fecha.format(dates[_date], 'YYYY-MM-DD HH:mm:ss')
-      await this._database.createAppointmentSlot(date);
+    
+    if(dates[0] >= dates[1]) {
+      console.error("User input end greater than start");
+    } else {
+      var generated_dates = getDaysArray(dates[0], dates[1])
+      for (const _date in generated_dates) {
+        let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
+        await this._database.createAppointmentSlot(date);
+      }
+      
+      if(auto_assign) {
+        await this._autoAssignUsers();
+      }
     }
     
-    if(auto_assign) {
-      await this._autoAssignUsers();
-    }
 
     return Val(undefined);
   }
@@ -123,3 +131,10 @@ export default class Appointments {
   // delete
   async deleteAppointments(appointments) {}
 }
+
+export function getDaysArray(start, end) {
+  for(var arr=[],dt=new Date(start); dt<=end; dt.setDate(dt.getDate()+1)){
+    arr.push(dt);
+  }
+  return arr;
+};

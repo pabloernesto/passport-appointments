@@ -2,9 +2,6 @@ import { DrawPageWithBody } from './util-request.js';
 import fecha from 'fecha'
 import fs from 'fs'
 
-const slots_form = 'app/lib/http/components/create-slots-form.html'
-const slots_form_s = 'app/lib/http/components/create-slots-form-success.html'
-
 const ONE_DAY = 1000*60*60*24*1
 export default class AdminMW {
   constructor(database, model) {
@@ -15,14 +12,12 @@ export default class AdminMW {
   async respond(req, res, ctx) {
     try {
       if(req.url == "/admin") {
-        const fileContents = fs.readFileSync(slots_form).toString()
-        res.end(DrawPageWithBody(fileContents, ctx));
-        return true;
+        req.url = "/create-slots-form.html"
+        return false;
+
       } else if (req.url == "/slots") {
-        const fileContents_s = fs.readFileSync(slots_form_s).toString()
-        await this.handleSlots(req, res, ctx);
-        res.end(DrawPageWithBody(fileContents_s, ctx));
-        return true;
+        req.url = "/crete-slots-form-success.html"
+        return false;
       }
       return false;
     } catch (error) {
@@ -31,9 +26,10 @@ export default class AdminMW {
       return true;
     }
   }
+  // TODO: reject bad input
   async handleSlots(req, res, ctx) {
     const form_obj = slots_parse(ctx.body);
-    await this._model.createSlots([form_obj.range_start]);
+    await this._model.createSlots([form_obj.range_start, form_obj.range_end]);
   }
 }
 
@@ -44,6 +40,7 @@ export function slots_parse(_form_data) {
   let form_data = validate(_form_data);
 
   // parse dates
+  // TODO not taking weekdays into account
   const range_start = fecha.parse(form_data["range-start"], "YYYY-MM-DD");
   const range_end = fecha.parse(form_data["range-end"], "YYYY-MM-DD");
   const time_start = fecha.parse(form_data["time-start"], "HH:mm");
