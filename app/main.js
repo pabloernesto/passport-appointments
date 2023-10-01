@@ -5,7 +5,7 @@ import AuthenticationMW from './lib/http/auth.js';
 import StaticFilesMW from './lib/http/static.js';
 import RedirectMW from './lib/http/redirect.js';
 import AppointmentsMW from './ui/http/appointment.js';
-import HTMLComponentsMW from './lib/http/components.js';
+import PagesMW from './lib/http/pages.js';
 import AdminMW from './lib/http/admin.js';
 
 import DatabaseWrapper from './storage/sqlite3/store.js';
@@ -21,6 +21,6 @@ server.add_middleware(new AppointmentsMW(model));
 server.add_middleware(await RedirectMW.fromMap({"/": "/index"}));
 server.add_middleware(new AdminMW(store, model));
 server.add_middleware(await StaticFilesMW.fromPath("./app/assets/static"));
-server.add_middleware(await HTMLComponentsMW.fromPath("./app/assets/html-components"));
+server.add_middleware(await PagesMW.fromPath("./app/assets/pages"));
 server.add_middleware(new http404MW());
 server.listen('127.0.0.1', 3000);

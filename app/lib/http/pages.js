@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream';
 
 const statics_path = "public";
 
-export default class HTMLComponentsMW {
+export default class PagesMW {
   constructor(path, asset_list) {
     this._statics_path = path;
     this._known_assets = asset_list;
@@ -32,7 +32,7 @@ export default class HTMLComponentsMW {
       path: s,
       url: new URL(path.relative(dir.path, s), "file:").pathname
     }));
-    return new HTMLComponentsMW(_path, asset_list);
+    return new PagesMW(_path, asset_list);
   }
 }
 
