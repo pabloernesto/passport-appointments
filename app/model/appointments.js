@@ -80,20 +80,18 @@ export default class Appointments {
     */
     // check 1 week from current time
     
-    if(dates[0] >= dates[1]) {
-      console.error("User input end greater than start");
-    } else {
-      var generated_dates = getDaysArray(dates[0], dates[1])
-      for (const _date in generated_dates) {
-        let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
-        await this._database.createAppointmentSlot(date);
-      }
-      
-      if(auto_assign) {
-        await this._autoAssignUsers();
-      }
+    if (dates[0] >= dates[1])
+      return Err("Range start >= end", { start: dates[0], end: dates[1]});
+
+    var generated_dates = getDaysArray(dates[0], dates[1])
+    for (const _date in generated_dates) {
+      let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
+      await this._database.createAppointmentSlot(date);
     }
     
+    if(auto_assign) {
+      await this._autoAssignUsers();
+    }
 
     return Val(undefined);
   }
