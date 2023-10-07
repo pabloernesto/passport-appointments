@@ -160,7 +160,7 @@ export default class DatabaseWrapper {
   // adds user id to the queue
   // TODO: make atomic
   async addUserToQueue(user) {
-    let _in = await this._userIsInQueue(user);
+    let _in = await this.userIsInQueue(user);
     if (_in)
       return Err("User already in queue.");
 
@@ -245,7 +245,7 @@ export default class DatabaseWrapper {
   }
     // TODO make atomic
   // https://stackoverflow.com/questions/2224951/return-the-nth-record-from-mysql-query
-  async _userIsInQueue(user) {
+  async userIsInQueue(user) {
     const query_get = this.db.prepare(`select * FROM appt_queue WHERE user = ?;`);
     const row = query_get.get([user]);
     return (!!row);

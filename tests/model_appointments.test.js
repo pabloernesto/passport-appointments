@@ -2,6 +2,7 @@ import Appointments from "../app/model/appointments";
 import Store from '../app/storage/sqlite3/store';
 import Authentication from '../app/lib/auth'
 import fecha from 'fecha';
+import { Val, Err } from '../app/lib/maybe.js'
 
 /* Test context */
 let model;
@@ -27,7 +28,7 @@ test('given an empty store, model.getAppointment() fails with missing user', asy
 test('given a store with no appointments, model.getAppointment() fails with no appointment', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.getAppointment("Wonder Woman2"))
-  .resolves.toEqual({ val: undefined });
+  .resolves.toMatchObject(Err("No appointment."));
 })
 
 test('given user in auth and single slot, when appointment is requested it is accepted with the correct date format', async () => {
@@ -47,6 +48,14 @@ test('given no slots, when requesting appt it enqueues', async () => {
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.requestAppointment("Wonder Woman2"))
   .resolves.toEqual({ val: "In queue." });
+})
+
+test('given a user in the queue, getAppointment() fails with "Enqueued"', async () => {
+  await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
+  await model.requestAppointment("Wonder Woman2");
+
+  await expect(model.getAppointment("Wonder Woman2"))
+  .resolves.toEqual(Err("Enqueued."));
 })
 
 test('given a user in the queue, when slots are added give the user an appointment', async () => {

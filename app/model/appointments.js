@@ -41,8 +41,21 @@ export default class Appointments {
   }
 
   // read
+
+  // returns:
+  //   Val({ user, date }) if there is an appointment for that user
+  //   Err("No appointment.") if there is no appointment for that user
+  //   Err("Enqueued.") if user is in the queue
+  //   Err(`${username} is not a user.`) if the user does not exist
   async getAppointment(user) {
-    return this._database.fetchAppointment(user);
+    const appt = await this._database.fetchAppointment(user);
+    // smell? having both val and err undefined seems wrong
+    if (appt.val !== undefined || appt.err !== undefined)
+      return appt;
+    const is_queued = await this._database.userIsInQueue(user);
+    if (is_queued)
+      return Err("Enqueued.");
+    return Err("No appointment.")
   }
 
   // update
@@ -54,33 +67,35 @@ export default class Appointments {
 
   /* administration */
 
+  /*  */
+  async createSlots(slots, auto_assign=true) {
+
+  }
+
   /*
     TODO: untested
     Creates appointment slots based on the provided date list.
     If auto_assign = true, assigns min(#slots, #users)
   */
   // TODO: take [ [date, number_of_slots]... ]
-
-  async createSlots(dates, auto_assign = true) {
+  async createSlotsBatch(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
     */
     // check 1 week from current time
     
-    if(dates[0] >= dates[1]) {
-      console.error("User input end greater than start");
-    } else {
-      var generated_dates = getDaysArray(dates[0], dates[1])
-      for (const _date in generated_dates) {
-        let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
-        await this._database.createAppointmentSlot(date);
-      }
-      
-      if(auto_assign) {
-        await this._autoAssignUsers();
-      }
+    if (dates[0] >= dates[1])
+      return Err("Range start >= end", { start: dates[0], end: dates[1]});
+
+    var generated_dates = getDaysArray(dates[0], dates[1])
+    for (const _date in generated_dates) {
+      let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
+      await this._database.createAppointmentSlot(date);
     }
     
+    if(auto_assign) {
+      await this._autoAssignUsers();
+    }
 
     return Val(undefined);
   }
