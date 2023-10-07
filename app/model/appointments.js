@@ -67,14 +67,18 @@ export default class Appointments {
 
   /* administration */
 
+  /*  */
+  async createSlots(slots, auto_assign=true) {
+
+  }
+
   /*
     TODO: untested
     Creates appointment slots based on the provided date list.
     If auto_assign = true, assigns min(#slots, #users)
   */
   // TODO: take [ [date, number_of_slots]... ]
-
-  async createSlots(dates, auto_assign = true) {
+  async createSlotsBatch(dates, auto_assign = true) {
     /*
       dates: list of js DateTime object, UTC
     */
