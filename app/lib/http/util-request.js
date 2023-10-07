@@ -1,4 +1,5 @@
 import querystring from 'node:querystring';
+import logoutButton from '../../assets/components/logout-button.js';
 
 const MAX_BODY_SIZE = 1024 * 1024; // 1MB limit
 
@@ -40,9 +41,6 @@ export function formBody(request) {
 }
 
 export function DrawPageWithBody(text, ctx, title="") {
-  let logout = ctx.user 
-    ? `<a href="http://127.0.0.1:3000/logout" target="_top">logout</a>` 
-    : ``;
   return `\
   <!DOCTYPE html>
   <html lang="en" class="booting">
@@ -66,6 +64,7 @@ export function DrawPageWithBody(text, ctx, title="") {
         <img src="/venezuela-banner-brush.png" width="200px" alt="Inicio">
       </a>
       <h1 class="header--title">passport-appointments</h1>
+      ${ logoutButton(ctx.user) }
     </header>
     <main class="main-column">
       ${ text }
