@@ -6,7 +6,7 @@ import StaticFilesMW from './lib/http/static.js';
 import RedirectMW from './lib/http/redirect.js';
 import AppointmentsMW from './ui/http/appointment.js';
 import PagesMW from './lib/http/pages.js';
-import AdminMW from './lib/http/admin.js';
+import AdminMW from './admin/http/admin.js';
 
 import DatabaseWrapper from './storage/sqlite3/store.js';
 import Appointments from './model/appointments.js';
