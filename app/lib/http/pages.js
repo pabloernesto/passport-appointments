@@ -5,6 +5,9 @@ import { pipeline } from 'node:stream';
 
 const statics_path = "public";
 
+/* Wrap every HTML file in the given path in standard boilerplate and expose it
+   as a page with the same name.
+ */
 export default class PagesMW {
   constructor(path, asset_list) {
     this._statics_path = path;
