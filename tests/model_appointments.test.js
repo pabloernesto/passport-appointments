@@ -32,7 +32,7 @@ test('given a store with no appointments, model.getAppointment() fails with no a
 })
 
 test('given user in auth and single slot, when appointment is requested it is accepted with the correct date format', async () => {
-  let when = Date.now();  // test value changes every run. potential problem.
+  let when = new Date();  // test value changes every run. potential problem.
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await model.createSlots([when], true);
   await model.requestAppointment("Wonder Woman2");
@@ -44,7 +44,6 @@ test('given user in auth and single slot, when appointment is requested it is ac
 })
 
 test('given no slots, when requesting appt it enqueues', async () => {
-  let when = "2023-01-01 12:00:00";
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await expect(model.requestAppointment("Wonder Woman2"))
   .resolves.toEqual({ val: "In queue." });
@@ -59,7 +58,7 @@ test('given a user in the queue, getAppointment() fails with "Enqueued"', async 
 })
 
 test('given a user in the queue, when slots are added give the user an appointment', async () => {
-  let when = Date.now();
+  let when = new Date();
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
   await model.requestAppointment("Wonder Woman2");
 
@@ -75,7 +74,7 @@ test('given a user in the queue, when slots are added give the user an appointme
 })
 
 test('not enough slots for 3 users', async () => {
-  let when = Date.now();
+  let when = new Date();
   await auth.createUser("Batman", "batman@batcave.org", "1964");
   await auth.createUser("Superman", "superman@un.org", "1950");
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");
@@ -105,7 +104,7 @@ test('not enough slots for 3 users', async () => {
 
 test('trying to autoassign with empty queue does not consume a slot', async () => {
   
-  let when = Date.now();
+  let when = new Date();
   await auth.createUser("Batman", "batman@batcave.org", "1964");
   await auth.createUser("Superman", "superman@un.org", "1950");
   await auth.createUser("Wonder Woman2", "wonderwoman@un.org", "1984");

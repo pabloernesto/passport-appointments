@@ -72,8 +72,18 @@ export default class Appointments {
      Slots are either Date objects or strings in `YYYY-MM-DD HH:mm:ss` format.
   */
   async createSlots(slots, auto_assign=true) {
-    for (const slot of slots)
-      await this._database.createAppointmentSlot(slot);
+    // format slots
+    slots = slots.map(slot =>
+      slot instanceof Date ? fecha.format(slot, 'YYYY-MM-DD HH:mm:ss')
+      : slot
+    )
+
+    // create slots
+    for (const slot of slots) {
+      let creation = await this._database.createAppointmentSlot(slot);
+    }
+
+    // clear queue
     if (auto_assign)
       await this._autoAssignUsers();
   }
