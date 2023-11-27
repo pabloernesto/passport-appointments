@@ -67,37 +67,29 @@ export default class Appointments {
 
   /* administration */
 
-  /*  */
+  /* Create `slots` in the database.
+    
+     Slots are either Date objects or strings in `YYYY-MM-DD HH:mm:ss` format.
+  */
   async createSlots(slots, auto_assign=true) {
-
+    for (const slot of slots)
+      await this._database.createAppointmentSlot(slot);
+    if (auto_assign)
+      await this._autoAssignUsers();
   }
 
-  /*
-    TODO: untested
-    Creates appointment slots based on the provided date list.
-    If auto_assign = true, assigns min(#slots, #users)
-  */
-  // TODO: take [ [date, number_of_slots]... ]
-  async createSlotsBatch(dates, auto_assign = true) {
-    /*
-      dates: list of js DateTime object, UTC
-    */
-    // check 1 week from current time
-    
-    if (dates[0] >= dates[1])
-      return Err("Range start >= end", { start: dates[0], end: dates[1]});
-
-    var generated_dates = getDaysArray(dates[0], dates[1])
-    for (const _date in generated_dates) {
-      let date = fecha.format(generated_dates[_date], 'YYYY-MM-DD HH:mm:ss')
-      await this._database.createAppointmentSlot(date);
-    }
-    
-    if(auto_assign) {
-      await this._autoAssignUsers();
-    }
-
-    return Val(undefined);
+  /* Batch-create slots based on the provided restrictions. */
+  async createSlotsBatch(
+      date_start,
+      date_end,
+      weekdays,
+      time_start,
+      time_end,
+      appointment_duration,
+      auto_assign=true
+  ) {
+    let slots = [];
+    return this.createSlots(slots, auto_assign);
   }
 
   /* 
