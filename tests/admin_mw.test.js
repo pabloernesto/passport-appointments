@@ -1,4 +1,4 @@
-import {slots_parse} from '../app/lib/http/admin'
+import {slots_parse} from '../app/admin/http/admin.js'
 
 
 
